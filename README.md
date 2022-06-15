@@ -1,7 +1,7 @@
 # ICG Projekt von Gruppe < The Walt Disney Company >
 <!-- Ein Bild der Anwendung muss im Ordner ./img relativ zu dieser Datei liegen -->
 
-<img src="img/screenshot.jpg" width="75%">
+<img src="img/Ducktales.webp" width="75%">
 
 Dieses Repository beinhaltet das Projekt des Kurses  "Interaktive Computergraphik" von < Daisy Duck, Gustav Gans und Kater Karlo >. 
 
