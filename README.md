@@ -1,9 +1,9 @@
-# ICG Projekt von Gruppe < The Walt Disney Company >
+# ICG Projekt von Gruppe 5
 <!-- Ein Bild der Anwendung muss im Ordner ./img relativ zu dieser Datei liegen -->
 
-<img src="img/Ducktales.webp" width="75%">
+<!-- <img src="img/Ducktales.webp" width="75%"> -->
 
-Dieses Repository beinhaltet das Projekt des Kurses  "Interaktive Computergraphik" von < Daisy Duck, Gustav Gans und Kater Karlo >. 
+Dieses Repository beinhaltet das Projekt des Kurses  "Interaktive Computergraphik" von Lorenz Bauer, Julius Arzberger, Marius Röhm 
 
 # Projekt Struktur
 <!-- Ihr könnt die Projektstruktur beliebig beschreiben. Hier einfach mit dem Unix Programm `tree`  -->
@@ -79,20 +79,16 @@ Die Slider auf der rechten Seite des Bildes von oben  ...
 
 |Nummer|Punkte|Beschreibung |bearbeitet| Verantwortliche/r |
 |------|------|---------------------------------------|---------------|-|
-|M1 |6 |Szenengraph | <ul><li>- [ ] </li></ul> | |
-|M2 |14 |Rasteriser & Ray Tracer | <ul><li>- [ ] </li></ul> | |
-|M3 |5 |min. drei eingebundene Objekte | <ul><li>- [ ] </li></ul> | |
-|M4 |7 |min. drei verschiedene Animationsknoten| <ul><li>- [ ] </li></ul> | |
-|M5 |4 |mehrfarbige Objekte | <ul><li>- [ ] </li></ul> | |
-|M6 |7 |mathematische Bibliothek |<ul><li>- [ ] </li></ul> | |
-|M7 |7 |Phong Shader | <ul><li>- [ ] </li></ul> | |
-|O1 |6 |mehrere Texturen | <ul><li>- [ ] </li></ul> | |
-|O2 |10 |Auswahl und Manipulation von Objekten | <ul><li>- [ ] </li></ul> | |
-|O3 |6 |Laden und Speichern | <ul><li>- [ ] </li></ul> | |
-|O4 |6 |Model Loader | <ul><li>- [ ] </li></ul> | |
-|O5 |8 |Kamera Knoten | <ul><li>- [ ] </li></ul> | |
-|O6 |8 |mehrere Lichtquellen |<ul><li>- [ ] </li></ul> | |
-|O7 |6 |Free Flight Modus | <ul><li>- [ ] </li></ul> | |
+|M1 |5 |Szenengraph | <ul><li>- [ ] </li></ul> | |
+|M2 |10 |Rasteriser & Ray Tracer | <ul><li>- [ ] </li></ul> | |
+|M3 |3 |min. drei eingebundene Objekte | <ul><li>- [ ] </li></ul> | |
+|M4 |8 |min. drei verschiedene Animationsknoten| <ul><li>- [ ] </li></ul> | |
+|M5 |4 |Objekte mit Textur | <ul><li>- [ ] </li></ul> | |
+|M6 |5 |mathematische Bibliothek |<ul><li>- [ ] </li></ul> | |
+|M7 |4 |Phong Shader | <ul><li>- [ ] </li></ul> | |
+|M8 |2 |Zwei Anwendungsfenster| <ul><li>- [ ] </li></ul> | |
+|M9 |4 |Taskleiste mit Icons | <ul><li>- [ ] </li></ul> | |
+|M10 |5 |Auswahl & Manipulation per Maus | <ul><li>- [ ] </li></ul> | |
 
 
 
