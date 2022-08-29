@@ -3,17 +3,22 @@ import 'bootstrap/scss/bootstrap.scss';
 import Vector from './vector';
 import {
     GroupNode,
-    SphereNode
+    SphereNode,
+    AABoxNode
 } from './nodes';
 import RayVisitor from './rayvisitor';
 import { Rotation, Scaling, Translation } from './transformation';
+import { RasterSetupVisitor, RasterVisitor } from './rastervisitor';
+import Shader from './shader';
+import vertexShader from './basic-vertex-shader.glsl';
+import fragmentShader from './basic-fragment-shader.glsl';
 
 window.addEventListener('load', () => {
     const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
     const ctx_ray = canvas_ray.getContext("2d");
     
     const canvas_raster = document.getElementById("rasterizer") as HTMLCanvasElement;
-    const ctx2 = canvas_raster.getContext("2d");
+    const ctx_raster = canvas_raster.getContext("webgl2");
 
     /* Call figure toggle if key 2 is pressed */
     document.addEventListener('keydown', (event) => {
@@ -24,10 +29,10 @@ window.addEventListener('load', () => {
     });
 
 
-    const sg = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
+    const sceneGraph = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
     const gnRotation = new Rotation(new Vector(1, 0, 0, 0), 0)
     const gn = new GroupNode(gnRotation);
-    sg.add(gn);
+    sceneGraph.add(gn);
     const gn1 = new GroupNode(new Translation(new Vector(1.2, .5, 0, 0)));
     gn.add(gn1);
     gn1.add(new SphereNode(new Vector(.4, 0, 0, 1)));
@@ -39,14 +44,38 @@ window.addEventListener('load', () => {
     const lightPositions = [
         new Vector(1, 1, 1, 1)
     ];
-    const camera = {
+
+    const camera_ray = {
         origin: new Vector(0, 0, 0, 1),
         width: canvas_ray.width,
         height: canvas_ray.height,
         alpha: Math.PI / 3
     }
 
-    const visitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
+    const camera_raster = {
+        eye: new Vector(0, 0, 0, 1),
+        center: new Vector(0, 0, 0, 1),
+        up: new Vector(0, 1, 0, 0),
+        fovy: Math.PI / 3,
+        aspect: canvas_raster.width / canvas_raster.height,
+        near: 0.1,
+        far: 100
+    }
+
+    const rayVisitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
+
+    // setup for raster rendering
+    const setupVisitor = new RasterSetupVisitor(ctx_raster);
+    setupVisitor.setup(sceneGraph);
+
+    const shader = new Shader(ctx_raster,
+        vertexShader,
+        fragmentShader
+    );
+    // render
+    const rasterVisitor = new RasterVisitor(ctx_raster, shader, null, setupVisitor.objects);
+    shader.load();
+    rasterVisitor.render(sceneGraph, camera_raster, lightPositions);
 
     let animationHandle: number;
 
@@ -63,7 +92,7 @@ window.addEventListener('load', () => {
         lastTimestamp = timestamp;
         gnRotation.angle = animationTime / 2000;
 
-        visitor.render(sg, camera, lightPositions);
+        rayVisitor.render(sceneGraph, camera_ray, lightPositions);
         // animationHandle = window.requestAnimationFrame(animate);
     }
 
