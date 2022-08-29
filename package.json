@@ -1,0 +1,24 @@
+{
+  "name": "icg",
+  "version": "1.0.1",
+  "description": "ICG exercise",
+  "scripts": {
+    "start": "webpack-dev-server --open",
+    "start-no-browser": "webpack-dev-server"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "author": "JP Stauffert",
+  "dependencies": {
+    "bootstrap": "^5.1.3",
+    "css-loader": "^6.7.1",
+    "raw-loader": "^4.0.2",
+    "sass-loader": "^13.0.0",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.3.0",
+    "webpack-dev-server": "^4.9.2"
+  },
+  "devDependencies": {
+    "webpack-cli": "^4.10.0"
+  }
+}
