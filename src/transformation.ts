@@ -1,6 +1,6 @@
 import Matrix from "./matrix";
 import Vector from "./vector";
-import Quaternion from './quaternion';
+// import Quaternion from './quaternion';
 
 export interface Transformation {
     getMatrix(): Matrix;
@@ -63,26 +63,26 @@ export class Scaling extends MatrixTransformation {
     }
 }
 
-export class SQT extends MatrixTransformation {
-    scale: Vector;
-    quaternion: Quaternion;
-    translation: Vector;
+// export class SQT extends MatrixTransformation {
+//     scale: Vector;
+//     quaternion: Quaternion;
+//     translation: Vector;
 
-    constructor(scale: Vector, rotation: { angle: number, axis: Vector }, translation: Vector) {
-        super(Matrix.identity(), Matrix.identity());
-        this.scale = scale;
-        this.translation = translation;
-        this.quaternion = Quaternion.fromAxisAngle(rotation.axis, rotation.angle);
-        this.recalculate();
-    }
+//     constructor(scale: Vector, rotation: { angle: number, axis: Vector }, translation: Vector) {
+//         super(Matrix.identity(), Matrix.identity());
+//         this.scale = scale;
+//         this.translation = translation;
+//         this.quaternion = Quaternion.fromAxisAngle(rotation.axis, rotation.angle);
+//         this.recalculate();
+//     }
 
-    set rotation(q: Quaternion) {
-        this.quaternion = q;
-        this.recalculate();
-    }
+//     set rotation(q: Quaternion) {
+//         this.quaternion = q;
+//         this.recalculate();
+//     }
 
-    private recalculate() {
-        this.matrix = Matrix.translation(this.translation).mul(this.quaternion.toMatrix()).mul(Matrix.scaling(this.scale));
-        this.inverse = Matrix.scaling(new Vector(1 / this.scale.x, 1 / this.scale.y, 1 / this.scale.z, 0)).mul(this.quaternion.inverse.toMatrix()).mul(Matrix.translation(this.translation.mul(-1)));
-    }
-}
+//     private recalculate() {
+//         this.matrix = Matrix.translation(this.translation).mul(this.quaternion.toMatrix()).mul(Matrix.scaling(this.scale));
+//         this.inverse = Matrix.scaling(new Vector(1 / this.scale.x, 1 / this.scale.y, 1 / this.scale.z, 0)).mul(this.quaternion.inverse.toMatrix()).mul(Matrix.translation(this.translation.mul(-1)));
+//     }
+// }
