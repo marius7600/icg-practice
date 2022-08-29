@@ -11,6 +11,8 @@ import { Rotation, Scaling, Translation } from './transformation';
 window.addEventListener('load', () => {
     const canvas = document.getElementById("raytracer") as HTMLCanvasElement;
     const ctx = canvas.getContext("2d");
+    ctx.canvas.width = window.innerWidth;
+    ctx.canvas.height = window.innerHeight;
 
     const sg = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
     const gnRotation = new Rotation(new Vector(1, 0, 0, 0), 0)
