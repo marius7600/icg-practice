@@ -9,8 +9,20 @@ import RayVisitor from './rayvisitor';
 import { Rotation, Scaling, Translation } from './transformation';
 
 window.addEventListener('load', () => {
-    const canvas = document.getElementById("raytracer") as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d");
+    const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
+    const ctx_ray = canvas_ray.getContext("2d");
+    
+    const canvas_raster = document.getElementById("rasterizer") as HTMLCanvasElement;
+    const ctx2 = canvas_raster.getContext("2d");
+
+    /* Call figure toggle if key 2 is pressed */
+    document.addEventListener('keydown', (event) => {
+        if (event.key === '2') {
+            toggleFigure();
+            console.log("Toggled canvas");
+            
+        }
+    });
 
 
     const sg = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
@@ -30,12 +42,12 @@ window.addEventListener('load', () => {
     ];
     const camera = {
         origin: new Vector(0, 0, 0, 1),
-        width: canvas.width,
-        height: canvas.height,
+        width: canvas_ray.width,
+        height: canvas_ray.height,
         alpha: Math.PI / 3
     }
 
-    const visitor = new RayVisitor(ctx, canvas.width, canvas.height);
+    const visitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
 
     let animationHandle: number;
 
@@ -74,3 +86,16 @@ window.addEventListener('load', () => {
     document.getElementById("stopAnimationBtn").addEventListener(
         "click", () => cancelAnimationFrame(animationHandle));
 });
+
+/* Toggle visability between the raytracer and rasterizer canvas */
+function toggleFigure() {
+    const ray = document.getElementById("raytracer_fig");
+    const raster = document.getElementById("rasterizer_fig");
+    if (ray.style.display === "none") {
+        ray.style.display = "block";
+        raster.style.display = "none";
+    } else {
+        ray.style.display = "none";
+        raster.style.display = "block";
+    }
+}
