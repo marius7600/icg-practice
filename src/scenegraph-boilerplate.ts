@@ -19,8 +19,7 @@ window.addEventListener('load', () => {
     document.addEventListener('keydown', (event) => {
         if (event.key === '2') {
             toggleFigure();
-            console.log("Toggled canvas");
-            
+            // console.log("Toggled canvas");
         }
     });
 
