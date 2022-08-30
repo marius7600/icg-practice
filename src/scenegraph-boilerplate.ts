@@ -53,8 +53,8 @@ window.addEventListener('load', () => {
     }
 
     const camera_raster = {
-        eye: new Vector(2, 2, 2, 1),
-        center: new Vector(0, 0, -1, 1),
+        eye: new Vector(0, 0, -2, 1),
+        center: new Vector(0, 0, 0, 1),
         up: new Vector(0, 1, 0, 0),
         fovy: 60,
         aspect: canvas_raster.width / canvas_raster.height,
@@ -72,6 +72,7 @@ window.addEventListener('load', () => {
         vertexShader,
         fragmentShader
     );
+
     const textureShader = new Shader(ctx_raster,
         //TODO add texture shader
         vertexShader,
@@ -80,6 +81,7 @@ window.addEventListener('load', () => {
     // render
     const rasterVisitor = new RasterVisitor(ctx_raster, phongShader, textureShader, setupVisitor.objects);
     phongShader.load();
+    rasterVisitor.setupCamera(camera_raster);
     rasterVisitor.render(sceneGraph, camera_raster, lightPositions);
     // rasterVisitor.render(sceneGraph, null, lightPositions);
 

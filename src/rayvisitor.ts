@@ -65,7 +65,7 @@ export default class RayVisitor implements Visitor {
     const height = this.imageData.height;
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
-        this.ray = Ray.makeRay(x, y, width, height, camera);
+        this.ray = Ray.makeRay(x, y, height, width, camera);
 
         // TODO initialize the matrix stack
         //Initialize the matrix stack with identity matrices
