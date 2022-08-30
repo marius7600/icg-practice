@@ -10,8 +10,10 @@ import RayVisitor from './rayvisitor';
 import { Rotation, Scaling, Translation } from './transformation';
 import { RasterSetupVisitor, RasterVisitor } from './rastervisitor';
 import Shader from './shader';
-import vertexShader from './basic-vertex-shader.glsl';2
-import fragmentShader from './basic-fragment-shader.glsl';
+// import phongVertexShader from './basic-vertex-shader.glsl';
+// import phongFragmentShader from './basic-fragment-shader.glsl';
+import phongVertexShader from './phong-vertex-perspective-shader.glsl';
+import phongFragmentShader from './phong-fragment-shader.glsl';
 
 window.addEventListener('load', () => {
     const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
@@ -24,11 +26,11 @@ window.addEventListener('load', () => {
     document.addEventListener('keydown', (event) => {
         if (event.key === '2') {
             toggleFigure();
-            // console.log("Toggled canvas");
         }
     });
 
 
+    /* Create the scenegraph */
     const sceneGraph = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
     const gnRotation = new Rotation(new Vector(1, 0, 0, 0), 0)
     const gn = new GroupNode(gnRotation);
@@ -45,15 +47,8 @@ window.addEventListener('load', () => {
         new Vector(1, 1, 1, 1)
     ];
 
-    const camera_ray = {
-        origin: new Vector(2, 2, 2, 1),
-        width: canvas_ray.width,
-        height: canvas_ray.height,
-        alpha: Math.PI / 3
-    }
-
-    const camera_raster = {
-        eye: new Vector(0, 0, -2, 1),
+    const camera = {
+        eye: new Vector(0, 0, -5, 1),
         center: new Vector(0, 0, 0, 1),
         up: new Vector(0, 1, 0, 0),
         fovy: 60,
@@ -62,28 +57,28 @@ window.addEventListener('load', () => {
         far: 100
     }
 
+    // setup for raytracing
     const rayVisitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
 
     // setup for raster rendering
-    const setupVisitor = new RasterSetupVisitor(ctx_raster);
-    setupVisitor.setup(sceneGraph);
+    const rasterSetupVisitor = new RasterSetupVisitor(ctx_raster);
+    rasterSetupVisitor.setup(sceneGraph);
 
     const phongShader = new Shader(ctx_raster,
-        vertexShader,
-        fragmentShader
+        phongVertexShader,
+        phongFragmentShader
     );
 
     const textureShader = new Shader(ctx_raster,
         //TODO add texture shader
-        vertexShader,
-        fragmentShader
+        phongVertexShader,
+        phongFragmentShader
     );
-    // render
-    const rasterVisitor = new RasterVisitor(ctx_raster, phongShader, textureShader, setupVisitor.objects);
+    // render rasterizer
+    const rasterVisitor = new RasterVisitor(ctx_raster, phongShader, textureShader, rasterSetupVisitor.objects);
     phongShader.load();
-    rasterVisitor.setupCamera(camera_raster);
-    rasterVisitor.render(sceneGraph, camera_raster, lightPositions);
-    // rasterVisitor.render(sceneGraph, null, lightPositions);
+    rasterVisitor.setupCamera(camera);
+    rasterVisitor.render(sceneGraph, camera, lightPositions);
 
     let animationHandle: number;
 
@@ -100,7 +95,7 @@ window.addEventListener('load', () => {
         lastTimestamp = timestamp;
         gnRotation.angle = animationTime / 2000;
 
-        rayVisitor.render(sceneGraph, camera_raster, lightPositions);
+        rayVisitor.render(sceneGraph, camera, lightPositions);
         // animationHandle = window.requestAnimationFrame(animate);
     }
 
@@ -117,10 +112,10 @@ window.addEventListener('load', () => {
     }
     animate(0);
 
-    document.getElementById("startAnimationBtn").addEventListener(
-        "click", startAnimation);
-    document.getElementById("stopAnimationBtn").addEventListener(
-        "click", () => cancelAnimationFrame(animationHandle));
+    // document.getElementById("startAnimationBtn").addEventListener(
+    //     "click", startAnimation);
+    // document.getElementById("stopAnimationBtn").addEventListener(
+    //     "click", () => cancelAnimationFrame(animationHandle));
 });
 
 /* Toggle visability between the raytracer and rasterizer canvas */

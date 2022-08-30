@@ -56,15 +56,14 @@ export class RasterVisitor implements Visitor {
    */
   render(
     rootNode: Node,
-    camera: Camera | null,
+    camera: Camera,
     lightPositions: Array<Vector>
   ) {
     // clear
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
-    if (camera) {
-      this.setupCamera(camera);
-    }
+    this.setupCamera(camera);
+    
 
     // traverse and render
     rootNode.accept(this);
