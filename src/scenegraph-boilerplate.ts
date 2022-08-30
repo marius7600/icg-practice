@@ -10,7 +10,7 @@ import RayVisitor from './rayvisitor';
 import { Rotation, Scaling, Translation } from './transformation';
 import { RasterSetupVisitor, RasterVisitor } from './rastervisitor';
 import Shader from './shader';
-import vertexShader from './basic-vertex-shader.glsl';
+import vertexShader from './basic-vertex-shader.glsl';2
 import fragmentShader from './basic-fragment-shader.glsl';
 
 window.addEventListener('load', () => {
@@ -29,7 +29,7 @@ window.addEventListener('load', () => {
     });
 
 
-    const sceneGraph = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
+    const sceneGraph = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
     const gnRotation = new Rotation(new Vector(1, 0, 0, 0), 0)
     const gn = new GroupNode(gnRotation);
     sceneGraph.add(gn);
@@ -46,17 +46,17 @@ window.addEventListener('load', () => {
     ];
 
     const camera_ray = {
-        origin: new Vector(0, 0, 0, 1),
+        origin: new Vector(2, 2, 2, 1),
         width: canvas_ray.width,
         height: canvas_ray.height,
         alpha: Math.PI / 3
     }
 
     const camera_raster = {
-        eye: new Vector(0, 0, 0, 1),
-        center: new Vector(0, 0, 0, 1),
+        eye: new Vector(2, 2, 2, 1),
+        center: new Vector(0, 0, -1, 1),
         up: new Vector(0, 1, 0, 0),
-        fovy: Math.PI / 3,
+        fovy: 60,
         aspect: canvas_raster.width / canvas_raster.height,
         near: 0.1,
         far: 100
@@ -68,14 +68,20 @@ window.addEventListener('load', () => {
     const setupVisitor = new RasterSetupVisitor(ctx_raster);
     setupVisitor.setup(sceneGraph);
 
-    const shader = new Shader(ctx_raster,
+    const phongShader = new Shader(ctx_raster,
+        vertexShader,
+        fragmentShader
+    );
+    const textureShader = new Shader(ctx_raster,
+        //TODO add texture shader
         vertexShader,
         fragmentShader
     );
     // render
-    const rasterVisitor = new RasterVisitor(ctx_raster, shader, null, setupVisitor.objects);
-    shader.load();
+    const rasterVisitor = new RasterVisitor(ctx_raster, phongShader, textureShader, setupVisitor.objects);
+    phongShader.load();
     rasterVisitor.render(sceneGraph, camera_raster, lightPositions);
+    // rasterVisitor.render(sceneGraph, null, lightPositions);
 
     let animationHandle: number;
 
@@ -92,7 +98,7 @@ window.addEventListener('load', () => {
         lastTimestamp = timestamp;
         gnRotation.angle = animationTime / 2000;
 
-        rayVisitor.render(sceneGraph, camera_ray, lightPositions);
+        rayVisitor.render(sceneGraph, camera_raster, lightPositions);
         // animationHandle = window.requestAnimationFrame(animate);
     }
 

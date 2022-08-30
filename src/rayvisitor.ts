@@ -53,7 +53,7 @@ export default class RayVisitor implements Visitor {
    */
   render(
     rootNode: Node,
-    camera: { origin: Vector, width: number, height: number, alpha: number },
+    camera: { eye: Vector, center: Vector, up: Vector, fovy: number, aspect: number, near: number },
     lightPositions: Array<Vector>
   ) {
     // clear
@@ -65,7 +65,7 @@ export default class RayVisitor implements Visitor {
     const height = this.imageData.height;
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
-        this.ray = Ray.makeRay(x, y, camera);
+        this.ray = Ray.makeRay(x, y, width, height, camera);
 
         // TODO initialize the matrix stack
         //Initialize the matrix stack with identity matrices
@@ -80,7 +80,7 @@ export default class RayVisitor implements Visitor {
             data[4 * (width * y + x) + 2] = 0;
             data[4 * (width * y + x) + 3] = 255;
           } else {
-            let color = phong(this.intersectionColor, this.intersection, lightPositions, 10, camera.origin);
+            let color = phong(this.intersectionColor, this.intersection, lightPositions, 10, camera.eye);
             data[4 * (width * y + x) + 0] = color.r * 255;
             data[4 * (width * y + x) + 1] = color.g * 255;
             data[4 * (width * y + x) + 2] = color.b * 255;

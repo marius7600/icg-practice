@@ -136,5 +136,7 @@ export default class RasterSphere {
         this.gl.disableVertexAttribArray(colorLocation);
         // TODO disable normal vertex attrib array
         this.gl.disableVertexAttribArray(normalLocation);
+        console.log(positionLocation, colorLocation, normalLocation);
+        
     }
 }

@@ -81,6 +81,10 @@ export default class RasterBox {
             1, 1, 1, // white
             1, 1, 0, // yellow
             0, 1, 1, // cyan
+            1, 0, 1, // magenta
+            0, 1, 0, // green
+            1, 0, 0, // red
+            0, 0, 1, // blue
         ];
         const colorBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
