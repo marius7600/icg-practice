@@ -1,6 +1,6 @@
-import Vector from './vector';
-import Shader from './shader';
-import Matrix from './matrix';
+import Vector from '../vector';
+import Shader from '../shader/shader';
+import Matrix from '../matrix';
 
 /**
  * A class creating buffers for a sphere to render it with WebGL

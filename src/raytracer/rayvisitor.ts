@@ -1,14 +1,14 @@
-import Matrix from './matrix';
-import Vector from './vector';
-import Sphere from './sphere';
-import Intersection from './intersection';
+import Matrix from '../matrix';
+import Vector from '../vector';
+import Sphere from '../sphere';
+import Intersection from '../intersection';
 import Ray from './ray';
-import Visitor from './visitor';
+import Visitor from '../visitor';
 import phong from './phong';
 import {
   Node, GroupNode, SphereNode,
   AABoxNode, TextureBoxNode   
-} from './nodes';
+} from '../nodes';
 import AABox from './aabox';
 
 const UNIT_SPHERE = new Sphere(new Vector(0, 0, 0, 1), 1, new Vector(0, 0, 0, 1));

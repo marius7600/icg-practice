@@ -1,15 +1,15 @@
 import RasterSphere from './raster-sphere';
 import RasterBox from './raster-box';
 import RasterTextureBox from './raster-texture-box';
-import Vector from './vector';
-import Matrix from './matrix';
-import Visitor from './visitor';
+import Vector from '../vector';
+import Matrix from '../matrix';
+import Visitor from '../visitor';
 import {
   Node, GroupNode,
   SphereNode, AABoxNode,
   TextureBoxNode
-} from './nodes';
-import Shader from './shader';
+} from '../nodes';
+import Shader from '../shader/shader';
 
 interface Camera {
   eye: Vector,

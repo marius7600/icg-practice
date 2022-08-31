@@ -6,14 +6,12 @@ import {
     SphereNode,
     AABoxNode
 } from './nodes';
-import RayVisitor from './rayvisitor';
+import RayVisitor from './raytracer/rayvisitor';
 import { Rotation, Scaling, Translation } from './transformation';
-import { RasterSetupVisitor, RasterVisitor } from './rastervisitor';
-import Shader from './shader';
-// import phongVertexShader from './basic-vertex-shader.glsl';
-// import phongFragmentShader from './basic-fragment-shader.glsl';
-import phongVertexShader from './phong-vertex-perspective-shader.glsl';
-import phongFragmentShader from './phong-fragment-shader.glsl';
+import { RasterSetupVisitor, RasterVisitor } from './rasterzier/rastervisitor';
+import Shader from './shader/shader';
+import phongVertexShader from './shader/phong-vertex-perspective-shader.glsl';
+import phongFragmentShader from './shader/phong-fragment-shader.glsl';
 
 window.addEventListener('load', () => {
     const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
