@@ -48,7 +48,6 @@ window.addEventListener('load', () => {
 
     // initialize the phong properties
     phongProperties = new PhongProperties();
-    console.log(phongProperties);
 
 
     /* Create the scenegraph */
@@ -189,7 +188,7 @@ function sliderChanged(event:any) {
 
 /* animate the scene */
 function animate(timestamp: number) {
-    console.log("start animate");
+    // console.log("animation loop started");
     if (lastTimestamp === 0) {
         lastTimestamp = timestamp;
     }
@@ -202,5 +201,5 @@ function animate(timestamp: number) {
         rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
     }
     requestAnimationFrame(animate);
-    console.log("animate end"); 
+    // console.log("animation loop ended"); 
 }
