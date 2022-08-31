@@ -10,9 +10,9 @@ attribute vec3 a_color;
 varying vec3 v_color;
 
 
-uniform mat4 M;
-uniform mat4 V;
-uniform mat4 P;
+uniform mat4 M; // Model matrix
+uniform mat4 V; // View matrix
+uniform mat4 P; // projection matrix
 uniform mat4 N; // normal matrix
 
 varying vec3 v_normal;

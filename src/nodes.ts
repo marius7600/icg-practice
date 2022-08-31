@@ -31,6 +31,7 @@ export class GroupNode extends Node {
     super();
     // TODO
     this.children = [];
+    this.transform = transform;
   }
 
   /**
@@ -50,6 +51,21 @@ export class GroupNode extends Node {
     // TODO
     this.children.push(childNode);
   }
+
+   //Für camera traversal
+   acceptOnlyCamera(visitor: Visitor) {
+    visitor.visitGroupNodeCamera(this);
+}
+
+remove(childNode: Node) {
+    let indexOfchild = this.children.indexOf(childNode);
+    this.children.splice(indexOfchild, 1);
+}
+
+containsCamera(cameraNode: CameraNode) {
+    return !!this.children.includes(cameraNode);
+
+}
 }
 
 /**
@@ -128,5 +144,52 @@ export class TextureBoxNode extends Node {
   accept(visitor: Visitor) {
     // TODO
     visitor.visitTextureBoxNode(this);
+  }
+}
+
+export class CameraNode extends Node {
+  public eye: Vector;
+  public center: Vector;
+  public up: Vector;
+  public fovy: number;
+  public aspect: number;
+  public near: number;
+  public far: number;
+  public id: number;
+
+
+  /**
+   * Creates a new Camera
+   * @param eye {Vector} - eye-Vector of camera
+   * @param center {Vector} - center Vector of camera
+   * @param up {Vector} - up Vector of camera
+   * @param fovy - field of view
+   * @param aspect - aspect ratio
+   * @param near - nearPlane
+   * @param far - farPlane
+   */
+
+  constructor(eye: Vector, center: Vector, up: Vector, fovy: number, aspect: number, near: number, far: number) {
+      super();
+      this.eye = eye;
+      this.center = center;
+      this.up = up;
+      this.fovy = fovy;
+      this.aspect = aspect;
+      this.near = near;
+      this.far = far;
+  }
+
+  /**
+   * Accepts a visitor according to the visitor pattern
+   * @param visitor
+   */
+
+  accept(visitor: Visitor) {
+      visitor.visitCameraNode(this)
+  }
+
+  updateFOV(fov: number) {
+      this.fovy = fov;
   }
 }

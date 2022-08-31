@@ -4,7 +4,8 @@ import Vector from './vector';
 import {
     GroupNode,
     SphereNode,
-    AABoxNode
+    AABoxNode,
+    CameraNode
 } from './nodes';
 import RayVisitor from './raytracer/rayvisitor';
 import { Rotation, Scaling, Translation } from './transformation';
@@ -30,33 +31,35 @@ window.addEventListener('load', () => {
 
     /* Create the scenegraph */
     const sceneGraph = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
-    const gnRotation = new Rotation(new Vector(1, 0, 0, 0), 0)
-    const gn = new GroupNode(gnRotation);
+    const cameraNode = new CameraNode(
+        new Vector(0, 0, -2, 1), // eye
+        new Vector(0, 0, 0, 1), // look at
+        new Vector(0, 1, 0, 0), // up
+        60,
+        canvas_raster.width / canvas_raster.height,
+        0.1,
+        100);
+    sceneGraph.add(cameraNode);
+    const gn = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
     sceneGraph.add(gn);
-    const gn1 = new GroupNode(new Translation(new Vector(1.2, .5, 0, 0)));
-    gn.add(gn1);
-    gn1.add(new SphereNode(new Vector(.4, 0, 0, 1)));
-    const gn2 = new GroupNode(new Translation(new Vector(-0.8, 1, 1, 0)));
-    gn.add(gn2);
-    const gn3 = new GroupNode(new Scaling(new Vector(0.4, 0.4, 0.4, 0)));
-    gn2.add(gn3);
-    gn3.add(new SphereNode(new Vector(0, 0, .3, 1)));
+    gn.add(new SphereNode(new Vector(.4, 0, 0, 1)));
     const lightPositions = [
         new Vector(1, 1, 1, 1)
     ];
 
-    const camera = {
-        eye: new Vector(0, 0, -5, 1),
-        center: new Vector(0, 0, 0, 1),
-        up: new Vector(0, 1, 0, 0),
-        fovy: 60,
-        aspect: canvas_raster.width / canvas_raster.height,
-        near: 0.1,
-        far: 100
-    }
+    // const camera = {
+    //     eye: new Vector(0, 0, -5, 1),
+    //     center: new Vector(0, 0, 0, 1),
+    //     up: new Vector(0, 1, 0, 0),
+    //     fovy: 60,
+    //     aspect: canvas_raster.width / canvas_raster.height,
+    //     near: 0.1,
+    //     far: 100
+    // }
 
     // setup for raytracing
     const rayVisitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
+
 
     // setup for raster rendering
     const rasterSetupVisitor = new RasterSetupVisitor(ctx_raster);
@@ -75,40 +78,42 @@ window.addEventListener('load', () => {
     // render rasterizer
     const rasterVisitor = new RasterVisitor(ctx_raster, phongShader, textureShader, rasterSetupVisitor.objects);
     phongShader.load();
-    rasterVisitor.setupCamera(camera);
-    rasterVisitor.render(sceneGraph, camera, lightPositions);
+    rasterVisitor.setupCamera(cameraNode);
+    rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
+
+    rayVisitor.render(sceneGraph, cameraNode, lightPositions);
 
     let animationHandle: number;
 
     let lastTimestamp = 0;
     let animationTime = 0;
     let animationHasStarted = true;
-    function animate(timestamp: number) {
-        let deltaT = timestamp - lastTimestamp;
-        if (animationHasStarted) {
-            deltaT = 0;
-            animationHasStarted = false;
-        }
-        animationTime += deltaT;
-        lastTimestamp = timestamp;
-        gnRotation.angle = animationTime / 2000;
+    // function animate(timestamp: number) {
+    //     let deltaT = timestamp - lastTimestamp;
+    //     if (animationHasStarted) {
+    //         deltaT = 0;
+    //         animationHasStarted = false;
+    //     }
+    //     animationTime += deltaT;
+    //     lastTimestamp = timestamp;
+    //     gnRotation.angle = animationTime / 2000;
 
-        rayVisitor.render(sceneGraph, camera, lightPositions);
-        // animationHandle = window.requestAnimationFrame(animate);
-    }
+    //     
+    //     // animationHandle = window.requestAnimationFrame(animate);
+    // }
 
-    function startAnimation() {
-        if (animationHandle) {
-            window.cancelAnimationFrame(animationHandle);
-        }
-        animationHasStarted = true;
-        function animation(t: number) {
-            animate(t);
-            animationHandle = window.requestAnimationFrame(animation);
-        }
-        animationHandle = window.requestAnimationFrame(animation);
-    }
-    animate(0);
+    // function startAnimation() {
+    //     if (animationHandle) {
+    //         window.cancelAnimationFrame(animationHandle);
+    //     }
+    //     animationHasStarted = true;
+    //     function animation(t: number) {
+    //         animate(t);
+    //         animationHandle = window.requestAnimationFrame(animation);
+    //     }
+    //     animationHandle = window.requestAnimationFrame(animation);
+    // }
+    // animate(0);
 
     // document.getElementById("startAnimationBtn").addEventListener(
     //     "click", startAnimation);

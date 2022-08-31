@@ -7,7 +7,7 @@ import Visitor from '../visitor';
 import {
   Node, GroupNode,
   SphereNode, AABoxNode,
-  TextureBoxNode
+  TextureBoxNode,CameraNode
 } from '../nodes';
 import Shader from '../shader/shader';
 
@@ -26,7 +26,7 @@ interface Renderable {
 }
 
 /**
- * Class representing a Visitor that uses Rasterisation 
+ * Class representing a Visitor that uses Rasterisation 2
  * to render a Scenegraph
  */
 export class RasterVisitor implements Visitor {
@@ -56,7 +56,7 @@ export class RasterVisitor implements Visitor {
    */
   render(
     rootNode: Node,
-    camera: Camera,
+    camera: CameraNode,
     lightPositions: Array<Vector>
   ) {
     // clear
@@ -202,6 +202,54 @@ export class RasterVisitor implements Visitor {
 
     this.renderables.get(node).render(shader);
   }
+
+    /**
+   * Visits a group node in the camera traversal used in GroupNode Base Class
+   * searches für Camera, if found visitCameraNode() is called
+   * @param node The node to visit
+   */
+     visitGroupNodeCamera(node: GroupNode) {
+
+      let mat = this.stack.at(this.stack.length - 1).traverse;
+      
+      let matTraverse = mat.mul(node.transform.getMatrix());      
+      //let matInv = matTraverse.invert();
+      this.stack.push({traverse: matTraverse, inverse: node.transform.getInverseMatrix()});
+
+      let cameraFound = false;
+      for (let child of node.children) {
+        if (cameraFound) {
+          break;
+        } else if (child instanceof CameraNode) {
+          child.accept(this);
+          cameraFound = true;
+        } else if (child instanceof GroupNode) {
+          child.acceptOnlyCamera(this); // Rekursiver Aufruf der exakten Methode s. Group Node Klasse
+        }
+      }
+      this.stack.pop();
+    }
+
+    visitCameraNode(node: CameraNode) {
+      let m = this.stack.at(this.stack.length - 1).traverse;
+      let centerLookat = m.mulVec(node.center);
+      let eyePos = m.mulVec(node.eye);
+      let upVec = m.mulVec(node.up);
+  
+      if (node) {
+        this.lookat = Matrix.lookat(
+            eyePos,
+            centerLookat,
+            upVec);
+  
+        this.perspective = Matrix.perspective(
+            node.fovy,
+            node.aspect,
+            node.near,
+            node.far
+        );
+      }
+}
 }
 
 /** 
@@ -292,5 +340,17 @@ export class RasterSetupVisitor {
         node.texture
       )
     );
+  }
+  
+  /**
+   * Visits a group node in camera traversal
+   * @param node The node to visit
+   */
+   visitGroupNodeCamera(node: GroupNode) {
+
+  }
+
+  visitCameraNode(node: CameraNode) {
+
   }
 }
