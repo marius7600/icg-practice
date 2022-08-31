@@ -15,7 +15,10 @@ import phongVertexShader from './shader/phong-vertex-perspective-shader.glsl';
 import phongFragmentShader from './shader/phong-fragment-shader.glsl';
 import PhongProperties from './phong-properties'
 
-// const phongProperties = new PhongProperties();
+let phongProperties: PhongProperties;
+
+let cameraNode: CameraNode;
+let sceneGraph: GroupNode;
 
 window.addEventListener('load', () => {
     const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
@@ -24,6 +27,10 @@ window.addEventListener('load', () => {
     const canvas_raster = document.getElementById("rasterizer") as HTMLCanvasElement;
     const ctx_raster = canvas_raster.getContext("webgl2");
 
+    // Event listeners for the slider changes
+    window.addEventListener('input', function (event) {
+        sliderChanged(event)
+        });
     /* Call figure toggle if key 2 is pressed */
     document.addEventListener('keydown', (event) => {
         if (event.key === '2') {
@@ -31,10 +38,14 @@ window.addEventListener('load', () => {
         }
     });
 
+    // initialize the phong properties
+    phongProperties = new PhongProperties();
+    console.log(phongProperties);
+
 
     /* Create the scenegraph */
-    const sceneGraph = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
-    const cameraNode = new CameraNode(
+    sceneGraph = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
+    cameraNode = new CameraNode(
         new Vector(0, 0, -2, 1), // eye
         new Vector(0, 0, 0, 1), // look at
         new Vector(0, 1, 0, 0), // up
@@ -49,16 +60,6 @@ window.addEventListener('load', () => {
     const lightPositions = [
         new Vector(1, 1, 1, 1)
     ];
-
-    // const camera = {
-    //     eye: new Vector(0, 0, -5, 1),
-    //     center: new Vector(0, 0, 0, 1),
-    //     up: new Vector(0, 1, 0, 0),
-    //     fovy: 60,
-    //     aspect: canvas_raster.width / canvas_raster.height,
-    //     near: 0.1,
-    //     far: 100
-    // }
 
     // setup for raytracing
     const rayVisitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
@@ -79,7 +80,7 @@ window.addEventListener('load', () => {
         phongFragmentShader
     );
     // render rasterizer
-    const rasterVisitor = new RasterVisitor(ctx_raster, phongShader, textureShader, rasterSetupVisitor.objects);
+    const rasterVisitor = new RasterVisitor(ctx_raster, phongShader, textureShader, rasterSetupVisitor.objects, phongProperties);
     phongShader.load();
     rasterVisitor.setupCamera(cameraNode);
     rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
@@ -126,13 +127,44 @@ window.addEventListener('load', () => {
 
 /* Toggle visability between the raytracer and rasterizer canvas */
 function toggleFigure() {
-    const ray = document.getElementById("raytracer_fig");
-    const raster = document.getElementById("rasterizer_fig");
-    if (ray.style.display === "none") {
-        ray.style.display = "block";
-        raster.style.display = "none";
+    const ray_canvas = document.getElementById("raytracer_fig");
+    const raster_canvas = document.getElementById("rasterizer_fig");
+    if (ray_canvas.style.display === "none") {
+        ray_canvas.style.display = "block";
+        raster_canvas.style.display = "none";
     } else {
-        ray.style.display = "none";
-        raster.style.display = "block";
+        ray_canvas.style.display = "none";
+        raster_canvas.style.display = "block";
+    }
+}
+
+/* update the phong properties if a slider is changed */
+function sliderChanged(event:any) {
+    const slider = event.target;
+    const value = slider.value;
+    const id = slider.id;
+    switch (id) {
+        case "ambient_value":
+            phongProperties.ambient = value;
+            console.log("Ambient: " + value);
+            break;
+        case "diffuse_value":
+            phongProperties.diffuse = value;
+            console.log("Diffuse: " + value);
+            break;
+        case "specular_value":
+            phongProperties.specular = value;
+            console.log("Specular: " + value);
+            break;
+        case "shininess_value":
+            phongProperties.shininess = value;
+            console.log("Shininess: " + value);
+            break;
+        case "fov_value":
+            cameraNode.fovy = value;
+            console.log("FOV: " + value);
+        default:
+            console.log("Unknown slider: " + id);
+            break;
     }
 }

@@ -10,16 +10,7 @@ import {
   TextureBoxNode,CameraNode
 } from '../nodes';
 import Shader from '../shader/shader';
-
-interface Camera {
-  eye: Vector,
-  center: Vector,
-  up: Vector,
-  fovy: number,
-  aspect: number,
-  near: number,
-  far: number
-}
+import PhongProperties from '../phong-properties';
 
 interface Renderable {
   render(shader: Shader): void;
@@ -42,10 +33,12 @@ export class RasterVisitor implements Visitor {
     private gl: WebGL2RenderingContext,
     private shader: Shader,
     private textureshader: Shader,
-    private renderables: WeakMap<Node, Renderable>
+    private renderables: WeakMap<Node, Renderable>,
+    private phongProperties: PhongProperties
   ) {
     // TODO setup
     this.stack = [{traverse: Matrix.identity(), inverse: Matrix.identity()}];
+    this.phongProperties = phongProperties;
   }
 
   /**
@@ -87,7 +80,7 @@ export class RasterVisitor implements Visitor {
    * Helper function to setup camera matrices
    * @param camera The camera used
    */
-  setupCamera(camera: Camera) {
+  setupCamera(camera: CameraNode) {
     this.lookat = Matrix.lookat(
       camera.eye,
       camera.center,
@@ -134,10 +127,10 @@ export class RasterVisitor implements Visitor {
     // const float kD = 0.6;
     // const float kS = 0.7;
     // const float shininess = 16.0;
-    shader.getUniformFloat("a_ka").set(0.3);
-    shader.getUniformFloat("a_kd").set(0.6);
-    shader.getUniformFloat("a_ks").set(0.7);
-    shader.getUniformFloat("a_shininess").set(16.0);
+    shader.getUniformFloat("a_ka").set(this.phongProperties.ambient);
+    shader.getUniformFloat("a_kd").set(this.phongProperties.diffuse);
+    shader.getUniformFloat("a_ks").set(this.phongProperties.specular);
+    shader.getUniformFloat("a_shininess").set(this.phongProperties.shininess);
     
     shader.getUniformMatrix("M").set(toWorld);
     shader.getUniformMatrix("M_inverse").set(fromWorld);
@@ -179,14 +172,10 @@ export class RasterVisitor implements Visitor {
     }
 
     // TODO set the material properties
-    // const float shininess = 16.0;
-    // const float kA = 0.3;
-    // const float kD = 0.6;
-    // const float kS = 0.7;
-    shader.getUniformFloat("a_ka").set(0.3);
-    shader.getUniformFloat("a_kd").set(0.6);
-    shader.getUniformFloat("a_ks").set(0.7);
-    shader.getUniformFloat("a_shininess").set(16.0);
+    shader.getUniformFloat("a_ka").set(this.phongProperties.ambient);
+    shader.getUniformFloat("a_kd").set(this.phongProperties.diffuse);
+    shader.getUniformFloat("a_ks").set(this.phongProperties.specular);
+    shader.getUniformFloat("a_shininess").set(this.phongProperties.shininess);
 
     shader.getUniformMatrix("M").set(toWorld);
     let V = shader.getUniformMatrix("V");
@@ -215,10 +204,10 @@ export class RasterVisitor implements Visitor {
       toWorld = toWorld.mul(this.stack[i].traverse);
     }
 
-    shader.getUniformFloat("a_ka").set(0.3);
-    shader.getUniformFloat("a_kd").set(0.6);
-    shader.getUniformFloat("a_ks").set(0.7);
-    shader.getUniformFloat("a_shininess").set(16.0);
+    shader.getUniformFloat("a_ka").set(this.phongProperties.ambient);
+    shader.getUniformFloat("a_kd").set(this.phongProperties.diffuse);
+    shader.getUniformFloat("a_ks").set(this.phongProperties.specular);
+    shader.getUniformFloat("a_shininess").set(this.phongProperties.shininess);
 
     shader.getUniformMatrix("M").set(toWorld);
     let P = shader.getUniformMatrix("P");
