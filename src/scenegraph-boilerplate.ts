@@ -163,6 +163,7 @@ function sliderChanged(event:any) {
         case "fov_value":
             cameraNode.fovy = value;
             console.log("FOV: " + value);
+            break;
         default:
             console.log("Unknown slider: " + id);
             break;
