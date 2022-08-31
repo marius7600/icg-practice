@@ -15,6 +15,11 @@ uniform mat4 V;
 uniform mat4 P;
 uniform mat4 N; // normal matrix
 
+attribute float a_ka;
+attribute float a_kd;
+attribute float a_ks;
+attribute float a_shininess;
+
 varying vec3 v_normal;
 
 // Pass the vertex position in view space
@@ -22,9 +27,20 @@ varying vec3 v_normal;
 // TODO
 varying vec3 v_position;
 
+// Pass the phon shading coefficients
+// to the fragment shader
+varying float v_ka;
+varying float v_kd;
+varying float v_ks;
+varying float v_shininess;
 
 
 void main() {
+  v_kd = a_kd;
+  v_ka = a_ka;
+  v_ks = a_ks;
+  v_shininess = a_shininess;
+
   gl_Position = P * V * M * vec4(a_position, 1.0);
   
   // Pass the color and transformed vertex position through

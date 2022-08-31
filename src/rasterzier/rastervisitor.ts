@@ -128,6 +128,16 @@ export class RasterVisitor implements Visitor {
       toWorld = toWorld.mul(this.stack[i].traverse);
       fromWorld = this.stack[i].inverse.mul(fromWorld);
     }
+
+    // TODO set the material properties
+    // const float kA = 0.3;
+    // const float kD = 0.6;
+    // const float kS = 0.7;
+    // const float shininess = 16.0;
+    shader.getUniformFloat("a_ka").set(0.3);
+    shader.getUniformFloat("a_kd").set(0.6);
+    shader.getUniformFloat("a_ks").set(0.7);
+    shader.getUniformFloat("a_shininess").set(16.0);
     
     shader.getUniformMatrix("M").set(toWorld);
     shader.getUniformMatrix("M_inverse").set(fromWorld);
@@ -167,6 +177,17 @@ export class RasterVisitor implements Visitor {
     for (let i = 0; i < this.stack.length; i++) {
       toWorld = toWorld.mul(this.stack[i].traverse);
     }
+
+    // TODO set the material properties
+    // const float shininess = 16.0;
+    // const float kA = 0.3;
+    // const float kD = 0.6;
+    // const float kS = 0.7;
+    shader.getUniformFloat("a_ka").set(0.3);
+    shader.getUniformFloat("a_kd").set(0.6);
+    shader.getUniformFloat("a_ks").set(0.7);
+    shader.getUniformFloat("a_shininess").set(16.0);
+
     shader.getUniformMatrix("M").set(toWorld);
     let V = shader.getUniformMatrix("V");
     if (V && this.lookat) {
@@ -193,6 +214,12 @@ export class RasterVisitor implements Visitor {
     for (let i = 0; i < this.stack.length; i++) {
       toWorld = toWorld.mul(this.stack[i].traverse);
     }
+
+    shader.getUniformFloat("a_ka").set(0.3);
+    shader.getUniformFloat("a_kd").set(0.6);
+    shader.getUniformFloat("a_ks").set(0.7);
+    shader.getUniformFloat("a_shininess").set(16.0);
+
     shader.getUniformMatrix("M").set(toWorld);
     let P = shader.getUniformMatrix("P");
     if (P && this.perspective) {
