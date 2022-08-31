@@ -1,13 +1,13 @@
 import Matrix from '../matrix';
 import Vector from '../vector';
-import Sphere from '../sphere';
+import Sphere from './ray-sphere';
 import Intersection from '../intersection';
 import Ray from './ray';
 import Visitor from '../visitor';
 import phong from './phong';
 import {
   Node, GroupNode, SphereNode,
-  AABoxNode, TextureBoxNode   
+  AABoxNode, TextureBoxNode, CameraNode   
 } from '../nodes';
 import AABox from './aabox';
 
@@ -24,6 +24,9 @@ export default class RayVisitor implements Visitor {
    * set individual pixels
    */
   imageData: ImageData;
+  camera: CameraNode;
+
+
 
   // TODO declare instance variables here
   stack:  [{ matrix: Matrix, inverse: Matrix }];
@@ -43,6 +46,7 @@ export default class RayVisitor implements Visitor {
     height: number
   ) {
     this.imageData = context.getImageData(0, 0, width, height);
+    this.camera = null;
   }
 
   /**
@@ -53,7 +57,7 @@ export default class RayVisitor implements Visitor {
    */
   render(
     rootNode: Node,
-    camera: { eye: Vector, center: Vector, up: Vector, fovy: number, aspect: number, near: number },
+    camera: CameraNode,
     lightPositions: Array<Vector>
   ) {
     // clear
@@ -172,4 +176,23 @@ export default class RayVisitor implements Visitor {
    * @param node The node to visit
    */
   visitTextureBoxNode(node: TextureBoxNode) { }
+
+  visitCameraNode(node: CameraNode) {
+    let center = this.stack[this.stack.length - 1].matrix.mulVec(node.center);
+    let eye = node.eye.mul(1);
+    eye.z -= 2;
+    eye = this.stack[this.stack.length - 1].matrix.mulVec(eye);
+    let up = this.stack[this.stack.length - 1].matrix.mulVec(node.up);
+    this.camera = new CameraNode(eye, center, up, node.fovy, node.aspect,
+      node.near, node.far);
+  }
+
+    /**
+   * Visits a camera node
+   * @param node The node to visit
+   */
+     visitGroupNodeCamera(node: GroupNode) {
+
+    }
 }
+
