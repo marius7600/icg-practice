@@ -145,12 +145,10 @@ function toggleFigure() {
         ray_canvas.style.display = "block";
         raster_canvas.style.display = "none";
         rasterizing = !rasterizing;
-        console.log(rasterizing);
     } else {
         ray_canvas.style.display = "none";
         raster_canvas.style.display = "block";
         rasterizing = !rasterizing;
-        console.log(rasterizing);
     }
 }
 

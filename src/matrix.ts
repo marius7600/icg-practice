@@ -161,7 +161,7 @@ export default class Matrix {
    * @return The resulting matrix
    */
   static perspective(fovy: number, aspect: number, near: number, far: number): Matrix {
-    let top = near * Math.tan(fovy * Math.PI / 360);
+    let top = near * Math.tan(fovy * Math.PI / 180);
     let right = top * aspect;
     return Matrix.frustum(-right, right, -top, top, near, far);
   }
