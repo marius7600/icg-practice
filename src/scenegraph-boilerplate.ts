@@ -86,15 +86,11 @@ window.addEventListener('load', () => {
         phongVertexShader,
         phongFragmentShader
     );
-    // render rasterizer
+
     rasterVisitor = new RasterVisitor(ctx_raster, phongShader, textureShader, rasterSetupVisitor.objects, phongProperties);
     phongShader.load();
     rasterVisitor.setupCamera(cameraNode);
-    rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
-
-    // render raytracer
-    rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
-
+        
     // start animation
     lastTimestamp = 0;
     requestAnimationFrame(animate);
