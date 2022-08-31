@@ -12,6 +12,9 @@ import { RasterSetupVisitor, RasterVisitor } from './rasterzier/rastervisitor';
 import Shader from './shader/shader';
 import phongVertexShader from './shader/phong-vertex-perspective-shader.glsl';
 import phongFragmentShader from './shader/phong-fragment-shader.glsl';
+import PhongProperties from './phong-properties'
+
+const phongProperties = new PhongProperties();
 
 window.addEventListener('load', () => {
     const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
