@@ -94,7 +94,7 @@ window.addEventListener('load', () => {
     rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
 
     // render raytracer
-    rayVisitor.render(sceneGraph, cameraNode, lightPositions);
+    rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
 
     // start animation
     lastTimestamp = 0;
@@ -145,11 +145,13 @@ function toggleFigure() {
     if (ray_canvas.style.display === "none") {
         ray_canvas.style.display = "block";
         raster_canvas.style.display = "none";
-        rasterizing != rasterizing;
+        rasterizing = !rasterizing;
+        console.log(rasterizing);
     } else {
         ray_canvas.style.display = "none";
         raster_canvas.style.display = "block";
-        rasterizing != rasterizing;
+        rasterizing = !rasterizing;
+        console.log(rasterizing);
     }
 }
 
@@ -197,7 +199,7 @@ function animate(timestamp: number) {
         rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
     }
     else {
-        rayVisitor.render(sceneGraph, cameraNode, lightPositions);
+        rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
     }
     requestAnimationFrame(animate);
     console.log("animate end"); 

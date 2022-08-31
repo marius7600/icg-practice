@@ -1,5 +1,6 @@
 import Vector from '../vector';
 import Intersection from '../intersection';
+import PhongProperties from '../phong-properties';
 
 /**
  * Calculate the colour of an object at the intersection point according to the Phong Lighting model.
@@ -12,8 +13,8 @@ import Intersection from '../intersection';
  */
 export default function phong(
   color: Vector, intersection: Intersection,
-  lightPositions: Array<Vector>, shininess: number,
-  cameraPosition: Vector, kA :number, kD :number, kS: number,
+  lightPositions: Array<Vector>,
+  cameraPosition: Vector, phongProperties: PhongProperties
 ): Vector {
   const lightColor = new Vector(0.8, 0.8, 0.8, 0);
   // const kA = 0.8;
@@ -27,13 +28,13 @@ export default function phong(
   var colorPhong = new Vector(0,0,0,0);
 
   //Ambient light
-  colorPhong = colorPhong.add(ambientLightning(color,kA));
+  colorPhong = colorPhong.add(ambientLightning(color, phongProperties.ambient));
 
   //Diffuse Light
-  colorPhong = diffuseLightning(lightPositions,kD,n,lightColor,p,colorPhong);
+  colorPhong = diffuseLightning(lightPositions, phongProperties.diffuse, n, lightColor, p, colorPhong);
  
   //Specular Light
-  colorPhong = specularLightning(lightPositions,kS,lightColor,colorPhong,v,p,n,shininess);
+  colorPhong = specularLightning(lightPositions, phongProperties.specular, lightColor, colorPhong, v, p, n, phongProperties.shininess);
   return colorPhong;
 }
 
