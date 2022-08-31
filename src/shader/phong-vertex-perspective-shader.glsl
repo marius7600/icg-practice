@@ -15,10 +15,10 @@ uniform mat4 V;
 uniform mat4 P;
 uniform mat4 N; // normal matrix
 
-attribute float a_ka;
-attribute float a_kd;
-attribute float a_ks;
-attribute float a_shininess;
+uniform float a_ka;
+uniform float a_kd;
+uniform float a_ks;
+uniform float a_shininess;
 
 varying vec3 v_normal;
 
