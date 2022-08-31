@@ -15,10 +15,18 @@ import phongVertexShader from './shader/phong-vertex-perspective-shader.glsl';
 import phongFragmentShader from './shader/phong-fragment-shader.glsl';
 import PhongProperties from './phong-properties'
 
+let rasterizing: boolean = true;
+
 let phongProperties: PhongProperties;
 
 let cameraNode: CameraNode;
 let sceneGraph: GroupNode;
+let lightPositions: Vector[];
+
+let rasterVisitor: RasterVisitor;
+let rayVisitor: RayVisitor;
+
+let lastTimestamp: number;
 
 window.addEventListener('load', () => {
     const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
@@ -57,12 +65,12 @@ window.addEventListener('load', () => {
     const gn = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
     sceneGraph.add(gn);
     gn.add(new SphereNode(new Vector(.4, 0, 0, 1)));
-    const lightPositions = [
+    lightPositions = [
         new Vector(1, 1, 1, 1)
     ];
 
     // setup for raytracing
-    const rayVisitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
+    rayVisitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
 
 
     // setup for raster rendering
@@ -80,18 +88,23 @@ window.addEventListener('load', () => {
         phongFragmentShader
     );
     // render rasterizer
-    const rasterVisitor = new RasterVisitor(ctx_raster, phongShader, textureShader, rasterSetupVisitor.objects, phongProperties);
+    rasterVisitor = new RasterVisitor(ctx_raster, phongShader, textureShader, rasterSetupVisitor.objects, phongProperties);
     phongShader.load();
     rasterVisitor.setupCamera(cameraNode);
     rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
 
+    // render raytracer
     rayVisitor.render(sceneGraph, cameraNode, lightPositions);
 
-    let animationHandle: number;
+    // start animation
+    lastTimestamp = 0;
+    requestAnimationFrame(animate);
 
-    let lastTimestamp = 0;
-    let animationTime = 0;
-    let animationHasStarted = true;
+    // let animationHandle: number;
+
+    // let lastTimestamp = 0;
+    // let animationTime = 0;
+    // let animationHasStarted = true;
     // function animate(timestamp: number) {
     //     let deltaT = timestamp - lastTimestamp;
     //     if (animationHasStarted) {
@@ -132,9 +145,11 @@ function toggleFigure() {
     if (ray_canvas.style.display === "none") {
         ray_canvas.style.display = "block";
         raster_canvas.style.display = "none";
+        rasterizing != rasterizing;
     } else {
         ray_canvas.style.display = "none";
         raster_canvas.style.display = "block";
+        rasterizing != rasterizing;
     }
 }
 
@@ -168,4 +183,22 @@ function sliderChanged(event:any) {
             console.log("Unknown slider: " + id);
             break;
     }
+}
+
+/* animate the scene */
+function animate(timestamp: number) {
+    console.log("start animate");
+    if (lastTimestamp === 0) {
+        lastTimestamp = timestamp;
+    }
+    const delta = (timestamp - lastTimestamp) / 1000;
+    lastTimestamp = timestamp;
+    if (rasterizing) {
+        rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
+    }
+    else {
+        rayVisitor.render(sceneGraph, cameraNode, lightPositions);
+    }
+    requestAnimationFrame(animate);
+    console.log("animate end"); 
 }
