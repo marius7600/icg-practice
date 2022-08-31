@@ -13,12 +13,12 @@ import Intersection from '../intersection';
 export default function phong(
   color: Vector, intersection: Intersection,
   lightPositions: Array<Vector>, shininess: number,
-  cameraPosition: Vector
+  cameraPosition: Vector, kA :number, kD :number, kS: number,
 ): Vector {
   const lightColor = new Vector(0.8, 0.8, 0.8, 0);
-  const kA = 0.8;
-  const kD = 0.5;
-  const kS = 0.5;
+  // const kA = 0.8;
+  // const kD = 0.5;
+  // const kS = 0.5;
 
   const p = intersection.point;
   const n = intersection.normal;

@@ -84,7 +84,7 @@ export default class RayVisitor implements Visitor {
             data[4 * (width * y + x) + 2] = 0;
             data[4 * (width * y + x) + 3] = 255;
           } else {
-            let color = phong(this.intersectionColor, this.intersection, lightPositions, 10, camera.eye);
+            let color = phong(this.intersectionColor, this.intersection, lightPositions, 10, camera.eye, 0.8, 0.5, 0.5);
             data[4 * (width * y + x) + 0] = color.r * 255;
             data[4 * (width * y + x) + 1] = color.g * 255;
             data[4 * (width * y + x) + 2] = color.b * 255;
