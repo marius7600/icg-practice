@@ -162,6 +162,15 @@ export class LightNode extends Node {
   ) {
     super();
   }
+
+  /**
+   * Accepts a visitor according to the visitor pattern
+   * @param visitor The visitor
+   */
+  accept(visitor: Visitor) {
+    visitor.visitLightNode(this);
+  }
+  
 }
 
 export class CameraNode extends Node {

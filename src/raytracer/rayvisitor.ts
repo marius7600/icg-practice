@@ -53,6 +53,10 @@ export default class RayVisitor implements Visitor {
     this.stack = [{ matrix: Matrix.identity(), inverse: Matrix.identity() }];
     this.intersection = null;
   }
+  visitLightNode(node: LightNode): void {
+    // TODO implement this
+    throw new Error('Method not implemented.');
+  }
 
   /**
    * Renders the Scenegraph

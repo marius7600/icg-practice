@@ -22,7 +22,13 @@ interface Renderable {
  */
 export class RasterVisitor implements Visitor {
   // TODO declare instance variables here
-  stack: [{traverse: Matrix, inverse: Matrix}] 
+  stack: [{traverse: Matrix, inverse: Matrix}]
+  lights: Array<LightNode> = [];
+  matrix: Matrix = Matrix.identity(); // TODO kann man evtl. durch Stack ersetzen?!
+
+  private lookat: Matrix;   //view matrix to transform vertices from the world coordinate system to the view coordinate system
+  private perspective: Matrix; //perspective matrix to transform vertices from the view coordinate system to the
+     
   /**
    * Creates a new RasterVisitor
    * @param gl The 3D context to render to
@@ -54,27 +60,36 @@ export class RasterVisitor implements Visitor {
   ) {
     // clear
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+    this.lights = [];
 
     this.setupCamera(camera);
-    
+
+    this.getLightNodes(rootNode);
 
     // traverse and render
     rootNode.accept(this);
   }
 
   /**
-   * The view matrix to transform vertices from
-   * the world coordinate system to the 
-   * view coordinate system
+   * Seachres for light nodes and sets them in the lights array
+   * @parm {Node} The node to search for light nodes
    */
-  private lookat: Matrix;
-
-  /**
-   * The perspective matrix to transform vertices from
-   * the view coordinate system to the 
-   * normalized device coordinate system
-   */
-  private perspective: Matrix;
+  getLightNodes(node: Node) {
+    // console.log("getting light nodes");
+    if (node instanceof LightNode) {
+      this.lights.push(new LightNode(node.color, this.matrix.mulVec(node.position)));
+      console.log("light found" + "at " + this.matrix.mulVec(node.position));
+    }
+    else if (node instanceof GroupNode) {
+      let myMatrix = this.matrix;
+      let nodeMatrix = this.matrix.mul(node.transform.getMatrix());
+      for (let i = 0; i < node.children.length; i++) {
+        this.matrix = nodeMatrix;
+        this.getLightNodes(node.children[i]);
+      }
+      this.matrix = myMatrix;
+    }
+  }
 
   /**
    * Helper function to setup camera matrices
@@ -219,53 +234,58 @@ export class RasterVisitor implements Visitor {
     this.renderables.get(node).render(shader);
   }
 
-    /**
+  /**
    * Visits a group node in the camera traversal used in GroupNode Base Class
    * searches für Camera, if found visitCameraNode() is called
    * @param node The node to visit
    */
-     visitGroupNodeCamera(node: GroupNode) {
+  visitGroupNodeCamera(node: GroupNode) {
 
-      let mat = this.stack.at(this.stack.length - 1).traverse;
-      
-      let matTraverse = mat.mul(node.transform.getMatrix());      
-      //let matInv = matTraverse.invert();
-      this.stack.push({traverse: matTraverse, inverse: node.transform.getInverseMatrix()});
+    let mat = this.stack.at(this.stack.length - 1).traverse;
+    
+    let matTraverse = mat.mul(node.transform.getMatrix());      
+    //let matInv = matTraverse.invert();
+    this.stack.push({traverse: matTraverse, inverse: node.transform.getInverseMatrix()});
 
-      let cameraFound = false;
-      for (let child of node.children) {
-        if (cameraFound) {
-          break;
-        } else if (child instanceof CameraNode) {
-          child.accept(this);
-          cameraFound = true;
-        } else if (child instanceof GroupNode) {
-          child.acceptOnlyCamera(this); // Rekursiver Aufruf der exakten Methode s. Group Node Klasse
-        }
+    let cameraFound = false;
+    for (let child of node.children) {
+      if (cameraFound) {
+        break;
+      } else if (child instanceof CameraNode) {
+        child.accept(this);
+        cameraFound = true;
+      } else if (child instanceof GroupNode) {
+        child.acceptOnlyCamera(this); // Rekursiver Aufruf der exakten Methode s. Group Node Klasse
       }
-      this.stack.pop();
     }
+    this.stack.pop();
+  }
 
-    visitCameraNode(node: CameraNode) {
-      let m = this.stack.at(this.stack.length - 1).traverse;
-      let centerLookat = m.mulVec(node.center);
-      let eyePos = m.mulVec(node.eye);
-      let upVec = m.mulVec(node.up);
-  
-      if (node) {
-        this.lookat = Matrix.lookat(
-            eyePos,
-            centerLookat,
-            upVec);
-  
-        this.perspective = Matrix.perspective(
-            node.fovy,
-            node.aspect,
-            node.near,
-            node.far
-        );
-      }
-}
+  visitCameraNode(node: CameraNode) {
+    let m = this.stack.at(this.stack.length - 1).traverse;
+    let centerLookat = m.mulVec(node.center);
+    let eyePos = m.mulVec(node.eye);
+    let upVec = m.mulVec(node.up);
+
+    if (node) {
+      this.lookat = Matrix.lookat(
+          eyePos,
+          centerLookat,
+          upVec);
+
+      this.perspective = Matrix.perspective(
+          node.fovy,
+          node.aspect,
+          node.near,
+          node.far
+      );
+    }
+  }
+
+  visitLightNode(node: LightNode): void {
+    // TODO implement this
+    console.log('Method visitLightNode not implemented');
+  }
 }
 
 /** 
@@ -363,10 +383,14 @@ export class RasterSetupVisitor {
    * @param node The node to visit
    */
    visitGroupNodeCamera(node: GroupNode) {
-
+    console.log('Method visitGroupNodeCamera not implemented.');
   }
 
   visitCameraNode(node: CameraNode) {
+    console.log('Method visitCameraNode not implemented.');
+  }
 
+  visitLightNode(node: LightNode) {
+    console.log('Method visitLightNode not implemented.');
   }
 }

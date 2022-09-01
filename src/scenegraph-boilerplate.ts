@@ -68,7 +68,8 @@ window.addEventListener('load', () => {
     lightPositions = [
         // new Vector(1, 1, 1, 1)
         new LightNode (new Vector(0.8, 0.8, 0.8, 0), new Vector(1, 1, 1, 1)),
-        new LightNode (new Vector(0.8, 0.8, 0.8, 0), new Vector(-1, -1, -1, 1))
+        new LightNode (new Vector(0.8, 0.8, 0.8, 0), new Vector(-1, -1, -1, 1)),
+        new LightNode (new Vector(0.8, 0.8, 0.8, 0), new Vector(1, -1, -1, 1))
     ];
 
     // setup for raytracing
@@ -96,7 +97,10 @@ window.addEventListener('load', () => {
         
     // start animation
     lastTimestamp = 0;
-    requestAnimationFrame(animate);
+    Promise.all([phongShader.load(), textureShader.load()]).then(() => {
+        window.requestAnimationFrame(animate);
+    });
+    // requestAnimationFrame(animate);
 
     // let animationHandle: number;
 
