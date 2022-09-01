@@ -12,8 +12,11 @@ import {
 import AABox from './aabox';
 import PhongProperties from '../phong-properties';
 
-const UNIT_SPHERE = new Sphere(new Vector(0, 0, 0, 1), 1, new Vector(0, 0, 0, 1));
-const UNIT_AABOX = new AABox(new Vector(-0.5, -0.5, -0.5, 1), new Vector(0.5, 0.5, 0.5, 1), new Vector(0, 0, 0, 1));
+
+interface Intersectable {
+  intersect(ray: Ray): Intersection | null;
+  color?: Vector;
+}
 
 /**
  * Class representing a Visitor that uses
@@ -26,14 +29,14 @@ export default class RayVisitor implements Visitor {
    */
   imageData: ImageData;
   camera: CameraNode;
-
+  objects: Array<Intersectable>;
 
 
   // TODO declare instance variables here
   stack:  [{ matrix: Matrix, inverse: Matrix }];
   intersection: Intersection | null;
   intersectionColor: Vector;
-  ray: Ray;
+
 
   /**
    * Creates a new RayVisitor
@@ -47,7 +50,8 @@ export default class RayVisitor implements Visitor {
     height: number
   ) {
     this.imageData = context.getImageData(0, 0, width, height);
-    this.camera = null;
+    this.stack = [{ matrix: Matrix.identity(), inverse: Matrix.identity() }];
+    this.intersection = null;
   }
 
   /**
@@ -65,32 +69,48 @@ export default class RayVisitor implements Visitor {
     // clear
     let data = this.imageData.data;
     data.fill(0);
+    this.objects = [];
+
+    //build list of render objects
+    rootNode.accept(this);
 
     // raytrace
     const width = this.imageData.width;
     const height = this.imageData.height;
+
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
-        this.ray = Ray.makeRay(x, y, height, width, camera);
+        const ray = Ray.makeRay(x, y, height, width, camera);
+        
+        let minIntersection = new Intersection(Infinity, null, null);
+        let minObj = null;
 
+        for (let shape of this.objects) {
+          const intersection = shape.intersect(ray);
+          if (intersection && intersection.closerThan(minIntersection)) {
+            minIntersection = intersection;
+            minObj = shape;
+          }
+        }
+        
         // TODO initialize the matrix stack
         //Initialize the matrix stack with identity matrices
-        this.stack = [{ matrix: Matrix.identity(), inverse: Matrix.identity() }];
-        this.intersection = null;
-        rootNode.accept(this);
+        // this.stack = [{ matrix: Matrix.identity(), inverse: Matrix.identity() }];
+        // this.intersection = null;
+        // rootNode.accept(this);
 
-        if (this.intersection) {
-          if (!this.intersectionColor) {
+        if (minObj) {
+          if (!minObj.color) {
             data[4 * (width * y + x) + 0] = 0;
             data[4 * (width * y + x) + 1] = 0;
             data[4 * (width * y + x) + 2] = 0;
             data[4 * (width * y + x) + 3] = 255;
           } else {
-            let color = phong(this.intersectionColor, this.intersection, lightPositions, camera.eye, phongProperties);
+            let color = phong(minObj.color, minIntersection, lightPositions, camera.eye, phongProperties);
             data[4 * (width * y + x) + 0] = color.r * 255;
             data[4 * (width * y + x) + 1] = color.g * 255;
             data[4 * (width * y + x) + 2] = color.b * 255;
-            data[4 * (width * y + x) + 3] = 255;
+            data[4 * (width * y + x) + 3] = color.a * 255;
           }
         }
       }
@@ -104,7 +124,9 @@ export default class RayVisitor implements Visitor {
    */
   visitGroupNode(node: GroupNode) {
     // TODO traverse the graph and build the model matrix
-    this.stack.push({ matrix: node.transform.getMatrix(), inverse: node.transform.getInverseMatrix() });
+    let toWorld = this.stack.at(this.stack.length - 1).matrix.mul(node.transform.getMatrix());
+    // this.stack.push({ matrix: wiggse, inverse: wiggse.inverse() });
+    this.stack.push({ matrix: toWorld, inverse: toWorld.transpose() });   // TODO is this correct?
     for (let i = 0; i < node.children.length; i++) {
       node.children[i].accept(this);
     }
@@ -116,30 +138,19 @@ export default class RayVisitor implements Visitor {
    * @param node - The node to visit
    */
   visitSphereNode(node: SphereNode) {
-    let toWorld = Matrix.identity();
-    let fromWorld = Matrix.identity();
-    // TODO assign the model matrix and its inverse
-    for (let i = 0; i < this.stack.length; i++) {
-      toWorld = toWorld.mul(this.stack[i].matrix);
-      fromWorld = this.stack[i].inverse.mul(fromWorld);
-    }
 
-    const ray = new Ray(fromWorld.mulVec(this.ray.origin), fromWorld.mulVec(this.ray.direction).normalize());
-    let intersection = UNIT_SPHERE.intersect(ray);
+    let m = this.stack[this.stack.length - 1];
+    // console.log(m);
+    // console.log(node.radius)
 
-    if (intersection) {
-      const intersectionPointWorld = toWorld.mulVec(intersection.point);
-      const intersectionNormalWorld = toWorld.mulVec(intersection.normal).normalize();
-      intersection = new Intersection(
-        (intersectionPointWorld.x - ray.origin.x) / ray.direction.x,
-        intersectionPointWorld,
-        intersectionNormalWorld
-      );
-      if (this.intersection === null || intersection.closerThan(this.intersection)) {
-        this.intersection = intersection;
-        this.intersectionColor = node.color;
-      }
-    }
+    let xScale = m.matrix.getVal(0, 0);
+    let yScale = m.matrix.getVal(0, 1);
+    let zScale = m.matrix.getVal(0, 2);
+
+    let scale = Math.sqrt(xScale * xScale + yScale * yScale + zScale * zScale);
+    // console.log(scale);
+    this.objects.push(new Sphere(m.matrix.mulVec(node.center),
+      node.radius * scale, node.color));
   }
 
   /**
@@ -147,30 +158,15 @@ export default class RayVisitor implements Visitor {
    * @param node The node to visit
    */
   visitAABoxNode(node: AABoxNode) {
-    let toWorld = Matrix.identity();
-    let fromWorld = Matrix.identity();
-    // TODO assign the model matrix and its inverse
-    for (let i = 0; i < this.stack.length; i++) {
-      toWorld = toWorld.mul(this.stack[i].matrix);
-      fromWorld = this.stack[i].inverse.mul(fromWorld);
-    }
-    
-    const ray = new Ray(fromWorld.mulVec(this.ray.origin), fromWorld.mulVec(this.ray.direction).normalize());
-    let intersection = UNIT_AABOX.intersect(ray);
+    let mat = Matrix.identity();
+    this.stack = [{ matrix: Matrix.identity(), inverse: Matrix.identity() }];
+    mat = this.stack[this.stack.length - 1].matrix.mul(mat);
 
-    if (intersection) {
-      const intersectionPointWorld = toWorld.mulVec(intersection.point);
-      const intersectionNormalWorld = toWorld.mulVec(intersection.normal).normalize();
-      intersection = new Intersection(
-        (intersectionPointWorld.x - ray.origin.x) / ray.direction.x,
-        intersectionPointWorld,
-        intersectionNormalWorld
-      );
-      if (this.intersection === null || intersection.closerThan(this.intersection)) {
-        this.intersection = intersection;
-        this.intersectionColor = node.color;
-      }
-    }
+    this.objects.push(new AABox(
+      mat.mulVec(new Vector(-0.5, -0.5, -0.5, 1)),
+      mat.mulVec(new Vector(0.5, 0.5, 0.5, 1)),
+      node.color
+    ));
   }
 
   /**
@@ -183,7 +179,7 @@ export default class RayVisitor implements Visitor {
     let center = this.stack[this.stack.length - 1].matrix.mulVec(node.center);
     let eye = node.eye.mul(1);
     eye.z -= 2;
-    eye = this.stack[this.stack.length - 1].matrix.mulVec(eye);
+    eye = this.stack[this.stack.length - 1].matrix.mulVec(node.eye);
     let up = this.stack[this.stack.length - 1].matrix.mulVec(node.up);
     this.camera = new CameraNode(eye, center, up, node.fovy, node.aspect,
       node.near, node.far);

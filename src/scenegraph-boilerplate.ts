@@ -63,7 +63,7 @@ window.addEventListener('load', () => {
     sceneGraph.add(cameraNode);
     const gn = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
     sceneGraph.add(gn);
-    gn.add(new SphereNode(new Vector(.4, 0, 0, 1)));
+    gn.add(new SphereNode(new Vector(.4, 0, 0, 1), new Vector(0, 0, 0, 1), 1));
     lightPositions = [
         new Vector(1, 1, 1, 1)
     ];

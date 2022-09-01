@@ -81,7 +81,9 @@ export class SphereNode extends Node {
    * @param color The colour of the Sphere
    */
   constructor(
-    public color: Vector
+    public color: Vector,
+    public center: Vector,
+    public radius: number,
   ) {
     super();
   }
@@ -147,17 +149,22 @@ export class TextureBoxNode extends Node {
   }
 }
 
+/**
+ * Class representing a Light in the Scenegraph
+ * @extends Node
+ * @param color {Vector} The colour of the light
+ * @param position {Vector} The position of the light
+ */
+export class LightNode extends Node {
+  constructor(
+    public color: Vector,
+    public position: Vector
+  ) {
+    super();
+  }
+}
+
 export class CameraNode extends Node {
-  public eye: Vector;
-  public center: Vector;
-  public up: Vector;
-  public fovy: number;
-  public aspect: number;
-  public near: number;
-  public far: number;
-  public id: number;
-
-
   /**
    * Creates a new Camera
    * @param eye {Vector} - eye-Vector of camera
@@ -169,15 +176,15 @@ export class CameraNode extends Node {
    * @param far - farPlane
    */
 
-  constructor(eye: Vector, center: Vector, up: Vector, fovy: number, aspect: number, near: number, far: number) {
-      super();
-      this.eye = eye;
-      this.center = center;
-      this.up = up;
-      this.fovy = fovy;
-      this.aspect = aspect;
-      this.near = near;
-      this.far = far;
+  constructor(
+    public eye: Vector,
+    public center: Vector,
+    public up: Vector,
+    public fovy: number,
+    public aspect: number,
+    public near: number,
+    public far: number) {
+    super();
   }
 
   /**
@@ -187,9 +194,5 @@ export class CameraNode extends Node {
 
   accept(visitor: Visitor) {
       visitor.visitCameraNode(this)
-  }
-
-  updateFOV(fov: number) {
-      this.fovy = fov;
   }
 }
