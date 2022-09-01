@@ -7,7 +7,7 @@ import Visitor from '../visitor';
 import phong from './phong';
 import {
   Node, GroupNode, SphereNode,
-  AABoxNode, TextureBoxNode, CameraNode   
+  AABoxNode, TextureBoxNode, CameraNode, LightNode   
 } from '../nodes';
 import AABox from './aabox';
 import PhongProperties from '../phong-properties';
@@ -63,7 +63,7 @@ export default class RayVisitor implements Visitor {
   render(
     rootNode: Node,
     camera: CameraNode,
-    lightPositions: Array<Vector>,
+    lightPositions: Array<LightNode>,
     phongProperties: PhongProperties
   ) {
     // clear

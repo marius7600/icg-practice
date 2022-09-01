@@ -5,7 +5,8 @@ import {
     GroupNode,
     SphereNode,
     AABoxNode,
-    CameraNode
+    CameraNode,
+    LightNode
 } from './nodes';
 import RayVisitor from './raytracer/rayvisitor';
 import { Rotation, Scaling, Translation } from './transformation';
@@ -21,7 +22,7 @@ let phongProperties: PhongProperties;
 
 let cameraNode: CameraNode;
 let sceneGraph: GroupNode;
-let lightPositions: Vector[];
+let lightPositions: LightNode[];
 
 let rasterVisitor: RasterVisitor;
 let rayVisitor: RayVisitor;
@@ -65,7 +66,9 @@ window.addEventListener('load', () => {
     sceneGraph.add(gn);
     gn.add(new SphereNode(new Vector(.4, 0, 0, 1), new Vector(0, 0, 0, 1), 1));
     lightPositions = [
-        new Vector(1, 1, 1, 1)
+        // new Vector(1, 1, 1, 1)
+        new LightNode (new Vector(0.8, 0.8, 0.8, 0), new Vector(1, 1, 1, 1)),
+        new LightNode (new Vector(0.8, 0.8, 0.8, 0), new Vector(-1, -1, -1, 1))
     ];
 
     // setup for raytracing
@@ -189,7 +192,8 @@ function animate(timestamp: number) {
     const delta = (timestamp - lastTimestamp) / 1000;
     lastTimestamp = timestamp;
     if (rasterizing) {
-        rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
+        // rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
+        rasterVisitor.render(sceneGraph, cameraNode);
     }
     else {
         rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);

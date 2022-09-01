@@ -7,7 +7,7 @@ import Visitor from '../visitor';
 import {
   Node, GroupNode,
   SphereNode, AABoxNode,
-  TextureBoxNode,CameraNode
+  TextureBoxNode,CameraNode, LightNode
 } from '../nodes';
 import Shader from '../shader/shader';
 import PhongProperties from '../phong-properties';
@@ -50,7 +50,7 @@ export class RasterVisitor implements Visitor {
   render(
     rootNode: Node,
     camera: CameraNode,
-    lightPositions: Array<Vector>
+    // lightPositions: Array<LightNode>
   ) {
     // clear
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
