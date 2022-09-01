@@ -23,7 +23,7 @@ interface Renderable {
 export class RasterVisitor implements Visitor {
   // TODO declare instance variables here
   stack: [{traverse: Matrix, inverse: Matrix}]
-  lights: Array<LightNode> = [];
+  lightNodes: Array<LightNode> = [];
   matrix: Matrix = Matrix.identity(); // TODO kann man evtl. durch Stack ersetzen?!
 
   private lookat: Matrix;   //view matrix to transform vertices from the world coordinate system to the view coordinate system
@@ -51,16 +51,14 @@ export class RasterVisitor implements Visitor {
    * Renders the Scenegraph
    * @param rootNode The root node of the Scenegraph
    * @param camera The camera used
-   * @param lightPositions The light light positions
    */
   render(
     rootNode: Node,
     camera: CameraNode,
-    // lightPositions: Array<LightNode>
   ) {
     // clear
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-    this.lights = [];
+    this.lightNodes = [];
 
     this.setupCamera(camera);
 
@@ -77,17 +75,15 @@ export class RasterVisitor implements Visitor {
   getLightNodes(node: Node) {
     // console.log("getting light nodes");
     if (node instanceof LightNode) {
-      this.lights.push(new LightNode(node.color, this.matrix.mulVec(node.position)));
-      console.log("light found" + "at " + this.matrix.mulVec(node.position));
+      // this.lights.push(new LightNode(node.color, this.matrix.mulVec(node.position)));
+      // this.lightNodes.push(new LightNode(node.color, this.stack.at(this.stack.length - 1).traverse.mulVec(node.position)));
+      // node.position = this.stack.at(this.stack.length - 1).traverse.mulVec(node.position);
+      this.lightNodes.push(node);
     }
     else if (node instanceof GroupNode) {
-      let myMatrix = this.matrix;
-      let nodeMatrix = this.matrix.mul(node.transform.getMatrix());
       for (let i = 0; i < node.children.length; i++) {
-        this.matrix = nodeMatrix;
         this.getLightNodes(node.children[i]);
       }
-      this.matrix = myMatrix;
     }
   }
 
@@ -284,7 +280,8 @@ export class RasterVisitor implements Visitor {
 
   visitLightNode(node: LightNode): void {
     // TODO implement this
-    console.log('Method visitLightNode not implemented');
+    // console.log('Method visitLightNode not implemented');
+    this.stack.at(this.stack.length - 1).traverse.mulVec(node.position);
   }
 }
 

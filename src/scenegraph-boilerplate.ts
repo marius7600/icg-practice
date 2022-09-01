@@ -65,12 +65,14 @@ window.addEventListener('load', () => {
     const gn = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
     sceneGraph.add(gn);
     gn.add(new SphereNode(new Vector(.4, 0, 0, 1), new Vector(0, 0, 0, 1), 1));
-    lightPositions = [
-        // new Vector(1, 1, 1, 1)
-        new LightNode (new Vector(0.8, 0.8, 0.8, 0), new Vector(1, 1, 1, 1)),
-        new LightNode (new Vector(0.8, 0.8, 0.8, 0), new Vector(-1, -1, -1, 1)),
-        new LightNode (new Vector(0.8, 0.8, 0.8, 0), new Vector(1, -1, -1, 1))
-    ];
+    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 1)));
+    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, -1, -1, 1)));
+    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, -1, 1)));
+    // lightPositions = [
+    //     new LightNode (new Vector(0.8, 0.8, 0.8, 0), new Vector(1, 1, 1, 1)),
+    //     new LightNode (new Vector(0.8, 0.8, 0.8, 0), new Vector(-1, -1, -1, 1)),
+    //     new LightNode (new Vector(0.8, 0.8, 0.8, 0), new Vector(1, -1, -1, 1))
+    // ];
 
     // setup for raytracing
     rayVisitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
@@ -200,7 +202,8 @@ function animate(timestamp: number) {
         rasterVisitor.render(sceneGraph, cameraNode);
     }
     else {
-        rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
+        // rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
+        rayVisitor.render(sceneGraph, cameraNode, phongProperties);
     }
     requestAnimationFrame(animate);
     // console.log("animation loop ended"); 

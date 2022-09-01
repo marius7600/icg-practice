@@ -36,6 +36,7 @@ export default class RayVisitor implements Visitor {
   stack:  [{ matrix: Matrix, inverse: Matrix }];
   intersection: Intersection | null;
   intersectionColor: Vector;
+  lightNodes: Array<LightNode> = [];
 
 
   /**
@@ -54,26 +55,24 @@ export default class RayVisitor implements Visitor {
     this.intersection = null;
   }
   visitLightNode(node: LightNode): void {
-    // TODO implement this
-    throw new Error('Method not implemented.');
+    this.lightNodes.push(node);
   }
 
   /**
    * Renders the Scenegraph
    * @param rootNode The root node of the Scenegraph
    * @param camera The camera used
-   * @param lightPositions The light light positions
    */
   render(
     rootNode: Node,
     camera: CameraNode,
-    lightPositions: Array<LightNode>,
     phongProperties: PhongProperties
   ) {
     // clear
     let data = this.imageData.data;
     data.fill(0);
     this.objects = [];
+    this.lightNodes = [];
 
     //build list of render objects
     rootNode.accept(this);
@@ -110,7 +109,7 @@ export default class RayVisitor implements Visitor {
             data[4 * (width * y + x) + 2] = 0;
             data[4 * (width * y + x) + 3] = 255;
           } else {
-            let color = phong(minObj.color, minIntersection, lightPositions, camera.eye, phongProperties);
+            let color = phong(minObj.color, minIntersection, this.lightNodes, camera.eye, phongProperties);
             data[4 * (width * y + x) + 0] = color.r * 255;
             data[4 * (width * y + x) + 1] = color.g * 255;
             data[4 * (width * y + x) + 2] = color.b * 255;
