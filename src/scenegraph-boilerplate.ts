@@ -66,6 +66,7 @@ window.addEventListener('load', () => {
     sceneGraph.add(gn);
     gn.add(new SphereNode(new Vector(.4, 0, 0, 1), new Vector(0, 0, 0, 1), 1));
     sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 1)));
+    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, 1, 1, 1)));
     sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, -1, -1, 1)));
     sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, -1, 1)));
     // lightPositions = [

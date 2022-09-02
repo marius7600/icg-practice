@@ -4,16 +4,9 @@ precision mediump float;
 varying vec3 v_color;
 varying vec3 v_position;
 varying vec3 v_normal;
+varying vec3 v_light_positions[8];
 
-
-
-const vec3 lightPos = vec3(1.0, 1.0, 1.0);
-
-// const float shininess = 16.0;
-// const float kA = 0.3;
-// const float kD = 0.6;
-// const float kS = 0.7;
-
+// const vec3 v_light_position = vec3(1.0, 1.0, 1.0);
 
 // Phong shading coefficients
 varying float v_ka;
@@ -22,28 +15,26 @@ varying float v_ks;
 varying float v_shininess;
 
 void main(void) {
-  // gl_FragColor = vec4(0.0, 0.0, 0.5, 1.0);
-  // Phong lighting calculation
-  //TODO
-  vec3 lightDir = normalize(lightPos - v_position);
-  vec3 viewDir = normalize(vec3(0.0, 0.0, 0.0) - v_position);
-  vec3 reflectDir = normalize(reflect(-lightDir, v_normal));
-
+  // Calculate the ambient contribution
   vec3 ambient = v_ka * v_color;
-  // vec3 ambient = kA * v_color;
+  // Create variable to hold diffuse & specular contribution
+  vec3 diffuse = vec3(0.0, 0.0, 0.0);
+  vec3 specular = vec3(0.0, 0.0, 0.0);
+  // Calculate the diffuse & specular contribution for each light source
+  for (float i = 0.0; i < 2.0; i+=1.0){
+    vec3 lightDir = normalize(v_light_positions[int(i)] - v_position);
 
-  vec3 specularTerm = normalize(v_normal*(dot(v_normal, lightDir)*2.0 - lightDir)); //    const r = n.mul(2*n.dot(s)).sub(s);
-  vec3 specular = v_color * pow(max(dot(specularTerm, viewDir), 0.0), v_shininess); //Works
-  // vec3 specular = v_color * pow(max(dot(specularTerm, viewDir), 0.0), shininess); //Works
+    vec3 viewDir = normalize(v_normal);
 
-  vec3 diffuse = v_color * max(dot(lightDir, v_normal), 0.0); //Works
-  specular = v_ks * specular;
-  // specular = kS * specular;
+    diffuse += v_color * max(dot(viewDir, lightDir), 0.0);
 
+    vec3 r = normalize(viewDir * (2.0 * dot(viewDir, lightDir)) - lightDir);
+    specular += v_color * pow(max(dot(r, viewDir), 0.0), v_shininess);
+  }
+  // Calculate the final color
   diffuse = v_kd * diffuse;
-  // diffuse = kD * diffuse;
+  specular = v_ks * specular;
+
+  // Output the color
   gl_FragColor = vec4(ambient + diffuse + specular, 1.0);
-
-
-
 }

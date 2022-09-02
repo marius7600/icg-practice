@@ -19,6 +19,10 @@ uniform float a_ka;
 uniform float a_kd;
 uniform float a_ks;
 uniform float a_shininess;
+uniform float a_number_of_lights;
+
+uniform vec3 u_light_positions[8];
+uniform vec3 u_light_colors[8];
 
 varying vec3 v_normal;
 
@@ -33,6 +37,7 @@ varying float v_ka;
 varying float v_kd;
 varying float v_ks;
 varying float v_shininess;
+varying vec3 v_light_positions[8];
 
 
 void main() {
@@ -46,6 +51,19 @@ void main() {
   // Pass the color and transformed vertex position through
   // TODO
   v_color = a_color;
-  v_position = vec3(M * vec4(a_position, 1.0));
+  // v_position = vec3(M * vec4(a_position, 1.0));
+  v_position = vec3(V * M * vec4(a_position,1.0));
   v_normal = normalize((V * N * vec4(a_normal, 0)).xyz);
+
+  // Pass the light positions and colors to the fragment shader
+  v_light_positions[0] = u_light_positions[0];
+  v_light_positions[1] = u_light_positions[1];
+  v_light_positions[2] = u_light_positions[2];
+  v_light_positions[3] = u_light_positions[3];
+  v_light_positions[4] = u_light_positions[4];
+  v_light_positions[5] = u_light_positions[5];
+  v_light_positions[6] = u_light_positions[6];
+  v_light_positions[7] = u_light_positions[7];
+
+  //TODO implement variable light colors
 }

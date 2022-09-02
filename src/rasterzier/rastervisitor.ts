@@ -134,14 +134,16 @@ export class RasterVisitor implements Visitor {
     }
 
     // TODO set the material properties
-    // const float kA = 0.3;
-    // const float kD = 0.6;
-    // const float kS = 0.7;
-    // const float shininess = 16.0;
     shader.getUniformFloat("a_ka").set(this.phongProperties.ambient);
     shader.getUniformFloat("a_kd").set(this.phongProperties.diffuse);
     shader.getUniformFloat("a_ks").set(this.phongProperties.specular);
     shader.getUniformFloat("a_shininess").set(this.phongProperties.shininess);
+
+    shader.getUniformInt("a_number_of_lights").set(this.lightNodes.length);
+    for (let i = 0; i < this.lightNodes.length; i++) {
+      shader.getUniformVec3("u_light_positions[" + i + "]").set(this.lightNodes[i].position);
+      shader.getUniformVec3("u_light_colors[" + i + "]").set(this.lightNodes[i].color);
+    }
     
     shader.getUniformMatrix("M").set(toWorld);
     shader.getUniformMatrix("M_inverse").set(fromWorld);
