@@ -39,12 +39,15 @@ varying float v_ks;
 varying float v_shininess;
 varying vec3 v_light_positions[8];
 
+varying float v_number_of_lights;
 
 void main() {
   v_kd = a_kd;
   v_ka = a_ka;
   v_ks = a_ks;
   v_shininess = a_shininess;
+  
+  v_number_of_lights = a_number_of_lights;
 
   gl_Position = P * V * M * vec4(a_position, 1.0);
   

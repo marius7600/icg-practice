@@ -28,12 +28,13 @@ export default class RayVisitor implements Visitor {
    * set individual pixels
    */
   imageData: ImageData;
-  camera: CameraNode;
+  camera: CameraNode;   // TODO do we need this? Camera is alwas given with render function
   objects: Array<Intersectable>;
 
 
   // TODO declare instance variables here
-  stack:  [{ matrix: Matrix, inverse: Matrix }];
+  // stack:  [{ matrix: Matrix, inverse: Matrix }];
+  stack: Array<Matrix> = [];
   intersection: Intersection | null;
   intersectionColor: Vector;
   lightNodes: Array<LightNode> = [];
@@ -51,10 +52,13 @@ export default class RayVisitor implements Visitor {
     height: number
   ) {
     this.imageData = context.getImageData(0, 0, width, height);
-    this.stack = [{ matrix: Matrix.identity(), inverse: Matrix.identity() }];
+    // this.stack = [{ matrix: Matrix.identity(), inverse: Matrix.identity() }];
+    this.stack.push(Matrix.identity());
     this.intersection = null;
   }
   visitLightNode(node: LightNode): void {
+    node.position = this.stack[this.stack.length - 1].mulVec(node.position);
+    console.log("Position of lightNode: " + node.position.x + ", " + node.position.y + ", " + node.position.z);
     this.lightNodes.push(node);
   }
 
@@ -82,7 +86,7 @@ export default class RayVisitor implements Visitor {
     const height = this.imageData.height;
 
     for (let x = 0; x < width; x++) {
-      for (let y = 0; y < height; y++) {
+      for (let y = 0; y < height; y++) {2
         const ray = Ray.makeRay(x, y, height, width, camera);
         
         let minIntersection = new Intersection(Infinity, null, null);
@@ -95,12 +99,6 @@ export default class RayVisitor implements Visitor {
             minObj = shape;
           }
         }
-        
-        // TODO initialize the matrix stack
-        //Initialize the matrix stack with identity matrices
-        // this.stack = [{ matrix: Matrix.identity(), inverse: Matrix.identity() }];
-        // this.intersection = null;
-        // rootNode.accept(this);
 
         if (minObj) {
           if (!minObj.color) {
@@ -127,9 +125,10 @@ export default class RayVisitor implements Visitor {
    */
   visitGroupNode(node: GroupNode) {
     // TODO traverse the graph and build the model matrix
-    let toWorld = this.stack.at(this.stack.length - 1).matrix.mul(node.transform.getMatrix());
+    let toWorld = this.stack.at(this.stack.length - 1).mul(node.transform.getMatrix());
     // this.stack.push({ matrix: wiggse, inverse: wiggse.inverse() });
-    this.stack.push({ matrix: toWorld, inverse: toWorld.transpose() });   // TODO is this correct?
+    // this.stack.push({ matrix: toWorld, inverse: toWorld.transpose() });   // TODO is this correct?
+    this.stack.push(toWorld);
     for (let i = 0; i < node.children.length; i++) {
       node.children[i].accept(this);
     }
@@ -146,13 +145,13 @@ export default class RayVisitor implements Visitor {
     // console.log(m);
     // console.log(node.radius)
 
-    let xScale = m.matrix.getVal(0, 0);
-    let yScale = m.matrix.getVal(0, 1);
-    let zScale = m.matrix.getVal(0, 2);
+    let xScale = m.getVal(0, 0);
+    let yScale = m.getVal(0, 1);
+    let zScale = m.getVal(0, 2);
 
     let scale = Math.sqrt(xScale * xScale + yScale * yScale + zScale * zScale);
     // console.log(scale);
-    this.objects.push(new Sphere(m.matrix.mulVec(node.center),
+    this.objects.push(new Sphere(m.mulVec(node.center),
       node.radius * scale, node.color));
   }
 
@@ -162,8 +161,9 @@ export default class RayVisitor implements Visitor {
    */
   visitAABoxNode(node: AABoxNode) {
     let mat = Matrix.identity();
-    this.stack = [{ matrix: Matrix.identity(), inverse: Matrix.identity() }];
-    mat = this.stack[this.stack.length - 1].matrix.mul(mat);
+    // this.stack = [{ matrix: Matrix.identity(), inverse: Matrix.identity() }];
+    this.stack.push(Matrix.identity());
+    mat = this.stack[this.stack.length - 1].mul(mat);
 
     this.objects.push(new AABox(
       mat.mulVec(new Vector(-0.5, -0.5, -0.5, 1)),
@@ -179,11 +179,11 @@ export default class RayVisitor implements Visitor {
   visitTextureBoxNode(node: TextureBoxNode) { }
 
   visitCameraNode(node: CameraNode) {
-    let center = this.stack[this.stack.length - 1].matrix.mulVec(node.center);
+    let center = this.stack[this.stack.length - 1].mulVec(node.center);
     let eye = node.eye.mul(1);
     eye.z -= 2;
-    eye = this.stack[this.stack.length - 1].matrix.mulVec(node.eye);
-    let up = this.stack[this.stack.length - 1].matrix.mulVec(node.up);
+    eye = this.stack[this.stack.length - 1].mulVec(node.eye);
+    let up = this.stack[this.stack.length - 1].mulVec(node.up);
     this.camera = new CameraNode(eye, center, up, node.fovy, node.aspect,
       node.near, node.far);
   }

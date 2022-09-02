@@ -6,6 +6,8 @@ varying vec3 v_position;
 varying vec3 v_normal;
 varying vec3 v_light_positions[8];
 
+varying float v_number_of_lights;
+
 // const vec3 v_light_position = vec3(1.0, 1.0, 1.0);
 
 // Phong shading coefficients
@@ -21,7 +23,7 @@ void main(void) {
   vec3 diffuse = vec3(0.0, 0.0, 0.0);
   vec3 specular = vec3(0.0, 0.0, 0.0);
   // Calculate the diffuse & specular contribution for each light source
-  for (float i = 0.0; i < 2.0; i+=1.0){
+  for (float i = 0.0; i < 8.0; i+=1.0){
     vec3 lightDir = normalize(v_light_positions[int(i)] - v_position);
 
     vec3 viewDir = normalize(v_normal);
