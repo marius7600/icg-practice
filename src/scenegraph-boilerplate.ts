@@ -22,7 +22,6 @@ let phongProperties: PhongProperties;
 
 let cameraNode: CameraNode;
 let sceneGraph: GroupNode;
-let lightPositions: LightNode[];
 
 let rasterVisitor: RasterVisitor;
 let rayVisitor: RayVisitor;
@@ -55,7 +54,7 @@ window.addEventListener('load', () => {
     sceneGraph = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
     cameraNode = new CameraNode(
         new Vector(0, 0, -2, 1), // eye
-        new Vector(0, 0, 0, 1), // look at
+        new Vector(0, 0, 0, 1), // center
         new Vector(0, 1, 0, 0), // up
         60,
         canvas_raster.width / canvas_raster.height,
@@ -64,11 +63,19 @@ window.addEventListener('load', () => {
     sceneGraph.add(cameraNode);
     const gn = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
     sceneGraph.add(gn);
-    gn.add(new SphereNode(new Vector(.4, 0, 0, 1), new Vector(0, 0, 0, 1), 1));
+    // gn.add(new SphereNode(new Vector(.4, 0, 0, 1), new Vector(1, 1, 1, 1), 1));
+    gn.add(new SphereNode(new Vector(.4, .7, 0, 1), new Vector(0, 0, 0, 1), 1));
     sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 1)));
-    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, 1, 1, 1)));
-    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, -1, -1, 1)));
-    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, -1, 1)));
+    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, 1, 1)));
+
+    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 1)));
+    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, -1, 1)));
+    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, 1, 1)));
+    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, -1, 1)));
+    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, 1, 1, 1)));
+    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, 1, -1, 1)));
+    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, -1, 1, 1)));
+    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, -1, -1, 1)));
     // lightPositions = [
     //     new LightNode (new Vector(0.8, 0.8, 0.8, 0), new Vector(1, 1, 1, 1)),
     //     new LightNode (new Vector(0.8, 0.8, 0.8, 0), new Vector(-1, -1, -1, 1)),
