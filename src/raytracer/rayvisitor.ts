@@ -58,7 +58,7 @@ export default class RayVisitor implements Visitor {
   }
   visitLightNode(node: LightNode): void {
     node.position = this.stack[this.stack.length - 1].mulVec(node.position);
-    console.log("Position of lightNode: " + node.position.x + ", " + node.position.y + ", " + node.position.z);
+    // console.log("Position of lightNode: " + node.position.x + ", " + node.position.y + ", " + node.position.z);
     this.lightNodes.push(node);
   }
 
