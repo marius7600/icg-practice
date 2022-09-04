@@ -66,17 +66,17 @@ window.addEventListener('load', () => {
     gn.add(new SphereNode(new Vector(.4, 0, 0, 1), new Vector(1, 1, 1, 1), 1));
     // gn.add(new SphereNode(new Vector(.4, .7, 0, 1), new Vector(0, 0, 0, 1), 1));
     // gn.add(new SphereNode(new Vector(.4, -.7, .420, 1), new Vector(2, 1, 0, 1), 1));
-    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 0, 0, 1)));
+    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 0, 0, 1)));
     // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, 1, 1)));
 
-    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 1)));
-    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, -1, 1)));
-    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, 1, 1)));
-    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, -1, 1)));
-    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, 1, 1, 1)));
-    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, 1, -1, 1)));
-    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, -1, 1, 1)));
-    // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, -1, -1, 1)));
+    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 1)));
+    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, -1, 1)));
+    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, 1, 1)));
+    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, -1, 1)));
+    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, 1, 1, 1)));
+    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, 1, -1, 1)));
+    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, -1, 1, 1)));
+    sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, -1, -1, 1)));
 
     // setup for raytracing
     rayVisitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
