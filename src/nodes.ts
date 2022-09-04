@@ -31,7 +31,7 @@ export class GroupNode extends Node {
     super();
     // TODO
     this.children = [];
-    this.transform = transform;
+    // this.transform = transform;
   }
 
   /**

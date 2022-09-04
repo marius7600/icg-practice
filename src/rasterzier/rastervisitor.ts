@@ -261,9 +261,9 @@ export class RasterVisitor implements Visitor {
 
   visitCameraNode(node: CameraNode) {
     let m = this.stack.at(this.stack.length - 1).traverse;
-    let centerLookat = m.mulVec(node.center);
-    let eyePos = m.mulVec(node.eye);
-    let upVec = m.mulVec(node.up);
+    let centerLookat = m.mul(node.center);
+    let eyePos = m.mul(node.eye);
+    let upVec = m.mul(node.up);
 
     if (node) {
       this.lookat = Matrix.lookat(
@@ -283,7 +283,7 @@ export class RasterVisitor implements Visitor {
   visitLightNode(node: LightNode): void {
     // TODO implement this
     // console.log('Method visitLightNode not implemented');
-    this.stack.at(this.stack.length - 1).traverse.mulVec(node.position);
+    this.stack.at(this.stack.length - 1).traverse.mul(node.position);
   }
 }
 

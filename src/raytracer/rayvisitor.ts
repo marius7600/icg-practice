@@ -57,7 +57,7 @@ export default class RayVisitor implements Visitor {
     this.intersection = null;
   }
   visitLightNode(node: LightNode): void {
-    node.position = this.stack[this.stack.length - 1].mulVec(node.position);
+    node.position = this.stack[this.stack.length - 1].mul(node.position);
     // console.log("Position of lightNode: " + node.position.x + ", " + node.position.y + ", " + node.position.z);
     this.lightNodes.push(node);
   }
@@ -69,7 +69,7 @@ export default class RayVisitor implements Visitor {
    */
   render(
     rootNode: Node,
-    camera: CameraNode,
+    // camera: CameraNode,
     phongProperties: PhongProperties
   ) {
     // clear
@@ -87,7 +87,7 @@ export default class RayVisitor implements Visitor {
 
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {2
-        const ray = Ray.makeRay(x, y, height, width, camera);
+        const ray = Ray.makeRay(x, y, height, width, this.camera);
         
         let minIntersection = new Intersection(Infinity, null, null);
         let minObj = null;
@@ -107,7 +107,8 @@ export default class RayVisitor implements Visitor {
             data[4 * (width * y + x) + 2] = 0;
             data[4 * (width * y + x) + 3] = 255;
           } else {
-            let color = phong(minObj.color, minIntersection, this.lightNodes, camera.eye, phongProperties);
+            // let color = phong(minObj.color, minIntersection, this.lightNodes, camera.eye, phongProperties);
+            let color = phong(minObj.color, minIntersection, this.lightNodes, this.camera.center, phongProperties);
             data[4 * (width * y + x) + 0] = color.r * 255;
             data[4 * (width * y + x) + 1] = color.g * 255;
             data[4 * (width * y + x) + 2] = color.b * 255;
@@ -151,7 +152,7 @@ export default class RayVisitor implements Visitor {
 
     let scale = Math.sqrt(xScale * xScale + yScale * yScale + zScale * zScale);
     // console.log(scale);
-    this.objects.push(new Sphere(m.mulVec(node.center),
+    this.objects.push(new Sphere(m.mul(node.center),
       node.radius * scale, node.color));
   }
 
@@ -166,8 +167,10 @@ export default class RayVisitor implements Visitor {
     mat = this.stack[this.stack.length - 1].mul(mat);
 
     this.objects.push(new AABox(
-      mat.mulVec(new Vector(-0.5, -0.5, -0.5, 1)),
-      mat.mulVec(new Vector(0.5, 0.5, 0.5, 1)),
+      // mat.mulVec(new Vector(-0.5, -0.5, -0.5, 1)),
+      mat.mul(new Vector(-0.5, -0.5, -0.5, 1)),
+      // mat.mulVec(new Vector(0.5, 0.5, 0.5, 1)),
+      mat.mul(new Vector(0.5, 0.5, 0.5, 1)),
       node.color
     ));
   }
@@ -179,11 +182,11 @@ export default class RayVisitor implements Visitor {
   visitTextureBoxNode(node: TextureBoxNode) { }
 
   visitCameraNode(node: CameraNode) {
-    let center = this.stack[this.stack.length - 1].mulVec(node.center);
+    let center = this.stack[this.stack.length - 1].mul(node.center);
     let eye = node.eye.mul(1);
     eye.z -= 2;
-    eye = this.stack[this.stack.length - 1].mulVec(node.eye);
-    let up = this.stack[this.stack.length - 1].mulVec(node.up);
+    eye = this.stack[this.stack.length - 1].mul(node.eye);
+    let up = this.stack[this.stack.length - 1].mul(node.up);
     this.camera = new CameraNode(eye, center, up, node.fovy, node.aspect,
       node.near, node.far);
   }
