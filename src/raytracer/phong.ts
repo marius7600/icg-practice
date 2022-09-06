@@ -1,5 +1,5 @@
 import Vector from '../vector';
-import Intersection from '../intersection';
+import Intersection from './intersection';
 import PhongProperties from '../phong-properties';
 import { LightNode } from '../nodes';
 

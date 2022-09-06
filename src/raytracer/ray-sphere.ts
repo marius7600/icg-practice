@@ -1,5 +1,5 @@
 import Vector from '../vector';
-import Intersection from '../intersection';
+import Intersection from './intersection';
 import Ray from './ray';
 
 /**
