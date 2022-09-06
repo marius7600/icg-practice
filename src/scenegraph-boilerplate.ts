@@ -29,6 +29,11 @@ let rayVisitor: RayVisitor;
 
 let lastTimestamp: number;
 
+let animationActivated: boolean = true;
+
+let phongShader: Shader;
+let textureShader: Shader;
+
 window.addEventListener('load', () => {
     const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
     const ctx_ray = canvas_ray.getContext("2d");
@@ -46,6 +51,10 @@ window.addEventListener('load', () => {
             toggleFigure();
         }
     });
+    document.getElementById('animationToggle').addEventListener('click', () => {
+        toggleAnimation();
+    });
+    // startAnimation();
 
     // initialize the phong properties
     phongProperties = new PhongProperties();
@@ -70,7 +79,7 @@ window.addEventListener('load', () => {
     // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 0, 0, 1)));
     // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, 1, 1)));
     // let light1, light2, light3;
-    light1= new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 1));
+    light1= new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 0, 0, 1));
     sceneGraph.add(light1);
     // light2 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, 1, 1));
     // light3 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 1));
@@ -84,6 +93,9 @@ window.addEventListener('load', () => {
     // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, -1, 1, 1)));
     // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, -1, -1, 1)));
 
+    let myBox = new AABoxNode(new Vector(50, 0.8, 0.8, 1));
+    sceneGraph.add(myBox);
+
     // setup for raytracing
     rayVisitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
 
@@ -92,12 +104,12 @@ window.addEventListener('load', () => {
     const rasterSetupVisitor = new RasterSetupVisitor(ctx_raster);
     rasterSetupVisitor.setup(sceneGraph);
 
-    const phongShader = new Shader(ctx_raster,
+    phongShader = new Shader(ctx_raster,
         phongVertexShader,
         phongFragmentShader
     );
 
-    const textureShader = new Shader(ctx_raster,
+    textureShader = new Shader(ctx_raster,
         //TODO add texture shader
         phongVertexShader,
         phongFragmentShader
@@ -107,11 +119,9 @@ window.addEventListener('load', () => {
     phongShader.load();
     rasterVisitor.setupCamera(cameraNode);
         
-    // start animation
-    lastTimestamp = 0;
-    Promise.all([phongShader.load(), textureShader.load()]).then(() => {
-        window.requestAnimationFrame(animate);
-    });
+    startAnimation();
+        
+
     // requestAnimationFrame(animate);
 
     // let animationHandle: number;
@@ -213,21 +223,48 @@ function sliderChanged(event:any) {
 
 /* animate the scene */
 function animate(timestamp: number) {
-    // console.log("animation loop started");
-    if (lastTimestamp === 0) {
-        lastTimestamp = timestamp;
-    }
-    const delta = (timestamp - lastTimestamp) / 1000;
-    lastTimestamp = timestamp;
-    if (rasterizing) {
-        // rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
-        rasterVisitor.render(sceneGraph, cameraNode);
+if (animationActivated) {
+	    // console.log("animation loop started");
+	    if (lastTimestamp === 0) {
+	        lastTimestamp = timestamp;
+	    }
+	    const delta = (timestamp - lastTimestamp) / 1000;
+	    lastTimestamp = timestamp;
+	    if (rasterizing) {
+	        // rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
+	        rasterVisitor.render(sceneGraph, cameraNode);
+	    }
+	    else {
+	        // rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
+	        // rayVisitor.render(sceneGraph, cameraNode, phongProperties);
+	        rayVisitor.render(sceneGraph, phongProperties);
+	    }
+	    requestAnimationFrame(animate);
+	    // console.log("animation loop ended"); 
+    // console.log("animation loop ended"); 
+	    // console.log("animation loop ended"); 
+} else {
+	
+}
+}
+
+function startAnimation() {
+    // start animation
+    lastTimestamp = 0;
+    Promise.all([phongShader.load(), textureShader.load()]).then(() => {
+        window.requestAnimationFrame(animate);
+    });
+}
+function toggleAnimation() {
+    console.log("toggle animation");
+    console.log("Animation Activated old Satus: " + animationActivated);
+    animationActivated = !animationActivated;
+    console.log("Animation Activated new Satus: " + animationActivated);
+    if (animationActivated){
+        startAnimation();
     }
     else {
-        // rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
-        // rayVisitor.render(sceneGraph, cameraNode, phongProperties);
-        rayVisitor.render(sceneGraph, phongProperties);
+        lastTimestamp = 0;
     }
-    requestAnimationFrame(animate);
-    // console.log("animation loop ended"); 
 }
+
