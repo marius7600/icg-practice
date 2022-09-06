@@ -261,9 +261,11 @@ function toggleAnimation() {
     animationActivated = !animationActivated;
     console.log("Animation Activated new Satus: " + animationActivated);
     if (animationActivated){
+        document.getElementById("animationToggle").style.background = "green";
         startAnimation();
     }
     else {
+        document.getElementById("animationToggle").style.background = "red";
         lastTimestamp = 0;
     }
 }
