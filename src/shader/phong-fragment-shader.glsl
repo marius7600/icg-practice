@@ -15,6 +15,7 @@ varying float v_ka;
 varying float v_kd;
 varying float v_ks;
 varying float v_shininess;
+// das hier alles uniform float
 
 void main(void) {
   // Calculate the ambient contribution
@@ -23,7 +24,7 @@ void main(void) {
   vec3 diffuse = vec3(0.0, 0.0, 0.0);
   vec3 specular = vec3(0.0, 0.0, 0.0);
   // Calculate the diffuse & specular contribution for each light source
-  for (float i = 0.0; i < 1.0; i+=1.0){
+  for (int i = 0; i < 1; i+=1){
     vec3 lightDir = normalize(v_light_positions[int(i)] - v_position);
 
     vec3 viewDir = normalize(v_normal);

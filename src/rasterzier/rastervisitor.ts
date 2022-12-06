@@ -141,7 +141,7 @@ export class RasterVisitor implements Visitor {
 
     shader.getUniformInt("a_number_of_lights").set(this.lightNodes.length);
     for (let i = 0; i < this.lightNodes.length; i++) {
-      shader.getUniformVec3("u_light_positions[" + i + "]").set(this.lightNodes[i].position);
+      shader.getUniformVec3("u_light_positions[" + i + "]").set(this.lightNodes[i].position); //unschön aber funktioniert
       shader.getUniformVec3("u_light_colors[" + i + "]").set(this.lightNodes[i].color);
     }
     

@@ -189,6 +189,8 @@ export default class RayVisitor implements Visitor {
     let up = this.stack[this.stack.length - 1].mul(node.up);
     this.camera = new CameraNode(eye, center, up, node.fovy, node.aspect,
       node.near, node.far);
+    // coordinaten hardcoden für test der camera
+    // this.camera = new CameraNode(new Vector(0, 0, 0, 1), new Vector(0, 0, -1, 1), new Vector(0, 1, 0, 0), node.fovy, node.aspect, node.near, node.far);
   }
 
     /**

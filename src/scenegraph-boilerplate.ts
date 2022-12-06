@@ -63,24 +63,24 @@ window.addEventListener('load', () => {
     /* Create the scenegraph */
     sceneGraph = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
     cameraNode = new CameraNode(
-        new Vector(0, 0, -2, 1), // eye
-        new Vector(0, 0, 0, 1), // center
+        new Vector(0, 0, 0, 1), // eye
+        new Vector(0, 0, -1, 1), // center
         new Vector(0, 1, 0, 0), // up
         60,
-        canvas_raster.width / canvas_raster.height,
+        canvas_raster.width / canvas_raster.height, 
         0.1,
         100);
     sceneGraph.add(cameraNode);
-    const gn = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
-    sceneGraph.add(gn);
-    gn.add(new SphereNode(new Vector(.4, 0, 0, 1), new Vector(1, 1, 1, 1), 1));
+    // const gn = new GroupNode(new Translation(new Vector(-1, -1, -4, 0)));
+    // sceneGraph.add(gn);
+    // gn.add(new SphereNode(new Vector(.4, 0, 0, 1), new Vector(1, 1, 1, 1), 1));
     // gn.add(new SphereNode(new Vector(.4, .7, 0, 1), new Vector(0, 0, 0, 1), 1));
     // gn.add(new SphereNode(new Vector(.4, -.7, .420, 1), new Vector(2, 1, 0, 1), 1));
     // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 0, 0, 1)));
     // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, 1, 1)));
     // let light1, light2, light3;
-    light1= new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 0, 0, 1));
-    sceneGraph.add(light1);
+    // light1= new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 0, 0, 1));
+    // sceneGraph.add(light1);
     // light2 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, 1, 1));
     // light3 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 1));
 
@@ -93,8 +93,26 @@ window.addEventListener('load', () => {
     // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, -1, 1, 1)));
     // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, -1, -1, 1)));
 
-    let myBox = new AABoxNode(new Vector(50, 0.8, 0.8, 1));
-    sceneGraph.add(myBox);
+    const sg = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
+    const gnRotation = new Rotation(new Vector(1, 0, 0, 0), 0)
+    const gn = new GroupNode(gnRotation);
+    sg.add(gn);
+    const gn1 = new GroupNode(new Translation(new Vector(1.2, .5, 0, 0)));
+    gn.add(gn1);
+    gn1.add(new SphereNode(new Vector(.4, 0, 0, 1), new Vector(0, 0, 0, 1), 1));
+    const gn2 = new GroupNode(new Translation(new Vector(-0.8, 1, 1, 0)));
+    gn.add(gn2);
+    const gn3 = new GroupNode(new Scaling(new Vector(0.4, 0.4, 0.4, 0)));
+    gn2.add(gn3);
+    gn3.add(new SphereNode(new Vector(0, 0, .3, 1), new Vector(0, 0, 0, 1), 1));
+    const lightPositions = [
+        new Vector(1, 1, 1, 1)
+    ];
+
+    sceneGraph.add(sg);
+
+    // let myBox = new AABoxNode(new Vector(50, 0.8, 0.8, 1));
+    // sceneGraph.add(myBox);
 
     // setup for raytracing
     rayVisitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
