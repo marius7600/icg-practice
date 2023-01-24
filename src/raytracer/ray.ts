@@ -31,7 +31,7 @@ export default class Ray {
     const dir = view.mul(camera.near).add(direction.mul(width)).add(camera.up.mul(height));
 
     // console.log("Tracing ray from " + camera.eye.x + " " + camera.eye.y + " " + camera.eye.z + " to " + dir.x + " " + dir.y + " " + dir.z);
-    return new Ray(camera.eye, dir.normalize())
+    return new Ray(camera.eye, dir.normalize()) // Startpunkt und Richtung
     // return new Ray(new Vector(0, 0, -2, 1), new Vector(0, 0, -1, 1));
   }
 }
