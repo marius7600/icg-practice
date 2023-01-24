@@ -36,7 +36,7 @@ let textureShader: Shader;
 
 window.addEventListener('load', () => {
     const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
-    const ctx_ray = canvas_ray.getContext("2d");
+    const ctx_ray = canvas_ray.getContext("2d"); 
     
     const canvas_raster = document.getElementById("rasterizer") as HTMLCanvasElement;
     const ctx_raster = canvas_raster.getContext("webgl2");
@@ -66,10 +66,10 @@ window.addEventListener('load', () => {
         new Vector(0, 0, 0, 1), // eye
         new Vector(0, 0, -1, 1), // center
         new Vector(0, 1, 0, 0), // up
-        60,
-        canvas_raster.width / canvas_raster.height, 
-        0.1,
-        100);
+        60, // fov
+        canvas_raster.width / canvas_raster.height, // aspect
+        0.1, // near
+        100); // far
     sceneGraph.add(cameraNode);
     // const gn = new GroupNode(new Translation(new Vector(-1, -1, -4, 0)));
     // sceneGraph.add(gn);
@@ -97,12 +97,12 @@ window.addEventListener('load', () => {
     const gnRotation = new Rotation(new Vector(1, 0, 0, 0), 0)
     const gn = new GroupNode(gnRotation);
     sg.add(gn);
-    const gn1 = new GroupNode(new Translation(new Vector(1.2, .5, 0, 0)));
+    const gn1 = new GroupNode(new Translation(new Vector(1.2, .5, 0, 0))); //position of the first sphere
     gn.add(gn1);
     gn1.add(new SphereNode(new Vector(.4, 0, 0, 1), new Vector(0, 0, 0, 1), 1));
-    const gn2 = new GroupNode(new Translation(new Vector(-0.8, 1, 1, 0)));
+    const gn2 = new GroupNode(new Translation(new Vector(-0.8, 1, 1, 0))); //position of the second sphere
     gn.add(gn2);
-    const gn3 = new GroupNode(new Scaling(new Vector(0.4, 0.4, 0.4, 0)));
+    const gn3 = new GroupNode(new Scaling(new Vector(0.4, 0.4, 0.4, 0))); //scaling of the third sphere
     gn2.add(gn3);
     gn3.add(new SphereNode(new Vector(0, 0, .3, 1), new Vector(0, 0, 0, 1), 1));
     const lightPositions = [
@@ -114,7 +114,7 @@ window.addEventListener('load', () => {
     // let myBox = new AABoxNode(new Vector(50, 0.8, 0.8, 1));
     // sceneGraph.add(myBox);
 
-    // setup for raytracing
+    // setup for raytracing rendering 
     rayVisitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
 
 
