@@ -108,11 +108,17 @@ export default class RayVisitor implements Visitor {
             data[4 * (width * y + x) + 3] = 255;
           } else {
             // let color = phong(minObj.color, minIntersection, this.lightNodes, camera.eye, phongProperties);
-            let color = phong(minObj.color, minIntersection, this.lightNodes, this.camera.center, phongProperties);
+            // let color = phong(minObj.color, minIntersection, this.lightNodes, this.camera.center, phongProperties);
+            
+            // Tino
+            let allLightNodes: Array<LightNode> = new Array();
+            allLightNodes.push(new LightNode(new Vector(.8,.8,.8,0),new Vector(1, 1, 1, 1)));
+            let color = phong(minObj.color, minIntersection, allLightNodes, this.camera.center, phongProperties);
+
             data[4 * (width * y + x) + 0] = color.r * 255;
             data[4 * (width * y + x) + 1] = color.g * 255;
             data[4 * (width * y + x) + 2] = color.b * 255;
-            data[4 * (width * y + x) + 3] = color.a * 255;
+            data[4 * (width * y + x) + 3] = 255;
           }
         }
       }
@@ -152,8 +158,13 @@ export default class RayVisitor implements Visitor {
 
     let scale = Math.sqrt(xScale * xScale + yScale * yScale + zScale * zScale);
     // console.log(scale);
-    this.objects.push(new Sphere(m.mul(node.center),
-      node.radius * scale, node.color));
+    // this.objects.push(new Sphere(m.mul(node.center),
+    //   node.radius * scale, node.color));
+
+
+    // sphere wie tino meinte
+    this.objects.push(new Sphere(m.mul(new Vector(0,0,0,1)),
+    1 * scale, node.color));
   }
 
   /**

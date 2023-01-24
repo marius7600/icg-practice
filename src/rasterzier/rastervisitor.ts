@@ -157,14 +157,22 @@ export class RasterVisitor implements Visitor {
       P.set(this.perspective);
     }
     // TODO set the normal matrix
+    // const normalMatrix = fromWorld.transpose();
+    // normalMatrix.setVal(0, 3, 0);
+    // normalMatrix.setVal(1, 3, 0);
+    // normalMatrix.setVal(2, 3, 0);
+    // normalMatrix.setVal(3, 3, 1);
+    // normalMatrix.setVal(3, 0, 0);
+    // normalMatrix.setVal(3, 1, 0);
+    // normalMatrix.setVal(3, 2, 0);
+
+    // Tino
     const normalMatrix = fromWorld.transpose();
-    normalMatrix.setVal(0, 3, 0);
-    normalMatrix.setVal(1, 3, 0);
-    normalMatrix.setVal(2, 3, 0);
-    normalMatrix.setVal(3, 3, 1);
     normalMatrix.setVal(3, 0, 0);
     normalMatrix.setVal(3, 1, 0);
     normalMatrix.setVal(3, 2, 0);
+    // 
+    
     if (normalMatrix && fromWorld) {
       shader.getUniformMatrix("N").set(normalMatrix);
     }

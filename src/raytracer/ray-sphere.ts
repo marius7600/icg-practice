@@ -25,7 +25,9 @@ export default class Sphere {
    */
    intersect(ray: Ray): Intersection | null {
     const x_0 = ray.origin.sub(this.center);
-    const c = Math.pow(x_0.dot(ray.direction.normalize()), 2) - Math.pow(x_0.length, 2) + Math.pow(this.radius, 2);
+    // const c = Math.pow(x_0.dot(ray.direction.normalize()), 2) - Math.pow(x_0.length, 2) + Math.pow(this.radius, 2);
+    // Tino
+    const c = Math.pow(x_0.dot(ray.direction.normalize()), 2) - x_0.dot(x_0) + Math.pow(this.radius, 2);
     let t;
     if (c < 0) {
       return null;
