@@ -1,16 +1,20 @@
-import RasterSphere from './raster-sphere';
-import RasterBox from './raster-box';
-import RasterTextureBox from './raster-texture-box';
-import Vector from '../vector';
-import Matrix from '../matrix';
-import Visitor from '../visitor';
+import RasterSphere from "./raster-sphere";
+import RasterBox from "./raster-box";
+import RasterTextureBox from "./raster-texture-box";
+import Vector from "../vector";
+import Matrix from "../matrix";
+import Visitor from "../visitor";
 import {
-  Node, GroupNode,
-  SphereNode, AABoxNode,
-  TextureBoxNode,CameraNode, LightNode
-} from '../nodes';
-import Shader from '../shader/shader';
-import PhongProperties from '../phong-properties';
+  Node,
+  GroupNode,
+  SphereNode,
+  AABoxNode,
+  TextureBoxNode,
+  CameraNode,
+  LightNode,
+} from "../nodes";
+import Shader from "../shader/shader";
+import PhongProperties from "../phong-properties";
 
 interface Renderable {
   render(shader: Shader): void;
@@ -22,13 +26,13 @@ interface Renderable {
  */
 export class RasterVisitor implements Visitor {
   // TODO declare instance variables here
-  stack: [{traverse: Matrix, inverse: Matrix}]
+  stack: [{ traverse: Matrix; inverse: Matrix }];
   lightNodes: Array<LightNode> = [];
   matrix: Matrix = Matrix.identity(); // TODO kann man evtl. durch Stack ersetzen?!
 
-  private lookat: Matrix;   //view matrix to transform vertices from the world coordinate system to the view coordinate system
+  private lookat: Matrix; //view matrix to transform vertices from the world coordinate system to the view coordinate system
   private perspective: Matrix; //perspective matrix to transform vertices from the view coordinate system to the
-     
+
   /**
    * Creates a new RasterVisitor
    * @param gl The 3D context to render to
@@ -43,7 +47,7 @@ export class RasterVisitor implements Visitor {
     private phongProperties: PhongProperties
   ) {
     // TODO setup
-    this.stack = [{traverse: Matrix.identity(), inverse: Matrix.identity()}];
+    this.stack = [{ traverse: Matrix.identity(), inverse: Matrix.identity() }];
     this.phongProperties = phongProperties;
   }
 
@@ -52,10 +56,7 @@ export class RasterVisitor implements Visitor {
    * @param rootNode The root node of the Scenegraph
    * @param camera The camera used
    */
-  render(
-    rootNode: Node,
-    camera: CameraNode,
-  ) {
+  render(rootNode: Node, camera: CameraNode) {
     // clear
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     this.lightNodes = [];
@@ -79,8 +80,7 @@ export class RasterVisitor implements Visitor {
       // this.lightNodes.push(new LightNode(node.color, this.stack.at(this.stack.length - 1).traverse.mulVec(node.position)));
       // node.position = this.stack.at(this.stack.length - 1).traverse.mulVec(node.position);
       this.lightNodes.push(node);
-    }
-    else if (node instanceof GroupNode) {
+    } else if (node instanceof GroupNode) {
       for (let i = 0; i < node.children.length; i++) {
         this.getLightNodes(node.children[i]);
       }
@@ -92,10 +92,7 @@ export class RasterVisitor implements Visitor {
    * @param camera The camera used
    */
   setupCamera(camera: CameraNode) {
-    this.lookat = Matrix.lookat(
-      camera.eye,
-      camera.center,
-      camera.up);
+    this.lookat = Matrix.lookat(camera.eye, camera.center, camera.up);
 
     this.perspective = Matrix.perspective(
       camera.fovy,
@@ -111,7 +108,10 @@ export class RasterVisitor implements Visitor {
    */
   visitGroupNode(node: GroupNode) {
     // TODO
-    this.stack.push({ traverse: node.transform.getMatrix(), inverse: node.transform.getInverseMatrix() });
+    this.stack.push({
+      traverse: node.transform.getMatrix(),
+      inverse: node.transform.getInverseMatrix(),
+    });
     for (let i = 0; i < node.children.length; i++) {
       node.children[i].accept(this);
     }
@@ -141,10 +141,14 @@ export class RasterVisitor implements Visitor {
 
     shader.getUniformInt("a_number_of_lights").set(this.lightNodes.length);
     for (let i = 0; i < this.lightNodes.length; i++) {
-      shader.getUniformVec3("u_light_positions[" + i + "]").set(this.lightNodes[i].position); //unschön aber funktioniert
-      shader.getUniformVec3("u_light_colors[" + i + "]").set(this.lightNodes[i].color);
+      shader
+        .getUniformVec3("u_light_positions[" + i + "]")
+        .set(this.lightNodes[i].position); //unschön aber funktioniert
+      shader
+        .getUniformVec3("u_light_colors[" + i + "]")
+        .set(this.lightNodes[i].color);
     }
-    
+
     shader.getUniformMatrix("M").set(toWorld);
     shader.getUniformMatrix("M_inverse").set(fromWorld);
 
@@ -171,8 +175,8 @@ export class RasterVisitor implements Visitor {
     normalMatrix.setVal(3, 0, 0);
     normalMatrix.setVal(3, 1, 0);
     normalMatrix.setVal(3, 2, 0);
-    // 
-    
+    //
+
     if (normalMatrix && fromWorld) {
       shader.getUniformMatrix("N").set(normalMatrix);
     }
@@ -246,12 +250,14 @@ export class RasterVisitor implements Visitor {
    * @param node The node to visit
    */
   visitGroupNodeCamera(node: GroupNode) {
-
     let mat = this.stack.at(this.stack.length - 1).traverse;
-    
-    let matTraverse = mat.mul(node.transform.getMatrix());      
+
+    let matTraverse = mat.mul(node.transform.getMatrix());
     //let matInv = matTraverse.invert();
-    this.stack.push({traverse: matTraverse, inverse: node.transform.getInverseMatrix()});
+    this.stack.push({
+      traverse: matTraverse,
+      inverse: node.transform.getInverseMatrix(),
+    });
 
     let cameraFound = false;
     for (let child of node.children) {
@@ -274,16 +280,13 @@ export class RasterVisitor implements Visitor {
     let upVec = m.mul(node.up);
 
     if (node) {
-      this.lookat = Matrix.lookat(
-          eyePos,
-          centerLookat,
-          upVec);
+      this.lookat = Matrix.lookat(eyePos, centerLookat, upVec);
 
       this.perspective = Matrix.perspective(
-          node.fovy,
-          node.aspect,
-          node.near,
-          node.far
+        node.fovy,
+        node.aspect,
+        node.near,
+        node.far
       );
     }
   }
@@ -295,15 +298,15 @@ export class RasterVisitor implements Visitor {
   }
 }
 
-/** 
- * Class representing a Visitor that sets up buffers 
- * for use by the RasterVisitor 
+/**
+ * Class representing a Visitor that sets up buffers
+ * for use by the RasterVisitor
  * */
 export class RasterSetupVisitor {
   /**
    * The created render objects
    */
-  public objects: WeakMap<Node, Renderable>
+  public objects: WeakMap<Node, Renderable>;
 
   /**
    * Creates a new RasterSetupVisitor
@@ -384,20 +387,20 @@ export class RasterSetupVisitor {
       )
     );
   }
-  
+
   /**
    * Visits a group node in camera traversal
    * @param node The node to visit
    */
-   visitGroupNodeCamera(node: GroupNode) {
-    console.log('Method visitGroupNodeCamera not implemented.');
+  visitGroupNodeCamera(node: GroupNode) {
+    console.log("Method visitGroupNodeCamera not implemented.");
   }
 
   visitCameraNode(node: CameraNode) {
-    console.log('Method visitCameraNode not implemented.');
+    console.log("Method visitCameraNode not implemented.");
   }
 
   visitLightNode(node: LightNode) {
-    console.log('Method visitLightNode not implemented.');
+    console.log("Method visitLightNode not implemented.");
   }
 }

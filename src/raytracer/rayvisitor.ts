@@ -7,7 +7,7 @@ import Visitor from '../visitor';
 import phong from './phong';
 import {
   Node, GroupNode, SphereNode,
-  AABoxNode, TextureBoxNode, CameraNode, LightNode   
+  AABoxNode, TextureBoxNode, CameraNode, LightNode
 } from '../nodes';
 import AABox from './aabox';
 import PhongProperties from '../phong-properties';
@@ -90,7 +90,7 @@ export default class RayVisitor implements Visitor {
     for (let x = 0; x < width; x++) {
       for (let y = 0; y < height; y++) {
         const ray = Ray.makeRay(x, y, height, width, this.camera); // ray = new Ray(origin, direction)
-        
+
         let minIntersection = new Intersection(Infinity, null, null);
         let minObj = null; // minObj is the closest object to the camera
 
@@ -102,20 +102,20 @@ export default class RayVisitor implements Visitor {
           }
         }
 
-        if (minObj) { 
-         
+        if (minObj) {
+
           if (!minObj.color) { // if no color is given then set pixel to black , else calculate color with phong
             data[4 * (width * y + x) + 0] = 255;
             data[4 * (width * y + x) + 1] = 0;
             data[4 * (width * y + x) + 2] = 0;
-            data[4 * (width * y + x) + 3] = 255;  
+            data[4 * (width * y + x) + 3] = 255;
           } else {
             // let color = phong(minObj.color, minIntersection, this.lightNodes, camera.eye, phongProperties);
             // let color = phong(minObj.color, minIntersection, this.lightNodes, this.camera.center, phongProperties);
-            
+
             // Tino
             let allLightNodes: Array<LightNode> = new Array();
-            allLightNodes.push(new LightNode(new Vector(.8,.8,.8,0),new Vector(1, 1, 1, 1)));
+            allLightNodes.push(new LightNode(new Vector(.8, .8, .8, 0), new Vector(1, 1, 1, 1)));
             let color = phong(minObj.color, minIntersection, allLightNodes, this.camera.center, phongProperties);
 
             data[4 * (width * y + x) + 0] = color.r * 255;
@@ -204,12 +204,12 @@ export default class RayVisitor implements Visitor {
     // this.camera = new CameraNode(new Vector(0, 0, 0, 1), new Vector(0, 0, -1, 1), new Vector(0, 1, 0, 0), node.fovy, node.aspect, node.near, node.far);
   }
 
-    /**
-   * Visits a camera node
-   * @param node The node to visit
-   */
-     visitGroupNodeCamera(node: GroupNode) {
+  /**
+ * Visits a camera node
+ * @param node The node to visit
+ */
+  visitGroupNodeCamera(node: GroupNode) {
 
-    }
+  }
 }
 
