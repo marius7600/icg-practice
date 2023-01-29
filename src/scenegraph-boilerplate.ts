@@ -36,15 +36,15 @@ let textureShader: Shader;
 
 window.addEventListener('load', () => {
     const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
-    const ctx_ray = canvas_ray.getContext("2d"); 
-    
+    const ctx_ray = canvas_ray.getContext("2d");
+
     const canvas_raster = document.getElementById("rasterizer") as HTMLCanvasElement;
     const ctx_raster = canvas_raster.getContext("webgl2");
 
     // Event listeners for the slider changes
     window.addEventListener('input', function (event) {
         sliderChanged(event)
-        });
+    });
     /* Call figure toggle if key 2 is pressed */
     document.addEventListener('keydown', (event) => {
         if (event.key === '2') {
@@ -105,9 +105,12 @@ window.addEventListener('load', () => {
     const gn3 = new GroupNode(new Scaling(new Vector(0.4, 0.4, 0.4, 0))); //scaling of the third sphere
     gn2.add(gn3);
     gn3.add(new SphereNode(new Vector(0, 0, .3, 1), new Vector(0, 0, 0, 1), 1));
-    const lightPositions = [
-        new Vector(1, 1, 1, 1)
-    ];
+    // const lightPositions = [
+    //     new Vector(1, 1, 1, 1)
+    // ];
+
+    light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 1));
+    gn.add(light1);
 
     sceneGraph.add(sg);
 
@@ -136,9 +139,9 @@ window.addEventListener('load', () => {
     rasterVisitor = new RasterVisitor(ctx_raster, phongShader, textureShader, rasterSetupVisitor.objects, phongProperties);
     phongShader.load();
     rasterVisitor.setupCamera(cameraNode);
-        
+
     startAnimation();
-        
+
 
     // requestAnimationFrame(animate);
 
@@ -196,7 +199,7 @@ function toggleFigure() {
 }
 
 /* update the phong properties if a slider is changed */
-function sliderChanged(event:any) {
+function sliderChanged(event: any) {
     const slider = event.target;
     const value = slider.value;
     const id = slider.id;
@@ -241,29 +244,29 @@ function sliderChanged(event:any) {
 
 /* animate the scene */
 function animate(timestamp: number) {
-if (animationActivated) {
-	    // console.log("animation loop started");
-	    if (lastTimestamp === 0) {
-	        lastTimestamp = timestamp;
-	    }
-	    const delta = (timestamp - lastTimestamp) / 1000;
-	    lastTimestamp = timestamp;
-	    if (rasterizing) {
-	        // rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
-	        rasterVisitor.render(sceneGraph, cameraNode);
-	    }
-	    else {
-	        // rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
-	        // rayVisitor.render(sceneGraph, cameraNode, phongProperties);
-	        rayVisitor.render(sceneGraph, phongProperties);
-	    }
-	    requestAnimationFrame(animate);
-	    // console.log("animation loop ended"); 
-    // console.log("animation loop ended"); 
-	    // console.log("animation loop ended"); 
-} else {
-	
-}
+    if (animationActivated) {
+        // console.log("animation loop started");
+        if (lastTimestamp === 0) {
+            lastTimestamp = timestamp;
+        }
+        const delta = (timestamp - lastTimestamp) / 1000;
+        lastTimestamp = timestamp;
+        if (rasterizing) {
+            // rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
+            rasterVisitor.render(sceneGraph, cameraNode);
+        }
+        else {
+            // rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
+            // rayVisitor.render(sceneGraph, cameraNode, phongProperties);
+            rayVisitor.render(sceneGraph, phongProperties);
+        }
+        requestAnimationFrame(animate);
+        // console.log("animation loop ended"); 
+        // console.log("animation loop ended"); 
+        // console.log("animation loop ended"); 
+    } else {
+
+    }
 }
 
 function startAnimation() {
@@ -278,7 +281,7 @@ function toggleAnimation() {
     console.log("Animation Activated old Satus: " + animationActivated);
     animationActivated = !animationActivated;
     console.log("Animation Activated new Satus: " + animationActivated);
-    if (animationActivated){
+    if (animationActivated) {
         document.getElementById("animationToggle").style.background = "green";
         startAnimation();
     }

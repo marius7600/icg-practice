@@ -58,9 +58,12 @@ export default class RayVisitor implements Visitor {
   }
 
   visitLightNode(node: LightNode): void {
-    node.position = this.stack[this.stack.length - 1].mul(node.position);
-    // console.log("Position of lightNode: " + node.position.x + ", " + node.position.y + ", " + node.position.z);
-    this.lightNodes.push(node);
+    // node.position = this.stack[this.stack.length - 1].mul(node.position);
+    // // console.log("Position of lightNode: " + node.position.x + ", " + node.position.y + ", " + node.position.z);
+    // this.lightNodes.push(node);
+
+    let myPosition = this.stack[this.stack.length - 1].mul(node.position);
+    this.lightNodes.push(new LightNode(node.color, myPosition));
   }
 
   /**
@@ -111,12 +114,12 @@ export default class RayVisitor implements Visitor {
             data[4 * (width * y + x) + 3] = 255;
           } else {
             // let color = phong(minObj.color, minIntersection, this.lightNodes, camera.eye, phongProperties);
-            // let color = phong(minObj.color, minIntersection, this.lightNodes, this.camera.center, phongProperties);
+            let color = phong(minObj.color, minIntersection, this.lightNodes, this.camera.center, phongProperties);
 
             // Tino
-            let allLightNodes: Array<LightNode> = new Array();
-            allLightNodes.push(new LightNode(new Vector(.8, .8, .8, 0), new Vector(1, 1, 1, 1)));
-            let color = phong(minObj.color, minIntersection, allLightNodes, this.camera.center, phongProperties);
+            // let allLightNodes: Array<LightNode> = new Array();
+            // allLightNodes.push(new LightNode(new Vector(.8, .8, .8, 0), new Vector(1, 1, 1, 1)));
+            // let color = phong(minObj.color, minIntersection, allLightNodes, this.camera.center, phongProperties);
 
             data[4 * (width * y + x) + 0] = color.r * 255;
             data[4 * (width * y + x) + 1] = color.g * 255;
