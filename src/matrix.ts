@@ -89,7 +89,7 @@ export default class Matrix {
         0, 0, 0, 1
       ]);
     }
-    else{
+    else {
       return Matrix.identity();
     }
   }
@@ -121,15 +121,15 @@ export default class Matrix {
     let u = s.cross(f).normalize();
 
     return new Matrix([
-        s.x, s.y, s.z, 0,
-        u.x, u.y, u.z, 0,
-        -f.x, -f.y, -f.z, 0,
-        0, 0, 0, 1
+      s.x, s.y, s.z, 0,
+      u.x, u.y, u.z, 0,
+      -f.x, -f.y, -f.z, 0,
+      0, 0, 0, 1
     ]).mul(new Matrix([
-        1, 0, 0, -eye.x,
-        0, 1, 0, -eye.y,
-        0, 0, 1, -eye.z,
-        0, 0, 0, 1
+      1, 0, 0, -eye.x,
+      0, 1, 0, -eye.y,
+      0, 0, 1, -eye.z,
+      0, 0, 0, 1
     ]));
   }
 
@@ -188,7 +188,7 @@ export default class Matrix {
    */
   mul(other: Vector): Vector;
   mul(other: Matrix): Matrix;
-  mul (other: Vector | Matrix): Vector | Matrix {
+  mul(other: Vector | Matrix): Vector | Matrix {
     // Matrix * Vector
     if (other instanceof Vector) {
       let result = new Vector(0, 0, 0, 0);

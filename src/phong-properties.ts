@@ -12,16 +12,6 @@ export default class PhongProperties {
         this.diffuse = phongValues.get('diffuse_value');
         this.specular = phongValues.get('specular_value');
         this.shininess = phongValues.get('shininess_value');
-        
-        // const shininess = 16.0;
-        // const kA = 0.3;
-        // const kD = 0.6;
-        // const kS = 0.7;
-
-        // this.ambient = kA;
-        // this.diffuse = kD;
-        // this.specular = kS;
-        // this.shininess = shininess;
     }
 
     /**
