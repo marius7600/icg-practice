@@ -52,20 +52,20 @@ export class GroupNode extends Node {
     this.children.push(childNode);
   }
 
-   //Für camera traversal
-   acceptOnlyCamera(visitor: Visitor) {
+  //Für camera traversal
+  acceptOnlyCamera(visitor: Visitor) {
     visitor.visitGroupNodeCamera(this);
-}
+  }
 
-remove(childNode: Node) {
+  remove(childNode: Node) {
     let indexOfchild = this.children.indexOf(childNode);
     this.children.splice(indexOfchild, 1);
-}
+  }
 
-containsCamera(cameraNode: CameraNode) {
+  containsCamera(cameraNode: CameraNode) {
     return !!this.children.includes(cameraNode);
 
-}
+  }
 }
 
 /**
@@ -170,7 +170,7 @@ export class LightNode extends Node {
   accept(visitor: Visitor) {
     visitor.visitLightNode(this);
   }
-  
+
 }
 
 export class CameraNode extends Node {
@@ -202,6 +202,6 @@ export class CameraNode extends Node {
    */
 
   accept(visitor: Visitor) {
-      visitor.visitCameraNode(this)
+    visitor.visitCameraNode(this)
   }
 }

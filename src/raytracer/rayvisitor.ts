@@ -52,16 +52,11 @@ export default class RayVisitor implements Visitor {
     height: number
   ) {
     this.imageData = context.getImageData(0, 0, width, height);
-    // this.stack = [{ matrix: Matrix.identity(), inverse: Matrix.identity() }];
     this.stack.push(Matrix.identity());
     this.intersection = null;
   }
 
   visitLightNode(node: LightNode): void {
-    // node.position = this.stack[this.stack.length - 1].mul(node.position);
-    // // console.log("Position of lightNode: " + node.position.x + ", " + node.position.y + ", " + node.position.z);
-    // this.lightNodes.push(node);
-
     let myPosition = this.stack[this.stack.length - 1].mul(node.position);
     this.lightNodes.push(new LightNode(node.color, myPosition));
   }
