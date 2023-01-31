@@ -15,11 +15,7 @@ uniform mat4 V; // View matrix
 uniform mat4 P; // projection matrix
 uniform mat4 N; // normal matrix
 
-uniform float a_ka;
-uniform float a_kd;
-uniform float a_ks;
-uniform float a_shininess;
-uniform float a_number_of_lights;
+// uniform float a_number_of_lights;
 
 uniform vec3 u_light_positions[8];
 uniform vec3 u_light_colors[8];
@@ -33,22 +29,17 @@ varying vec3 v_position;
 
 // Pass the phon shading coefficients
 // to the fragment shader
-varying float v_ka;
-varying float v_kd;
-varying float v_ks;
-varying float v_shininess;
+uniform float u_ka;
+uniform float u_kd;
+uniform float u_ks;
+uniform float u_shininess;
 varying vec3 v_light_positions[8];
 
-varying float v_number_of_lights;
+// varying float v_number_of_lights;
 
 void main() {
-  // kann raus direkt attribut siehe z36
-  v_kd = a_kd;
-  v_ka = a_ka;
-  v_ks = a_ks;
-  v_shininess = a_shininess;
   
-  v_number_of_lights = a_number_of_lights; //wichtig
+  // v_number_of_lights = a_number_of_lights; //wichtig Frage an Tino: Warum ist das Wichtig kann kommplet raus und es funktioniert immer noch?!?
 
   gl_Position = P * V * M * vec4(a_position, 1.0); //wichtig
   

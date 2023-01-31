@@ -134,12 +134,12 @@ export class RasterVisitor implements Visitor {
     }
 
     // TODO set the material properties
-    shader.getUniformFloat("a_ka").set(this.phongProperties.ambient);
-    shader.getUniformFloat("a_kd").set(this.phongProperties.diffuse);
-    shader.getUniformFloat("a_ks").set(this.phongProperties.specular);
-    shader.getUniformFloat("a_shininess").set(this.phongProperties.shininess);
+    shader.getUniformFloat("u_ka").set(this.phongProperties.ambient);
+    shader.getUniformFloat("u_kd").set(this.phongProperties.diffuse);
+    shader.getUniformFloat("u_ks").set(this.phongProperties.specular);
+    shader.getUniformFloat("u_shininess").set(this.phongProperties.shininess);
 
-    shader.getUniformInt("a_number_of_lights").set(this.lightNodes.length);
+    shader.getUniformInt("u_number_of_lights").set(this.lightNodes.length);
     for (let i = 0; i < this.lightNodes.length; i++) {
       shader
         .getUniformVec3("u_light_positions[" + i + "]")
@@ -197,10 +197,10 @@ export class RasterVisitor implements Visitor {
     }
 
     // TODO set the material properties
-    shader.getUniformFloat("a_ka").set(this.phongProperties.ambient);
-    shader.getUniformFloat("a_kd").set(this.phongProperties.diffuse);
-    shader.getUniformFloat("a_ks").set(this.phongProperties.specular);
-    shader.getUniformFloat("a_shininess").set(this.phongProperties.shininess);
+    shader.getUniformFloat("u_ka").set(this.phongProperties.ambient);
+    shader.getUniformFloat("u_kd").set(this.phongProperties.diffuse);
+    shader.getUniformFloat("u_ks").set(this.phongProperties.specular);
+    shader.getUniformFloat("u_shininess").set(this.phongProperties.shininess);
 
     shader.getUniformMatrix("M").set(toWorld);
     let V = shader.getUniformMatrix("V");
@@ -229,10 +229,10 @@ export class RasterVisitor implements Visitor {
       toWorld = toWorld.mul(this.stack[i].traverse);
     }
 
-    shader.getUniformFloat("a_ka").set(this.phongProperties.ambient);
-    shader.getUniformFloat("a_kd").set(this.phongProperties.diffuse);
-    shader.getUniformFloat("a_ks").set(this.phongProperties.specular);
-    shader.getUniformFloat("a_shininess").set(this.phongProperties.shininess);
+    shader.getUniformFloat("u_ka").set(this.phongProperties.ambient);
+    shader.getUniformFloat("u_kd").set(this.phongProperties.diffuse);
+    shader.getUniformFloat("u_ks").set(this.phongProperties.specular);
+    shader.getUniformFloat("u_shininess").set(this.phongProperties.shininess);
 
     shader.getUniformMatrix("M").set(toWorld);
     let P = shader.getUniformMatrix("P");
