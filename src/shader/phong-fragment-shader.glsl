@@ -31,11 +31,40 @@ void main(void) {
       break;
     }
     vec3 lightDir = normalize(v_light_positions[i] - v_position);
-    vec3 viewDir = normalize(v_normal);
+    // vec3 viewDir = normalize(v_normal);
 
-    diffuse += v_color * max(dot(viewDir, lightDir), 0.0);
-    vec3 r = normalize(viewDir * (2.0 * dot(viewDir, lightDir)) - lightDir);
+    // diffuse += v_color * max(dot(viewDir, lightDir), 0.0);
+    // vec3 r = normalize(viewDir * (2.0 * dot(viewDir, lightDir)) - lightDir);
+    // specular += v_color * pow(max(dot(r, viewDir), 0.0), u_shininess);
+
+
+// In Zeile 34 wollt ihr den Vektor v (viewDir) berechnen.
+// Dieser Vektor startet an der Position des Fragments und verläuft in Richtung der Kamera (bzw. Auge):
+// https://lectures.hci.informatik.uni-wuerzburg.de/ss22/icg/05-02-phong-reflectance-model-deck.html#/reflection-model-geometry
+// Das sich die Kamera im Ursprung (0,0,0) befindet, lässt sich dieser Vektor sehr einfach aus der fragment-Position (v_position) berechnen. 
+// Also im Grunde Ursprung – fragmet_position und dann normalisiert.
+    vec3 camPos = vec3(0.0, 0.0, 0.0);
+    vec3 viewDir = normalize(camPos - v_position);
+ 
+// In den Zeilen 36 und 37 ist euch dann der zweite Fehler eingeschlichen.
+// Dort habt ihr viewDir verwendet.
+// In der Vorlesung sieht man hier, wie sich der Diffuse Anteil berechnet:
+// https://lectures.hci.informatik.uni-wuerzburg.de/ss22/icg/05-02-phong-reflectance-model-deck.html#/diffuse-lighting-1
+// Dort wird der normalen-Vektor n verwendet und der Vektor s (bei euch lightDir), der zum Licht hinzeigt.
+// Also habt ihr da soweit alles richtig gemacht, nur dass ihr nicht den viewDir und lightDir verwenden müsst, sondern stattdessen v_normal und lightDir.
+
+    diffuse += v_color * max(dot(v_normal, lightDir), 0.0);
+    vec3 r = normalize(v_normal * (2.0 * dot(v_normal, lightDir)) - lightDir);
     specular += v_color * pow(max(dot(r, viewDir), 0.0), u_shininess);
+    
+// In der Zeile 36 ist es dann auch wieder das gleiche Problem.
+// Hier steht beschrieben, wie sich r berechnen lässt (Formel 5):
+// https://lectures.hci.informatik.uni-wuerzburg.de/ss22/icg/05-03-light-propagation-add-on-deck.html#/reflection-geometry-model/2
+// Schaut euch dann an, welche Vektoren miteinander verrechnet werden müssen und vergleicht dann, welche Vektoren ihr miteinander verrechnet.
+// Da müsst ihr dann auch nur den Vektor in der Gleichung durch den richtigen Vektor austauschen.
+// Davon abgesehen müsste die Berechnung sonst stimmen.
+ 
+
   }
 
   // Calculate the final color
