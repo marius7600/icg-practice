@@ -214,3 +214,25 @@ export class CameraNode extends Node {
     visitor.visitCameraNode(this)
   }
 }
+
+export class PyramidNode extends Node {
+
+  minPoint: Vector;
+  maxPoint: Vector;
+   /**
+     * Creates a Pyramid.
+     * The Pyramids center is located at the origin
+     * with all edges of length 1
+     * @param dimensions
+     * @param color The colour of the Pyramid
+     */
+  constructor(public dimensions:Vector, public color: Vector) {
+    super();
+    this.maxPoint = dimensions.div(2)
+    this.minPoint = this.maxPoint.mul(-1)
+  }
+
+  accept(visitor: Visitor) {
+    visitor.visitPyramidNode(this);
+  }
+}

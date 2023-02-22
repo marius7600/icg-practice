@@ -6,7 +6,8 @@ import {
     SphereNode,
     AABoxNode,
     CameraNode,
-    LightNode
+    LightNode, 
+    PyramidNode
 } from './nodes';
 import RayVisitor from './raytracer/rayvisitor';
 import { Rotation, Scaling, Translation } from './transformation';
@@ -111,8 +112,15 @@ window.addEventListener('load', () => {
     // ];
     
     //Add rasterbox
-    const rasterBox = new AABoxNode(new Vector(1, 1, 1, 0), new Vector(0, 0, 1, 1));
+    const rasterBox = new AABoxNode(new Vector(1, 2, 1, 0), new Vector(0, 0, 1, 1));
     gn1.add(rasterBox);
+
+    //Add pyramid
+
+    const gn4 = new GroupNode(new Translation(new Vector(-1, -2, 1.5, 0))); //position of the second sphere
+    gn3.add(gn4);
+    const pyramid = new PyramidNode(new Vector(2, 2, 2, 0), new Vector(1, 0, 1, 1));
+    gn4.add(pyramid);
 
     light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 0));
     gn.add(light1);

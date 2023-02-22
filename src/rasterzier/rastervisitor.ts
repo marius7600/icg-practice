@@ -1,6 +1,7 @@
 import RasterSphere from "./raster-sphere";
 import RasterBox from "./raster-box";
 import RasterTextureBox from "./raster-texture-box";
+import RasterPyramid from "./raster-Pyramid";
 import Vector from "../vector";
 import Matrix from "../matrix";
 import Visitor from "../visitor";
@@ -12,6 +13,7 @@ import {
   TextureBoxNode,
   CameraNode,
   LightNode,
+  PyramidNode,
 } from "../nodes";
 import Shader from "../shader/shader";
 import PhongProperties from "../phong-properties";
@@ -123,64 +125,7 @@ export class RasterVisitor implements Visitor {
    * @param node The node to visit
    */
   visitSphereNode(node: SphereNode) {
-    const shader = this.shader;
-    shader.use();
-    let toWorld = Matrix.identity();
-    let fromWorld = Matrix.identity();
-    // TODO Calculate the model matrix for the sphere
-    for (let i = 0; i < this.stack.length; i++) {
-      toWorld = toWorld.mul(this.stack[i].traverse);
-      fromWorld = this.stack[i].inverse.mul(fromWorld);
-    }
-
-    // TODO set the material properties
-    shader.getUniformFloat("u_ka").set(this.phongProperties.ambient);
-    shader.getUniformFloat("u_kd").set(this.phongProperties.diffuse);
-    shader.getUniformFloat("u_ks").set(this.phongProperties.specular);
-    shader.getUniformFloat("u_shininess").set(this.phongProperties.shininess);
-
-    shader.getUniformInt("u_number_of_lights").set(this.lightNodes.length);
-    for (let i = 0; i < this.lightNodes.length; i++) {
-      shader
-        .getUniformVec3("u_light_positions[" + i + "]")
-        .set(this.lightNodes[i].position); //unschön aber funktioniert
-      shader
-        .getUniformVec3("u_light_colors[" + i + "]")
-        .set(this.lightNodes[i].color);
-    }
-
-    shader.getUniformMatrix("M").set(toWorld);
-    shader.getUniformMatrix("M_inverse").set(fromWorld);
-
-    const V = shader.getUniformMatrix("V");
-    if (V && this.lookat) {
-      V.set(this.lookat);
-    }
-    const P = shader.getUniformMatrix("P");
-    if (P && this.perspective) {
-      P.set(this.perspective);
-    }
-    // TODO set the normal matrix
-    // const normalMatrix = fromWorld.transpose();
-    // normalMatrix.setVal(0, 3, 0);
-    // normalMatrix.setVal(1, 3, 0);
-    // normalMatrix.setVal(2, 3, 0);
-    // normalMatrix.setVal(3, 3, 1);
-    // normalMatrix.setVal(3, 0, 0);
-    // normalMatrix.setVal(3, 1, 0);
-    // normalMatrix.setVal(3, 2, 0);
-
-    // Tino
-    const normalMatrix = fromWorld.transpose();
-    normalMatrix.setVal(3, 0, 0);
-    normalMatrix.setVal(3, 1, 0);
-    normalMatrix.setVal(3, 2, 0);
-    //
-
-    if (normalMatrix && fromWorld) {
-      shader.getUniformMatrix("N").set(normalMatrix);
-    }
-    this.renderables.get(node).render(shader);
+   this.visitNode(node);
   }
 
   /**
@@ -188,42 +133,7 @@ export class RasterVisitor implements Visitor {
    * @param  {AABoxNode} node - The node to visit
    */
   visitAABoxNode(node: AABoxNode) {
-    let shader = this.shader;
-    shader.use();
-    let toWorld = Matrix.identity();
-    let fromWorld = Matrix.identity();
-    // TODO Calculate the model matrix for the box
-    for (let i = 0; i < this.stack.length; i++) {
-      toWorld = toWorld.mul(this.stack[i].traverse);
-      fromWorld = this.stack[i].inverse.mul(fromWorld);
-    }
-
-    shader.getUniformMatrix("M").set(toWorld);
-    let V = shader.getUniformMatrix("V");
-    if (V && this.lookat) {
-      V.set(this.lookat);
-    }
-
-    let P = shader.getUniformMatrix("P");
-    if (P && this.perspective) {
-      P.set(this.perspective);
-    }
-
-    let N = shader.getUniformMatrix("N");
-    let normal = this.lookat.mul(fromWorld).transpose(); // erst invert dann transpose
-    if (N && normal) {
-      N.set(normal); // pass to shader
-    }
-
-    // TODO set the material properties
-    shader.getUniformFloat("u_ka").set(this.phongProperties.ambient);
-    shader.getUniformFloat("u_kd").set(this.phongProperties.diffuse);
-    shader.getUniformFloat("u_ks").set(this.phongProperties.specular);
-    shader.getUniformFloat("u_shininess").set(this.phongProperties.shininess);
-
-    this.renderables.get(node).render(shader);
-    
-
+   this.visitNode(node);
   }
 
   /**
@@ -306,6 +216,65 @@ export class RasterVisitor implements Visitor {
     // TODO implement this
     // console.log('Method visitLightNode not implemented');
     this.stack.at(this.stack.length - 1).traverse.mul(node.position);
+  }
+
+  visitPyramidNode(node: PyramidNode) {
+    this.visitNode(node);
+}
+
+  private visitNode(node: Node) {
+    const shader = this.shader;
+    shader.use();
+    // let shader = this.shader;
+    // shader.use();
+    let toWorld = Matrix.identity();
+    let fromWorld = Matrix.identity();
+    // TODO Calculate the model matrix for the box
+    for (let i = 0; i < this.stack.length; i++) {
+      toWorld = toWorld.mul(this.stack[i].traverse);
+      fromWorld = this.stack[i].inverse.mul(fromWorld);
+    }
+
+    shader.getUniformMatrix("M").set(toWorld);
+    let V = shader.getUniformMatrix("V");
+    if (V && this.lookat) {
+      V.set(this.lookat);
+    }
+
+    let P = shader.getUniformMatrix("P");
+    if (P && this.perspective) {
+      P.set(this.perspective);
+    }
+
+    let N = shader.getUniformMatrix("N");
+    let normal = this.lookat.mul(fromWorld).transpose(); // erst invert dann transpose
+    if (N && normal) {
+      N.set(normal); // pass to shader
+    }
+
+    // TODO set the material properties
+    shader.getUniformFloat("u_ka").set(this.phongProperties.ambient);
+    shader.getUniformFloat("u_kd").set(this.phongProperties.diffuse);
+    shader.getUniformFloat("u_ks").set(this.phongProperties.specular);
+    shader.getUniformFloat("u_shininess").set(this.phongProperties.shininess);
+
+        shader.getUniformInt("u_number_of_lights").set(this.lightNodes.length);
+    for (let i = 0; i < this.lightNodes.length; i++) {
+      shader
+        .getUniformVec3("u_light_positions[" + i + "]")
+        .set(this.lightNodes[i].position); //unschön aber funktioniert
+      shader
+        .getUniformVec3("u_light_colors[" + i + "]")
+        .set(this.lightNodes[i].color);
+    }
+
+    toWorld.transpose()
+    toWorld.setVal(3, 0, 0)
+    toWorld.setVal(3, 1, 0)
+    toWorld.setVal(3, 2, 0)
+
+    this.renderables.get(node)?.render(shader);
+
   }
 }
 
@@ -399,6 +368,18 @@ export class RasterSetupVisitor {
       )
     );
   }
+
+  visitPyramidNode(node: PyramidNode) {
+    this.objects.set(
+        node,
+        new RasterPyramid(
+            this.gl,
+            node.minPoint,
+            node.maxPoint,
+            node.color
+        )
+    );
+}
 
   /**
    * Visits a group node in camera traversal

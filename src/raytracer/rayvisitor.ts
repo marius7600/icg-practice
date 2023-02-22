@@ -13,6 +13,7 @@ import {
   TextureBoxNode,
   CameraNode,
   LightNode,
+  PyramidNode
 } from "../nodes";
 import AABox from "./aabox";
 import PhongProperties from "../phong-properties";
@@ -183,10 +184,10 @@ export default class RayVisitor implements Visitor {
    * @param node The node to visit
    */
   visitAABoxNode(node: AABoxNode) {
-    // let m = this.stack[this.stack.length - 1];
-    // let min = m.mul(node.min);
-    // let max = m.mul(node.max);
-    // this.objects.push(new AABox(min, max, node.color));
+    let m = this.stack[this.stack.length - 1];
+    let min = m.mul(node.minPoint);
+    let max = m.mul(node.maxPoint);
+    this.objects.push(new AABox(min, max, node.color));
   }
 
   /**
@@ -220,4 +221,8 @@ export default class RayVisitor implements Visitor {
    * @param node The node to visit
    */
   visitGroupNodeCamera(node: GroupNode) { }
+
+  visitPyramidNode(node: PyramidNode) {
+    // Do nothing :)
+  }
 }
