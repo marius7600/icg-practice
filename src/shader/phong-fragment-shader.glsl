@@ -56,10 +56,10 @@ void main(void) {
 // Dort wird der normalen-Vektor n verwendet und der Vektor s (bei euch lightDir), der zum Licht hinzeigt.
 // Also habt ihr da soweit alles richtig gemacht, nur dass ihr nicht den viewDir und lightDir verwenden müsst, sondern stattdessen v_normal und lightDir.
 
-    diffuse += v_color * max(dot(N, lightDir), 0.0);
+    diffuse +=  max(dot(N, lightDir), 0.0);
     // vec3 r = normalize(v_normal * (2.0 * dot(v_normal, lightDir)) - lightDir);
     vec3 r = (2.0 * dot(N, lightDir) * N - lightDir);
-    specular += v_color * pow(max(dot(r, viewDir), 0.0), u_shininess);
+    specular +=  pow(max(dot(r, viewDir), 0.0), u_shininess);
     
 // In der Zeile 36 ist es dann auch wieder das gleiche Problem.
 // Hier steht beschrieben, wie sich r berechnen lässt (Formel 5):

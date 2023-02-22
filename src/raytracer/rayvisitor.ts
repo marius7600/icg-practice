@@ -183,20 +183,10 @@ export default class RayVisitor implements Visitor {
    * @param node The node to visit
    */
   visitAABoxNode(node: AABoxNode) {
-    let mat = Matrix.identity();
-    // this.stack = [{ matrix: Matrix.identity(), inverse: Matrix.identity() }];
-    this.stack.push(Matrix.identity());
-    mat = this.stack[this.stack.length - 1].mul(mat);
-
-    this.objects.push(
-      new AABox(
-        // mat.mulVec(new Vector(-0.5, -0.5, -0.5, 1)),
-        mat.mul(new Vector(-0.5, -0.5, -0.5, 1)),
-        // mat.mulVec(new Vector(0.5, 0.5, 0.5, 1)),
-        mat.mul(new Vector(0.5, 0.5, 0.5, 1)),
-        node.color
-      )
-    );
+    // let m = this.stack[this.stack.length - 1];
+    // let min = m.mul(node.min);
+    // let max = m.mul(node.max);
+    // this.objects.push(new AABox(min, max, node.color));
   }
 
   /**

@@ -15,6 +15,7 @@ import Shader from './shader/shader';
 import phongVertexShader from './shader/phong-vertex-perspective-shader.glsl';
 import phongFragmentShader from './shader/phong-fragment-shader.glsl';
 import PhongProperties from './phong-properties'
+import RasterBox from './rasterzier/raster-box';
 
 let rasterizing: boolean = true;
 
@@ -99,7 +100,7 @@ window.addEventListener('load', () => {
     sg.add(gn);
     const gn1 = new GroupNode(new Translation(new Vector(1.2, .5, 0, 0))); //position of the first sphere
     gn.add(gn1);
-    gn1.add(new SphereNode(new Vector(.4, 0, 0, 1), new Vector(0, 0, 0, 1), 1));
+    // gn1.add(new SphereNode(new Vector(.4, 0, 0, 1), new Vector(0, 0, 0, 1), 1));
     const gn2 = new GroupNode(new Translation(new Vector(-0.8, 1, 1, 0))); //position of the second sphere
     gn.add(gn2);
     const gn3 = new GroupNode(new Scaling(new Vector(0.4, 0.4, 0.4, 0))); //scaling of the third sphere
@@ -108,6 +109,10 @@ window.addEventListener('load', () => {
     // const lightPositions = [
     //     new Vector(1, 1, 1, 1)
     // ];
+    
+    //Add rasterbox
+    const rasterBox = new AABoxNode(new Vector(1, 1, 1, 0), new Vector(0, 0, 1, 1));
+    gn1.add(rasterBox);
 
     light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 0));
     gn.add(light1);

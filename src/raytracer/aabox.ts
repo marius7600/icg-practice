@@ -1,6 +1,7 @@
 import Vector from '../vector';
 import Ray from './ray';
 import Intersection from './intersection';
+import { Polygon } from '../polygon';
 
 /**
  * Class representing an axis aligned box
@@ -41,14 +42,26 @@ export default class AABox {
       new Vector(maxPoint.x, maxPoint.y, minPoint.z, 1),
       new Vector(minPoint.x, maxPoint.y, minPoint.z, 1)
     ];
+    // this.indices = [
+    //   0, 1, 2, 3,
+    //   1, 5, 6, 2,
+    //   4, 0, 3, 7,
+    //   3, 2, 6, 7,
+    //   5, 4, 7, 6,
+    //   0, 4, 5, 1
+    // ];
+
     this.indices = [
-      0, 1, 2, 3,
-      1, 5, 6, 2,
-      4, 0, 3, 7,
-      3, 2, 6, 7,
-      5, 4, 7, 6,
-      0, 4, 5, 1
-    ];
+      0,1,2,   0,2,3, //front
+      0,5,4,   0,1,5, //floor
+      1,2,6,   1,6,5, //right
+      0,3,7,   0,7,4, //left
+      2,6,7,   2,7,3, //top
+      4,6,5,   4,7,6  //back
+
+  ]
+
+
   }
 
   /**
@@ -57,8 +70,26 @@ export default class AABox {
    * @return The intersection if there is one, null if there is none
    */
   intersect(ray: Ray): Intersection | null {
-    // TODO
-    return null;
+    
+        let closestIntersection: Intersection = null;
+        let shortestT = Number.MAX_VALUE
+        for (let i = 0; i < this.indices.length; i+=3) {
+            const point1 = this.vertices[this.indices[i]]
+            const point2 = this.vertices[this.indices[i+1]]
+            const point3 = this.vertices[this.indices[i+2]]
+            const intersection = Polygon.intersect(ray, point1, point2, point3, shortestT);
+            if (intersection) {
+                if (!closestIntersection || intersection.closerThan(closestIntersection)) {
+                    closestIntersection = intersection
+                    shortestT = intersection.t
+                }
+            }
+        }
+        return closestIntersection
+  }
+
+  toString(): string {
+    return `AABox(${this.vertices[0]}, ${this.vertices[6]})`;
   }
 
 }

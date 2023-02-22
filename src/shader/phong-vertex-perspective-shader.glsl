@@ -47,7 +47,7 @@ void main() {
   // TODO
   v_color = a_color;
   // v_position = vec3(M * vec4(a_position, 1.0));
-  v_position = vec3(V * M * vec4(a_position,1.0));
+  v_position = vec3((V * M * vec4(a_position,1.0)).xyz);
   v_normal = normalize((V * N * vec4(a_normal, 0)).xyz);
 
   // kann auch raus

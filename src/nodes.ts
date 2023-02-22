@@ -104,14 +104,19 @@ export class SphereNode extends Node {
  */
 export class AABoxNode extends Node {
 
+  minPoint: Vector;
+  maxPoint: Vector;
+
   /**
    * Creates an axis aligned box.
    * The box's center is located at the origin
    * with all edges of length 1
    * @param color The colour of the cube
    */
-  constructor(public color: Vector) {
+  constructor(public dimensions: Vector, public color: Vector) {
     super();
+    this.maxPoint = dimensions.div(2)
+    this.minPoint = this.maxPoint.mul(-1)
   }
 
   /**
@@ -121,6 +126,10 @@ export class AABoxNode extends Node {
   accept(visitor: Visitor) {
     // TODO
     visitor.visitAABoxNode(this);
+  }
+
+  toString() {
+    return `AABoxNode: ${this.color}`;
   }
 }
 

@@ -188,12 +188,31 @@ export class RasterVisitor implements Visitor {
    * @param  {AABoxNode} node - The node to visit
    */
   visitAABoxNode(node: AABoxNode) {
-    this.shader.use();
     let shader = this.shader;
+    shader.use();
     let toWorld = Matrix.identity();
+    let fromWorld = Matrix.identity();
     // TODO Calculate the model matrix for the box
     for (let i = 0; i < this.stack.length; i++) {
       toWorld = toWorld.mul(this.stack[i].traverse);
+      fromWorld = this.stack[i].inverse.mul(fromWorld);
+    }
+
+    shader.getUniformMatrix("M").set(toWorld);
+    let V = shader.getUniformMatrix("V");
+    if (V && this.lookat) {
+      V.set(this.lookat);
+    }
+
+    let P = shader.getUniformMatrix("P");
+    if (P && this.perspective) {
+      P.set(this.perspective);
+    }
+
+    let N = shader.getUniformMatrix("N");
+    let normal = this.lookat.mul(fromWorld).transpose(); // erst invert dann transpose
+    if (N && normal) {
+      N.set(normal); // pass to shader
     }
 
     // TODO set the material properties
@@ -202,17 +221,9 @@ export class RasterVisitor implements Visitor {
     shader.getUniformFloat("u_ks").set(this.phongProperties.specular);
     shader.getUniformFloat("u_shininess").set(this.phongProperties.shininess);
 
-    shader.getUniformMatrix("M").set(toWorld);
-    let V = shader.getUniformMatrix("V");
-    if (V && this.lookat) {
-      V.set(this.lookat);
-    }
-    let P = shader.getUniformMatrix("P");
-    if (P && this.perspective) {
-      P.set(this.perspective);
-    }
-
     this.renderables.get(node).render(shader);
+    
+
   }
 
   /**
@@ -364,11 +375,12 @@ export class RasterSetupVisitor {
     this.objects.set(
       node,
       new RasterBox(
-        this.gl,
-        new Vector(-0.5, -0.5, -0.5, 1),
-        new Vector(0.5, 0.5, 0.5, 1)
+          this.gl,
+          node.minPoint,
+          node.maxPoint,
+          node.color
       )
-    );
+  );
   }
 
   /**
