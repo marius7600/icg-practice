@@ -5,18 +5,16 @@ import Intersection from "./intersection";
 import Ray from "./ray";
 import Visitor from "../visitor";
 import phong from "./phong";
-import {
-  Node,
-  GroupNode,
-  SphereNode,
-  AABoxNode,
-  TextureBoxNode,
-  CameraNode,
-  LightNode,
-  PyramidNode
-} from "../nodes";
 import AABox from "./aabox";
 import PhongProperties from "../phong-properties";
+import Node from "../nodes/node";
+import AABoxNode from "../nodes/aabox-node";
+import CameraNode from "../nodes/camera-node";
+import GroupNode from "../nodes/group-node";
+import LightNode from "../nodes/light-node";
+import PyramidNode from "../nodes/pyramid-node";
+import SphereNode from "../nodes/shere-node";
+import TextureBoxNode from "../nodes/texture-box-node";
 
 interface Intersectable {
   intersect(ray: Ray): Intersection | null;
@@ -194,7 +192,7 @@ export default class RayVisitor implements Visitor {
    * Visits a textured box node
    * @param node The node to visit
    */
-  visitTextureBoxNode(node: TextureBoxNode) { }
+  visitTextureBoxNode(node: TextureBoxNode) {}
 
   visitCameraNode(node: CameraNode) {
     // Frage an Marius: warum machen wir uns den ganzen aufwand, und verwenden nicht einfach node.eye, node.center, node.up?
@@ -220,7 +218,7 @@ export default class RayVisitor implements Visitor {
    * Visits a camera node
    * @param node The node to visit
    */
-  visitGroupNodeCamera(node: GroupNode) { }
+  visitGroupNodeCamera(node: GroupNode) {}
 
   visitPyramidNode(node: PyramidNode) {
     // Do nothing :)

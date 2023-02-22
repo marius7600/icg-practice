@@ -5,18 +5,16 @@ import RasterPyramid from "./raster-Pyramid";
 import Vector from "../vector";
 import Matrix from "../matrix";
 import Visitor from "../visitor";
-import {
-  Node,
-  GroupNode,
-  SphereNode,
-  AABoxNode,
-  TextureBoxNode,
-  CameraNode,
-  LightNode,
-  PyramidNode,
-} from "../nodes";
 import Shader from "../shader/shader";
 import PhongProperties from "../phong-properties";
+import Node from "../nodes/node";
+import AABoxNode from "../nodes/aabox-node";
+import CameraNode from "../nodes/camera-node";
+import GroupNode from "../nodes/group-node";
+import LightNode from "../nodes/light-node";
+import PyramidNode from "../nodes/pyramid-node";
+import SphereNode from "../nodes/shere-node";
+import TextureBoxNode from "../nodes/texture-box-node";
 
 interface Renderable {
   render(shader: Shader): void;
@@ -125,7 +123,7 @@ export class RasterVisitor implements Visitor {
    * @param node The node to visit
    */
   visitSphereNode(node: SphereNode) {
-   this.visitNode(node);
+    this.visitNode(node);
   }
 
   /**
@@ -133,7 +131,7 @@ export class RasterVisitor implements Visitor {
    * @param  {AABoxNode} node - The node to visit
    */
   visitAABoxNode(node: AABoxNode) {
-   this.visitNode(node);
+    this.visitNode(node);
   }
 
   /**
@@ -220,7 +218,7 @@ export class RasterVisitor implements Visitor {
 
   visitPyramidNode(node: PyramidNode) {
     this.visitNode(node);
-}
+  }
 
   private visitNode(node: Node) {
     const shader = this.shader;
@@ -258,7 +256,7 @@ export class RasterVisitor implements Visitor {
     shader.getUniformFloat("u_ks").set(this.phongProperties.specular);
     shader.getUniformFloat("u_shininess").set(this.phongProperties.shininess);
 
-        shader.getUniformInt("u_number_of_lights").set(this.lightNodes.length);
+    shader.getUniformInt("u_number_of_lights").set(this.lightNodes.length);
     for (let i = 0; i < this.lightNodes.length; i++) {
       shader
         .getUniformVec3("u_light_positions[" + i + "]")
@@ -268,13 +266,12 @@ export class RasterVisitor implements Visitor {
         .set(this.lightNodes[i].color);
     }
 
-    toWorld.transpose()
-    toWorld.setVal(3, 0, 0)
-    toWorld.setVal(3, 1, 0)
-    toWorld.setVal(3, 2, 0)
+    toWorld.transpose();
+    toWorld.setVal(3, 0, 0);
+    toWorld.setVal(3, 1, 0);
+    toWorld.setVal(3, 2, 0);
 
     this.renderables.get(node)?.render(shader);
-
   }
 }
 
@@ -343,13 +340,8 @@ export class RasterSetupVisitor {
   visitAABoxNode(node: AABoxNode) {
     this.objects.set(
       node,
-      new RasterBox(
-          this.gl,
-          node.minPoint,
-          node.maxPoint,
-          node.color
-      )
-  );
+      new RasterBox(this.gl, node.minPoint, node.maxPoint, node.color)
+    );
   }
 
   /**
@@ -371,15 +363,10 @@ export class RasterSetupVisitor {
 
   visitPyramidNode(node: PyramidNode) {
     this.objects.set(
-        node,
-        new RasterPyramid(
-            this.gl,
-            node.minPoint,
-            node.maxPoint,
-            node.color
-        )
+      node,
+      new RasterPyramid(this.gl, node.minPoint, node.maxPoint, node.color)
     );
-}
+  }
 
   /**
    * Visits a group node in camera traversal

@@ -1,7 +1,7 @@
 import Vector from "../vector";
 import Intersection from "./intersection";
 import PhongProperties from "../phong-properties";
-import { LightNode } from "../nodes";
+import LightNode from "../nodes/light-node";
 
 /**
  * Calculate the colour of an object at the intersection point according to the Phong Lighting model.
