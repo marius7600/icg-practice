@@ -1,6 +1,7 @@
 import Vector from '../vector';
 import GroupNode from './group-node';
 import {Rotation} from '../transformation';
+import { Translation } from '../transformation';
 
 /**
  * Class representing an Animation
@@ -69,12 +70,162 @@ export class RotationNode extends AnimationNode {
      rotation.matrix = matrix.mul(rotation.getMatrix());
      rotation.inverse = rotation.getInverseMatrix().mul(inverse);
      this.groupNode.transform = rotation;
-
-     console.log("Node: " + this.groupNode + " Axis: " + this.axis);
      
     }
   }
 
+}
+
+/**
+ * Class representing a Jumper Animation
+ * @extends AnimationNode
+ */
+export class JumperNode extends AnimationNode {
+
+  /**
+   * the TranslationVector to be applied
+   */
+  translation: Vector;
+
+  /**
+   * number that increases == x Axis of a sine wave  (makes group node go up and down)
+   */
+  number: number;
+
+  /**
+   *
+   * @param groupNode the GroupNode that has to jump
+   * @param translation the applied translation
+   */
+  constructor(groupNode: GroupNode, translation: Vector) {
+      super(groupNode);
+      this.translation = translation;
+      this.number = 1;
+  }
+
+  /**
+   * Advances the animation by deltaT
+   * @param deltaT The time difference, the animation is advanced by
+   */
+  simulate(deltaT: number) {
+
+      if (this.active) {
+          this.number += 0.003 * deltaT;
+          this.groupNode.transform = new Translation(new Vector(
+              this.translation.x * Math.sin(this.number) / 3,
+              this.translation.y * Math.sin(this.number) / 3,
+              this.translation.z * Math.sin(this.number) / 3,
+              1));
+      }
+  }
+}
+
+export class DriverNode extends AnimationNode {
+  /**
+   *  sets Movement active, default == false
+   */
+  private forward: boolean;
+  private backward: boolean;
+  private left: boolean;
+  private right: boolean;
+
+  private xposition :number;
+  private yposition : number;
+
+  /**
+   *
+   *  the applied translation Vector
+   */
+  translation: Vector;
+
+  /**
+   *
+   * @param groupNode the GroupNode that drives
+   */
+  constructor(groupNode: GroupNode) {
+      super(groupNode);
+      this.translation = new Vector(0, 0, 0, 1);
+      this.yposition = 0;
+      this.xposition = 0;
+
+  }
+
+  /**
+   * passing a true/false to bools on which movements are executed
+   * @param active, listens to key events
+   */
+  moveForward(active: boolean) {
+      this.forward = active;
+  }
+
+  moveBack(active: boolean) {
+      this.backward = active;
+  }
+
+  moveRight(active: boolean) {
+      this.right = active;
+  }
+
+  moveLeft(active: boolean) {
+      this.left = active;
+  }
+
+
+  simulate(deltaT: number) {
+
+      if (this.forward) {
+          if (this.yposition < 4.5){
+
+              this.groupNode.transform = new Translation(new Vector(
+                      this.translation.x,
+                      this.translation.y += 0.1,
+                      this.translation.z,
+                      this.translation.w
+                  )
+              );
+              this.yposition +=0.1;
+          }
+
+      }
+      if (this.backward) {
+          if(this.yposition > -1.7 ){
+
+              this.groupNode.transform = new Translation(new Vector(
+                  this.translation.x,
+                  this.translation.y -= 0.1,
+                  this.translation.z,
+                  this.translation.w
+              ));
+              this.yposition-=0.1;
+          }
+
+
+      }
+      if (this.left) {
+          if(this.xposition < 0.3){
+              this.groupNode.transform = new Translation(new Vector(
+                  this.translation.x -= 0.1,
+                  this.translation.y,
+                  this.translation.z,
+                  this.translation.w
+              ));
+              this.xposition+=0.1
+          }
+
+      }
+      if (this.right) {
+          if(this.xposition > -3.10000000000000000001){
+              this.groupNode.transform = new Translation(new Vector(
+                  this.translation.x += 0.1,
+                  this.translation.y,
+                  this.translation.z,
+                  this.translation.w
+              ));
+              this.xposition-=0.1;
+          }
+
+      }
+  }
 }
 
 /**

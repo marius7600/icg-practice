@@ -15,7 +15,7 @@ import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
 import PyramidNode from "./nodes/pyramid-node";
 import SphereNode from "./nodes/shere-node";
-import {RotationNode} from "./nodes/animation-nodes";
+import {JumperNode, RotationNode, DriverNode} from "./nodes/animation-nodes";
 
 let rasterizing: boolean = true;
 
@@ -130,6 +130,8 @@ window.addEventListener("load", () => {
 
   //Add animation node
   const animationNode = new RotationNode(gn1, new Vector(0, 1, 0, 0));
+  const animationNode2 = new JumperNode(gn1, new Vector(0, 1, 0, 0));
+  
   //animationNode.toggleActive();
 
   light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 0));
@@ -170,6 +172,8 @@ window.addEventListener("load", () => {
   lastTimestamp = performance.now();
   startAnimation();
 
+
+
   /* animate the scene */
   function animate(timestamp: number) {
     let delta = 0.01;
@@ -195,6 +199,7 @@ window.addEventListener("load", () => {
     } else {
     }
     animationNode.simulate(delta);  
+    //animationNode2.simulate(delta);
     window.requestAnimationFrame(animate);
   }
   
@@ -219,6 +224,8 @@ window.addEventListener("load", () => {
       lastTimestamp = 0;
     }
   }
+
+
 
   // requestAnimationFrame(animate);
 
@@ -259,6 +266,7 @@ window.addEventListener("load", () => {
   // document.getElementById("stopAnimationBtn").addEventListener(
   //     "click", () => cancelAnimationFrame(animationHandle));
 });
+
 
 /* Toggle visability between the raytracer and rasterizer canvas */
 function toggleFigure() {
