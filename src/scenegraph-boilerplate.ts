@@ -15,7 +15,7 @@ import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
 import PyramidNode from "./nodes/pyramid-node";
 import SphereNode from "./nodes/shere-node";
-import {JumperNode, RotationNode, DriverNode} from "./nodes/animation-nodes";
+import {JumperNode, RotationNode, ScalerNode} from "./nodes/animation-nodes";
 
 let rasterizing: boolean = true;
 
@@ -131,6 +131,7 @@ window.addEventListener("load", () => {
   //Add animation node
   const animationNode = new RotationNode(gn1, new Vector(0, 1, 0, 0));
   const animationNode2 = new JumperNode(gn1, new Vector(0, 1, 0, 0));
+  const animationNode3 = new ScalerNode(gn1, new Vector(1, 1, 1, 0));
   
   //animationNode.toggleActive();
 
@@ -198,8 +199,9 @@ window.addEventListener("load", () => {
       // console.log("animation loop ended");
     } else {
     }
-    animationNode.simulate(delta);  
+    //animationNode.simulate(delta);  
     //animationNode2.simulate(delta);
+    animationNode3.simulate(delta);
     window.requestAnimationFrame(animate);
   }
   

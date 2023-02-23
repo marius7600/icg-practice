@@ -1,7 +1,7 @@
 import Vector from '../vector';
 import GroupNode from './group-node';
-import {Rotation} from '../transformation';
-import { Translation } from '../transformation';
+import { Rotation } from '../transformation';
+import { Translation, Scaling } from '../transformation';
 
 /**
  * Class representing an Animation
@@ -23,7 +23,7 @@ class AnimationNode {
   /**
    * Toggles the active state of the animation node
    */
-  toggleActive() {  
+  toggleActive() {
     this.active = !this.active;
   }
 
@@ -63,14 +63,14 @@ export class RotationNode extends AnimationNode {
     // group node to reflect a rotation
     // TODO
     if (this.active) {
-     this.angle = Math.PI * 4;
-     const matrix = this.groupNode.transform.getMatrix();
-     const inverse = this.groupNode.transform.getInverseMatrix();
-     let rotation = new Rotation(this.axis, this.angle * deltaT / 10000);
-     rotation.matrix = matrix.mul(rotation.getMatrix());
-     rotation.inverse = rotation.getInverseMatrix().mul(inverse);
-     this.groupNode.transform = rotation;
-     
+      this.angle = Math.PI * 4;
+      const matrix = this.groupNode.transform.getMatrix();
+      const inverse = this.groupNode.transform.getInverseMatrix();
+      let rotation = new Rotation(this.axis, this.angle * deltaT / 10000);
+      rotation.matrix = matrix.mul(rotation.getMatrix());
+      rotation.inverse = rotation.getInverseMatrix().mul(inverse);
+      this.groupNode.transform = rotation;
+
     }
   }
 
@@ -98,9 +98,9 @@ export class JumperNode extends AnimationNode {
    * @param translation the applied translation
    */
   constructor(groupNode: GroupNode, translation: Vector) {
-      super(groupNode);
-      this.translation = translation;
-      this.number = 1;
+    super(groupNode);
+    this.translation = translation;
+    this.number = 1;
   }
 
   /**
@@ -109,122 +109,65 @@ export class JumperNode extends AnimationNode {
    */
   simulate(deltaT: number) {
 
-      if (this.active) {
-          this.number += 0.003 * deltaT;
-          this.groupNode.transform = new Translation(new Vector(
-              this.translation.x * Math.sin(this.number) / 3,
-              this.translation.y * Math.sin(this.number) / 3,
-              this.translation.z * Math.sin(this.number) / 3,
-              1));
-      }
+    if (this.active) {
+      this.number += 0.003 * deltaT;
+      this.groupNode.transform = new Translation(new Vector(
+        this.translation.x * Math.sin(this.number) / 3,
+        this.translation.y * Math.sin(this.number) / 3,
+        this.translation.z * Math.sin(this.number) / 3,
+        1));
+    }
   }
 }
 
-export class DriverNode extends AnimationNode {
-  /**
-   *  sets Movement active, default == false
-   */
-  private forward: boolean;
-  private backward: boolean;
-  private left: boolean;
-  private right: boolean;
+/**
+ * Class representing a Scaler Animation
+ * @extends AnimationNode
+ */
+export class ScalerNode extends AnimationNode {
 
-  private xposition :number;
-  private yposition : number;
-
-  /**
-   *
-   *  the applied translation Vector
-   */
-  translation: Vector;
-
-  /**
-   *
-   * @param groupNode the GroupNode that drives
-   */
-  constructor(groupNode: GroupNode) {
-      super(groupNode);
-      this.translation = new Vector(0, 0, 0, 1);
-      this.yposition = 0;
-      this.xposition = 0;
-
+  scalingVector: Vector;
+  scalingfactor: number;
+  newTransformation: Scaling;
+  constructor(scalingGN: GroupNode, scalingVector: Vector) {
+    super(scalingGN);
+    this.scalingVector = scalingVector;
   }
-
-  /**
-   * passing a true/false to bools on which movements are executed
-   * @param active, listens to key events
-   */
-  moveForward(active: boolean) {
-      this.forward = active;
-  }
-
-  moveBack(active: boolean) {
-      this.backward = active;
-  }
-
-  moveRight(active: boolean) {
-      this.right = active;
-  }
-
-  moveLeft(active: boolean) {
-      this.left = active;
-  }
-
 
   simulate(deltaT: number) {
+    //Scale groupnode up one time if key '+' is pressed
+    if (this.active) {
 
-      if (this.forward) {
-          if (this.yposition < 4.5){
+      window.addEventListener('keydown', (event) => {
+        const position = this.groupNode.transform.getMatrix();
+        if (event.key === '+') {
+          this.scalingfactor = 1.00001;
+          // Create new transformation with position and groupnode.transform
+          this.newTransformation = new Scaling(this.scalingVector.mul((this.scalingfactor)));
+        } else if (event.key === '-') {
+          // Scale down
+          this.scalingfactor = 0.99999;
+          this.newTransformation = new Scaling(this.scalingVector.mul((this.scalingfactor)));
+        }
+        this.newTransformation.matrix = position.mul(this.newTransformation.getMatrix());
+        this.groupNode.transform = this.newTransformation;
 
-              this.groupNode.transform = new Translation(new Vector(
-                      this.translation.x,
-                      this.translation.y += 0.1,
-                      this.translation.z,
-                      this.translation.w
-                  )
-              );
-              this.yposition +=0.1;
-          }
-
-      }
-      if (this.backward) {
-          if(this.yposition > -1.7 ){
-
-              this.groupNode.transform = new Translation(new Vector(
-                  this.translation.x,
-                  this.translation.y -= 0.1,
-                  this.translation.z,
-                  this.translation.w
-              ));
-              this.yposition-=0.1;
-          }
+      });
+    }
 
 
-      }
-      if (this.left) {
-          if(this.xposition < 0.3){
-              this.groupNode.transform = new Translation(new Vector(
-                  this.translation.x -= 0.1,
-                  this.translation.y,
-                  this.translation.z,
-                  this.translation.w
-              ));
-              this.xposition+=0.1
-          }
+    // deltaT = 1;
+    //     if (this.active) {
+    //       window.addEventListener('keydown', (event) => {
+    //         if (event.key === '+') {
+    //         // Scale up
+    //         this.scalingfactor += 1;
+    //         console.log(this.scalingfactor);
 
-      }
-      if (this.right) {
-          if(this.xposition > -3.10000000000000000001){
-              this.groupNode.transform = new Translation(new Vector(
-                  this.translation.x += 0.1,
-                  this.translation.y,
-                  this.translation.z,
-                  this.translation.w
-              ));
-              this.xposition-=0.1;
-          }
-
-      }
+    //         this.groupNode.transform = new Scaling(this.scalingVector.mul((Math.sin(this.scalingfactor))));
+    //     }
+    //     });
+    // }
   }
 }
 
