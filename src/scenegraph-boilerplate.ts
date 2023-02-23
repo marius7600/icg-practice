@@ -15,6 +15,7 @@ import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
 import PyramidNode from "./nodes/pyramid-node";
 import SphereNode from "./nodes/shere-node";
+import {RotationNode} from "./nodes/animation-nodes";
 
 let rasterizing: boolean = true;
 
@@ -119,7 +120,6 @@ window.addEventListener("load", () => {
   gn1.add(rasterBox);
 
   //Add pyramid
-
   const gn4 = new GroupNode(new Translation(new Vector(-1, -2, 1.5, 0))); //position of the second sphere
   gn3.add(gn4);
   const pyramid = new PyramidNode(
@@ -127,6 +127,10 @@ window.addEventListener("load", () => {
     new Vector(1, 0, 1, 1)
   );
   gn4.add(pyramid);
+
+  //Add animation node
+  const animationNode = new RotationNode(gn1, new Vector(0, 1, 0, 0));
+  //animationNode.toggleActive();
 
   light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 0));
   gn.add(light1);
@@ -162,7 +166,59 @@ window.addEventListener("load", () => {
   phongShader.load();
   rasterVisitor.setupCamera(cameraNode);
 
+  
+  lastTimestamp = performance.now();
   startAnimation();
+
+  /* animate the scene */
+  function animate(timestamp: number) {
+    let delta = 0.01;
+    if (animationActivated) {
+      // console.log("animation loop started");
+      if (lastTimestamp === 0) {
+        lastTimestamp = timestamp;
+      }
+       delta = (timestamp - lastTimestamp);
+      lastTimestamp = timestamp;
+      if (rasterizing) {
+        // rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
+        rasterVisitor.render(sceneGraph, cameraNode);
+      } else {
+        // rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
+        // rayVisitor.render(sceneGraph, cameraNode, phongProperties);
+        rayVisitor.render(sceneGraph, phongProperties);
+      }
+      //requestAnimationFrame(animate);
+      // console.log("animation loop ended");
+      // console.log("animation loop ended");
+      // console.log("animation loop ended");
+    } else {
+    }
+    animationNode.simulate(delta);  
+    window.requestAnimationFrame(animate);
+  }
+  
+  function startAnimation() {
+    // start animation
+    lastTimestamp = 0;
+    Promise.all([phongShader.load(), textureShader.load()]).then(() => {
+      window.requestAnimationFrame(animate);
+    });
+  }
+  
+  function toggleAnimation() {
+    console.log("toggle animation");
+    console.log("Animation Activated old Satus: " + animationActivated);
+    animationActivated = !animationActivated;
+    console.log("Animation Activated new Satus: " + animationActivated);
+    if (animationActivated) {
+      document.getElementById("animationToggle").style.background = "green";
+      startAnimation();
+    } else {
+      document.getElementById("animationToggle").style.background = "red";
+      lastTimestamp = 0;
+    }
+  }
 
   // requestAnimationFrame(animate);
 
@@ -263,48 +319,3 @@ function sliderChanged(event: any) {
   }
 }
 
-/* animate the scene */
-function animate(timestamp: number) {
-  if (animationActivated) {
-    // console.log("animation loop started");
-    if (lastTimestamp === 0) {
-      lastTimestamp = timestamp;
-    }
-    const delta = (timestamp - lastTimestamp) / 1000;
-    lastTimestamp = timestamp;
-    if (rasterizing) {
-      // rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
-      rasterVisitor.render(sceneGraph, cameraNode);
-    } else {
-      // rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
-      // rayVisitor.render(sceneGraph, cameraNode, phongProperties);
-      rayVisitor.render(sceneGraph, phongProperties);
-    }
-    requestAnimationFrame(animate);
-    // console.log("animation loop ended");
-    // console.log("animation loop ended");
-    // console.log("animation loop ended");
-  } else {
-  }
-}
-
-function startAnimation() {
-  // start animation
-  lastTimestamp = 0;
-  Promise.all([phongShader.load(), textureShader.load()]).then(() => {
-    window.requestAnimationFrame(animate);
-  });
-}
-function toggleAnimation() {
-  console.log("toggle animation");
-  console.log("Animation Activated old Satus: " + animationActivated);
-  animationActivated = !animationActivated;
-  console.log("Animation Activated new Satus: " + animationActivated);
-  if (animationActivated) {
-    document.getElementById("animationToggle").style.background = "green";
-    startAnimation();
-  } else {
-    document.getElementById("animationToggle").style.background = "red";
-    lastTimestamp = 0;
-  }
-}
