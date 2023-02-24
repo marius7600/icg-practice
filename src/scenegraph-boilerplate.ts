@@ -15,7 +15,7 @@ import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
 import PyramidNode from "./nodes/pyramid-node";
 import SphereNode from "./nodes/shere-node";
-import {JumperNode, RotationNode, ScalerNode} from "./nodes/animation-nodes";
+import { DriverNode, JumperNode, RotationNode, ScalerNode } from "./nodes/animation-nodes";
 
 let rasterizing: boolean = true;
 
@@ -132,7 +132,8 @@ window.addEventListener("load", () => {
   const animationNode = new RotationNode(gn1, new Vector(0, 1, 0, 0));
   const animationNode2 = new JumperNode(gn1, new Vector(0, 1, 0, 0));
   const animationNode3 = new ScalerNode(gn1, new Vector(1, 1, 1, 0));
-  
+  const animationNode4 = new DriverNode(gn1);
+
   //animationNode.toggleActive();
 
   light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 0));
@@ -169,7 +170,7 @@ window.addEventListener("load", () => {
   phongShader.load();
   rasterVisitor.setupCamera(cameraNode);
 
-  
+
   lastTimestamp = performance.now();
   startAnimation();
 
@@ -183,7 +184,7 @@ window.addEventListener("load", () => {
       if (lastTimestamp === 0) {
         lastTimestamp = timestamp;
       }
-       delta = (timestamp - lastTimestamp);
+      delta = (timestamp - lastTimestamp);
       lastTimestamp = timestamp;
       if (rasterizing) {
         // rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
@@ -201,10 +202,10 @@ window.addEventListener("load", () => {
     }
     //animationNode.simulate(delta);  
     //animationNode2.simulate(delta);
-    animationNode3.simulate(delta);
+    animationNode4.simulate(delta);
     window.requestAnimationFrame(animate);
   }
-  
+
   function startAnimation() {
     // start animation
     lastTimestamp = 0;
@@ -212,7 +213,7 @@ window.addEventListener("load", () => {
       window.requestAnimationFrame(animate);
     });
   }
-  
+
   function toggleAnimation() {
     console.log("toggle animation");
     console.log("Animation Activated old Satus: " + animationActivated);

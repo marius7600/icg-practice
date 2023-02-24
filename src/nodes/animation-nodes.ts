@@ -125,10 +125,10 @@ export class JumperNode extends AnimationNode {
  * @extends AnimationNode
  */
 export class ScalerNode extends AnimationNode {
-
   scalingVector: Vector;
   scalingfactor: number;
   newTransformation: Scaling;
+
   constructor(scalingGN: GroupNode, scalingVector: Vector) {
     super(scalingGN);
     this.scalingVector = scalingVector;
@@ -137,7 +137,6 @@ export class ScalerNode extends AnimationNode {
   simulate(deltaT: number) {
     //Scale groupnode up one time if key '+' is pressed
     if (this.active) {
-
       window.addEventListener('keydown', (event) => {
         const position = this.groupNode.transform.getMatrix();
         if (event.key === '+') {
@@ -168,6 +167,34 @@ export class ScalerNode extends AnimationNode {
     //     }
     //     });
     // }
+  }
+}
+
+export class DriverNode extends AnimationNode {
+
+  newTranslation: Translation;
+  constructor(groupNode: GroupNode) {
+    super(groupNode);
+  }
+
+  simulate(deltaT: number) {
+    if (this.active) {
+      window.addEventListener('keydown', (event) => {
+        const currentPosition = this.groupNode.transform.getMatrix();
+        // Translate groupnode at the position of the groupnode
+        if (event.key === 'w') {
+          this.newTranslation = new Translation(currentPosition.mul(new Vector(0, 0.0001, 0, 1)));
+        } else if (event.key === 'a') {
+          this.newTranslation = new Translation(currentPosition.mul(new Vector(-0.0001, 0, 0, 1)));
+        } else if (event.key === 's') {
+          this.newTranslation = new Translation(currentPosition.mul(new Vector(0, -0.0001, 0, 1)));
+        } else if (event.key === 'd') {
+          this.newTranslation = new Translation(currentPosition.mul(new Vector(0.0001, 0, 0, 1)));
+        }
+        //this.newTranslation.matrix = currentPosition.mul(this.newTranslation.getMatrix());
+        this.groupNode.transform = this.newTranslation;
+      });
+    }
   }
 }
 
