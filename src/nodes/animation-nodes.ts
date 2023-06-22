@@ -2,6 +2,7 @@ import Vector from '../vector';
 import GroupNode from './group-node';
 import { Rotation } from '../transformation';
 import { Translation, Scaling } from '../transformation';
+import Matrix from '../matrix';
 
 /**
  * Class representing an Animation
@@ -59,15 +60,12 @@ export class RotationNode extends AnimationNode {
    * @param deltaT The time difference, the animation is advanced by
    */
   simulate(deltaT: number) {
-    // change the matrix of the attached
-    // group node to reflect a rotation
-    // TODO
     if (this.active) {
       this.angle = Math.PI * 4;
-      const matrix = this.groupNode.transform.getMatrix();
+      const position = this.groupNode.transform.getMatrix();
       const inverse = this.groupNode.transform.getInverseMatrix();
       let rotation = new Rotation(this.axis, this.angle * deltaT / 10000);
-      rotation.matrix = matrix.mul(rotation.getMatrix());
+      rotation.matrix = position.mul(rotation.getMatrix());
       rotation.inverse = rotation.getInverseMatrix().mul(inverse);
       this.groupNode.transform = rotation;
 
@@ -108,14 +106,35 @@ export class JumperNode extends AnimationNode {
    * @param deltaT The time difference, the animation is advanced by
    */
   simulate(deltaT: number) {
-
     if (this.active) {
+      //pause anmiation if key 'p' is pressed, continue on 'c'
+      window.addEventListener('keydown', (event) => {
+        if (event.key === 'p' && this.active) {
+          this.active = false;
+        } else if (event.key === 'c' && !this.active) {
+          this.active = true;
+        }
+      });
+
       this.number += 0.003 * deltaT;
-      this.groupNode.transform = new Translation(new Vector(
-        this.translation.x * Math.sin(this.number) / 3,
-        this.translation.y * Math.sin(this.number) / 3,
-        this.translation.z * Math.sin(this.number) / 3,
+
+      const position = this.groupNode.transform.getMatrix();
+
+      let trans = new Translation(new Vector(
+        this.translation.x * Math.sin(this.number) / 100,
+        this.translation.y * Math.sin(this.number) / 100,
+        this.translation.z * Math.sin(this.number) / 100,
         1));
+
+      trans.matrix = position.mul(trans.getMatrix());
+      this.groupNode.transform = trans;
+
+
+      // this.groupNode.transform = new Translation(new Vector(
+      //   this.translation.x * Math.sin(this.number) / 3,
+      //   this.translation.y * Math.sin(this.number) / 3,
+      //   this.translation.z * Math.sin(this.number) / 3,
+      //   1));
     }
   }
 }
@@ -128,6 +147,7 @@ export class ScalerNode extends AnimationNode {
   scalingVector: Vector;
   scalingfactor: number;
   newTransformation: Scaling;
+  scale: number = 0.00001;
 
   constructor(scalingGN: GroupNode, scalingVector: Vector) {
     super(scalingGN);
@@ -135,38 +155,20 @@ export class ScalerNode extends AnimationNode {
   }
 
   simulate(deltaT: number) {
-    //Scale groupnode up one time if key '+' is pressed
     if (this.active) {
       window.addEventListener('keydown', (event) => {
-        const position = this.groupNode.transform.getMatrix();
+        const position: Matrix = this.groupNode.transform.getMatrix();
         if (event.key === '+') {
-          this.scalingfactor = 1.00001;
-          // Create new transformation with position and groupnode.transform
-          this.newTransformation = new Scaling(this.scalingVector.mul((this.scalingfactor)));
+          position.data[0] += this.scale;
+          position.data[5] += this.scale;
+          position.data[10] += this.scale;
         } else if (event.key === '-') {
-          // Scale down
-          this.scalingfactor = 0.99999;
-          this.newTransformation = new Scaling(this.scalingVector.mul((this.scalingfactor)));
+          position.data[0] -= this.scale;
+          position.data[5] -= this.scale;
+          position.data[10] -= this.scale;
         }
-        this.newTransformation.matrix = position.mul(this.newTransformation.getMatrix());
-        this.groupNode.transform = this.newTransformation;
-
       });
     }
-
-
-    // deltaT = 1;
-    //     if (this.active) {
-    //       window.addEventListener('keydown', (event) => {
-    //         if (event.key === '+') {
-    //         // Scale up
-    //         this.scalingfactor += 1;
-    //         console.log(this.scalingfactor);
-
-    //         this.groupNode.transform = new Scaling(this.scalingVector.mul((Math.sin(this.scalingfactor))));
-    //     }
-    //     });
-    // }
   }
 }
 
@@ -177,22 +179,27 @@ export class DriverNode extends AnimationNode {
     super(groupNode);
   }
 
+  // This function is used to simulate the movement of the groupnode
+  // get the current position of the groupnode and translate it in the direction of the pressed key
+
   simulate(deltaT: number) {
     if (this.active) {
       window.addEventListener('keydown', (event) => {
-        const currentPosition = this.groupNode.transform.getMatrix();
+        const position = this.groupNode.transform.getMatrix();
         // Translate groupnode at the position of the groupnode
         if (event.key === 'w') {
-          this.newTranslation = new Translation(currentPosition.mul(new Vector(0, 0.0001, 0, 1)));
+          // move up
+          position.data[13] += 0.0001;
         } else if (event.key === 'a') {
-          this.newTranslation = new Translation(currentPosition.mul(new Vector(-0.0001, 0, 0, 1)));
+          // move left
+          position.data[12] -= 0.0001;
         } else if (event.key === 's') {
-          this.newTranslation = new Translation(currentPosition.mul(new Vector(0, -0.0001, 0, 1)));
+          // move down
+          position.data[13] -= 0.0001;
         } else if (event.key === 'd') {
-          this.newTranslation = new Translation(currentPosition.mul(new Vector(0.0001, 0, 0, 1)));
+          // move right
+          position.data[12] += 0.0001;
         }
-        //this.newTranslation.matrix = currentPosition.mul(this.newTranslation.getMatrix());
-        this.groupNode.transform = this.newTranslation;
       });
     }
   }

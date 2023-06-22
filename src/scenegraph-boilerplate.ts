@@ -174,7 +174,13 @@ window.addEventListener("load", () => {
   lastTimestamp = performance.now();
   startAnimation();
 
-
+  function startAnimation() {
+    // start animation
+    lastTimestamp = 0;
+    Promise.all([phongShader.load(), textureShader.load()]).then(() => {
+      window.requestAnimationFrame(animate);
+    });
+  }
 
   /* animate the scene */
   function animate(timestamp: number) {
@@ -198,20 +204,12 @@ window.addEventListener("load", () => {
       // console.log("animation loop ended");
       // console.log("animation loop ended");
       // console.log("animation loop ended");
-    } else {
+      animationNode2.simulate(delta);
+      window.requestAnimationFrame(animate);
     }
     //animationNode.simulate(delta);  
     //animationNode2.simulate(delta);
-    animationNode4.simulate(delta);
-    window.requestAnimationFrame(animate);
-  }
 
-  function startAnimation() {
-    // start animation
-    lastTimestamp = 0;
-    Promise.all([phongShader.load(), textureShader.load()]).then(() => {
-      window.requestAnimationFrame(animate);
-    });
   }
 
   function toggleAnimation() {
