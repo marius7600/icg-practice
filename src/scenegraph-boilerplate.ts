@@ -17,6 +17,8 @@ import PyramidNode from "./nodes/pyramid-node";
 import SphereNode from "./nodes/shere-node";
 import { DriverNode, JumperNode, RotationNode, ScalerNode } from "./nodes/animation-nodes";
 
+import MouseVisitor from "./mousevisitor";
+
 let rasterizing: boolean = true;
 
 let phongProperties: PhongProperties;
@@ -46,6 +48,14 @@ window.addEventListener("load", () => {
   //   const x = info.x
   //   const y = info.y
   // });
+
+  canvas_ray.addEventListener("click", function (info) {
+    const x = info.x
+    const y = info.y
+    const mouseVisitor = new MouseVisitor();
+    console.log(mouseVisitor.getSelectedNode(sceneGraph, x, y, ctx_ray));
+  });
+
 
 
   // Event listeners for the slider changes

@@ -22,7 +22,8 @@ export default class MouseVisitor implements Visitor {
 
     stack: Array<Matrix> = [];
     intersection: Intersection | null;
-    objects: Array<Intersectable>;
+    intersectables: Array<Intersectable>;
+    nodes: Array<any>;
     camera: CameraNode;
     imageData: ImageData;
     lightNodes: Array<LightNode> = [];
@@ -30,6 +31,9 @@ export default class MouseVisitor implements Visitor {
     constructor() {
         this.stack.push(Matrix.identity());
         this.intersection = null;
+
+        this.intersectables = [];
+        this.nodes = [];
     }
 
 
@@ -64,9 +68,10 @@ export default class MouseVisitor implements Visitor {
         let zScale = m.getVal(0, 2);
 
         let scale = Math.sqrt(xScale * xScale + yScale * yScale + zScale * zScale);
-        this.objects.push(
+        this.intersectables.push(
             new Sphere(m.mul(node.center), node.radius * scale, node.color)
         );
+        this.nodes.push(node);
     }
     visitAABoxNode(node: AABoxNode): void {
         // throw new Error('Method not implemented.');
@@ -74,10 +79,11 @@ export default class MouseVisitor implements Visitor {
         let m = this.stack[this.stack.length - 1];
         let min = m.mul(node.minPoint);
         let max = m.mul(node.maxPoint);
-        this.objects.push(new AABox(min, max, node.color));
+        this.intersectables.push(new AABox(min, max, node.color));
+        this.nodes.push(node);
     }
     visitTextureBoxNode(node: TextureBoxNode): void {
-        throw new Error('Method not implemented.');
+        // throw new Error('Method not implemented.');2
     }
     visitCameraNode(node: CameraNode): void {
         // throw new Error('Method not implemented.');
@@ -98,10 +104,10 @@ export default class MouseVisitor implements Visitor {
         );
     }
     visitGroupNodeCamera(node: GroupNode): void {
-        throw new Error('Method not implemented.');
+        // throw new Error('Method not implemented.');
     }
     visitPyramidNode(node: PyramidNode): void {
-        throw new Error('Method not implemented.');
+        // throw new Error('Method not implemented.');
     }
 
 
@@ -113,30 +119,34 @@ export default class MouseVisitor implements Visitor {
      * @returns the closest node to the mouse position
      */
     getSelectedNode(sceneGraph: GroupNode, mouse_x: number, mouse_y: number, context: CanvasRenderingContext2D): Node {
+
+        this.intersection = null;
+        this.intersectables = [];
+        this.nodes = [];
+        this.camera = null;
+        this.imageData = null;
+        this.lightNodes = [];
+
         let width = context.canvas.width;
         let height = context.canvas.height;
 
-        let selectedNode: Node = null;
         sceneGraph.accept(this);
 
-        for (let x = 0; x < width; x++) {
-            for (let y = 0; y < height; y++) {
-                const ray = Ray.makeRay(x, y, height, width, this.camera);
+        const ray = Ray.makeRay(mouse_x, mouse_y, height, width, this.camera);
 
-                let minIntersection: Intersection = null;
-                let minObject: Intersectable = null;
+        let minIntersection: Intersection = null;
+        let selectedNode: Node = null;
 
-                for (let object of this.objects) {
-                    const intersection = object.intersect(ray);
-                    if (intersection && intersection.closerThan(minIntersection)) {
-                        minIntersection = intersection;
-                        minObject = object;
-                    }
-                }
-
+        for (let i = 0; i < this.intersectables.length; i++) {
+            const intersection = this.intersectables[i].intersect(ray);
+            console.log("Intersection: " + intersection.t);
+            if (intersection && intersection.closerThan(minIntersection)) {
+                console.log("New minIntersection found: " + intersection.t)
+                minIntersection = intersection;
+                selectedNode = this.nodes[i];
             }
-        }
 
-        return selectedNode;
+            return selectedNode;
+        }
     }
 }
