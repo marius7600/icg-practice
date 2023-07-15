@@ -132,6 +132,12 @@ export default class MouseVisitor implements Visitor {
 
         sceneGraph.accept(this);
 
+        console.log("Mouse Position: " + mouse_x + ", " + mouse_y);
+        console.log("Height: " + height + ", Width: " + width);
+        console.log(this.intersectables.length + " intersectables found")
+        console.log(this.nodes.length + " nodes found")
+
+
         const ray = Ray.makeRay(mouse_x, mouse_y, height, width, this.camera);
 
         let minIntersection: Intersection = null;
