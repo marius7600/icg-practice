@@ -39,10 +39,14 @@ window.addEventListener("load", () => {
   const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
   const ctx_ray = canvas_ray.getContext("2d");
 
-  const canvas_raster = document.getElementById(
-    "rasterizer"
-  ) as HTMLCanvasElement;
+  const canvas_raster = document.getElementById("rasterizer") as HTMLCanvasElement;
   const ctx_raster = canvas_raster.getContext("webgl2");
+
+  // canvas_raster.addEventListener("mousemove", function (info) {
+  //   const x = info.x
+  //   const y = info.y
+  // });
+
 
   // Event listeners for the slider changes
   window.addEventListener("input", function (event) {
