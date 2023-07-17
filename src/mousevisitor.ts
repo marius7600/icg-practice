@@ -136,16 +136,20 @@ export default class MouseVisitor implements Visitor {
         console.log("Height: " + height + ", Width: " + width);
         console.log(this.intersectables.length + " intersectables found")
         console.log(this.nodes.length + " nodes found")
+        console.log(this.camera);
 
 
         const ray = Ray.makeRay(mouse_x, mouse_y, height, width, this.camera);
 
-        let minIntersection: Intersection = null;
+        console.log("Ray origin:" + ray.origin.data.toString())
+        console.log("Ray direction:" + ray.direction.data.toString())
+
+        let minIntersection = new Intersection(Infinity, null, null);
         let selectedNode: Node = null;
 
         for (let i = 0; i < this.intersectables.length; i++) {
             const intersection = this.intersectables[i].intersect(ray);
-            console.log("Intersection: " + intersection.t);
+            // console.log("Intersection: " + intersection.t);
             if (intersection && intersection.closerThan(minIntersection)) {
                 console.log("New minIntersection found: " + intersection.t)
                 minIntersection = intersection;
