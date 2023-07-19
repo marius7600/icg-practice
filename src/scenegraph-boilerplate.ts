@@ -50,10 +50,13 @@ window.addEventListener("load", () => {
   // });
 
   canvas_ray.addEventListener("click", function (info) {
-    const x = info.x
-    const y = info.y
+    const x = info.offsetX
+    const y = info.offsetY
     const mouseVisitor = new MouseVisitor();
-    console.log(mouseVisitor.getSelectedNode(sceneGraph, x, y, ctx_ray));
+    let selectedNode = mouseVisitor.getSelectedNode(sceneGraph, x, y, ctx_ray);
+    if (selectedNode != null) {
+      console.log(selectedNode);
+    }
   });
 
 

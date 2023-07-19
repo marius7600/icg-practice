@@ -1,42 +1,40 @@
-import AABoxNode from './nodes/aabox-node';
-import CameraNode from './nodes/camera-node';
-import GroupNode from './nodes/group-node';
-import LightNode from './nodes/light-node';
-import PyramidNode from './nodes/pyramid-node';
-import SphereNode from './nodes/shere-node';
-import TextureBoxNode from './nodes/texture-box-node';
-
-import Sphere from './raytracer/ray-sphere';
-import AABox from './raytracer/aabox';
+import Matrix from "./matrix";
+import AABoxNode from "./nodes/aabox-node";
+import CameraNode from "./nodes/camera-node";
+import GroupNode from "./nodes/group-node";
+import LightNode from "./nodes/light-node";
+import Node from "./nodes/node";
+import PyramidNode from "./nodes/pyramid-node";
+import SphereNode from "./nodes/shere-node";
+import TextureBoxNode from "./nodes/texture-box-node";
+import AABox from "./raytracer/aabox";
+import Intersection from "./raytracer/intersection";
+import Ray from "./raytracer/ray";
+import Sphere from "./raytracer/ray-sphere";
+import Visitor from "./visitor";
 
 interface Intersectable {
     intersect(ray: Ray): Intersection | null;
+    node?: Node;
 }
 
-import Matrix from './matrix';
-import Intersection from './raytracer/intersection';
-
-import Ray from './raytracer/ray';
-import Visitor from './visitor';
 export default class MouseVisitor implements Visitor {
-
     stack: Array<Matrix> = [];
-    intersection: Intersection | null;
+    intersection: Intersection;
     intersectables: Array<Intersectable>;
     nodes: Array<any>;
     camera: CameraNode;
     imageData: ImageData;
     lightNodes: Array<LightNode> = [];
 
+    ray: Ray;
+
     constructor() {
         this.stack.push(Matrix.identity());
-        this.intersection = null;
-
+        // this.intersection = new Intersection(Infinity, null, null);
         this.intersectables = [];
         this.nodes = [];
     }
-
-
 
     visitLightNode(node: LightNode): void {
         // throw new Error('Method not implemented.');
@@ -110,7 +108,6 @@ export default class MouseVisitor implements Visitor {
         // throw new Error('Method not implemented.');
     }
 
-
     /**
      * Calculates the closest node to the mouse position
      * @param sceneGraph sceneGraph to be rendered
@@ -118,45 +115,42 @@ export default class MouseVisitor implements Visitor {
      * @param mouse_y y coordinate of the mouse
      * @returns the closest node to the mouse position
      */
-    getSelectedNode(sceneGraph: GroupNode, mouse_x: number, mouse_y: number, context: CanvasRenderingContext2D): Node {
-
-        this.intersection = null;
+    getSelectedNode(
+        sceneGraph: Node,
+        mouse_x: number,
+        mouse_y: number,
+        context: CanvasRenderingContext2D
+    ): Node {
+        this.intersection = new Intersection(Infinity, null, null);
         this.intersectables = [];
         this.nodes = [];
         this.camera = null;
         this.imageData = null;
         this.lightNodes = [];
 
-        let width = context.canvas.width;
-        let height = context.canvas.height;
-
         sceneGraph.accept(this);
 
-        console.log("Mouse Position: " + mouse_x + ", " + mouse_y);
-        console.log("Height: " + height + ", Width: " + width);
-        console.log(this.intersectables.length + " intersectables found")
-        console.log(this.nodes.length + " nodes found")
-        console.log(this.camera);
-
-
-        const ray = Ray.makeRay(mouse_x, mouse_y, height, width, this.camera);
-
-        console.log("Ray origin:" + ray.origin.data.toString())
-        console.log("Ray direction:" + ray.direction.data.toString())
+        this.ray = Ray.makeRay(mouse_x, mouse_y, context.canvas.height, context.canvas.width, this.camera);
 
         let minIntersection = new Intersection(Infinity, null, null);
         let selectedNode: Node = null;
-
-        for (let i = 0; i < this.intersectables.length; i++) {
-            const intersection = this.intersectables[i].intersect(ray);
-            // console.log("Intersection: " + intersection.t);
-            if (intersection && intersection.closerThan(minIntersection)) {
-                console.log("New minIntersection found: " + intersection.t)
-                minIntersection = intersection;
+        for (
+            let i = 0;
+            i < this.intersectables.length && i < this.nodes.length;
+            i++
+        ) {
+            try {
+                this.intersection = this.intersectables[i].intersect(this.ray);
+            } catch (e) {
+                console.log(e);
+                continue;
+            }
+            if (this.intersection && this.intersection.closerThan(minIntersection)) {
+                console.log("New minIntersection found: " + this.intersection);
+                minIntersection = this.intersection;
                 selectedNode = this.nodes[i];
             }
-
-            return selectedNode;
         }
+        return selectedNode;
     }
 }
