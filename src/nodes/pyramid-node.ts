@@ -15,7 +15,9 @@ export default class PyramidNode extends Node {
   constructor(public dimensions: Vector, public color: Vector) {
     super();
     this.maxPoint = dimensions.div(2);
+    this.maxPoint.w = 1;
     this.minPoint = this.maxPoint.mul(-1);
+    this.minPoint.w = 1;
   }
 
   accept(visitor: Visitor) {

@@ -10,7 +10,7 @@ export default class Ray {
    * @param origin The origin of the Ray
    * @param direction The direction of the Ray
    */
-  constructor(public origin: Vector, public direction: Vector) {}
+  constructor(public origin: Vector, public direction: Vector) { }
 
   /**
    * Creates a ray from the camera through the image plane.
@@ -38,13 +38,5 @@ export default class Ray {
       0
     );
     return new Ray(origin, direction.normalize());
-
-    // // Tino: camera hardcoded
-    // const origin = new Vector(0, 0, 0, 1);
-    // const width = canvasWidth
-    // const height = canvasHeight
-    // const alpha  = Math.PI / 3
-    // const direction = new Vector(x - (width / 2), (height / 2) - y, -((width / 2) / (Math.tan(alpha / 2))), 0);
-    // return new Ray(origin, direction)
   }
 }

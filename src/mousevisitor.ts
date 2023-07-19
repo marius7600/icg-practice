@@ -18,6 +18,7 @@ import Intersection from './raytracer/intersection';
 
 import Ray from './raytracer/ray';
 import Visitor from './visitor';
+import TaskbarNode from './nodes/taskbar-node';
 export default class MouseVisitor implements Visitor {
 
     stack: Array<Matrix> = [];
@@ -79,6 +80,7 @@ export default class MouseVisitor implements Visitor {
         let m = this.stack[this.stack.length - 1];
         let min = m.mul(node.minPoint);
         let max = m.mul(node.maxPoint);
+        // this.intersectables.push(new AABox(min, max, node.color));
         this.intersectables.push(new AABox(min, max, node.color));
         this.nodes.push(node);
     }
@@ -107,6 +109,10 @@ export default class MouseVisitor implements Visitor {
         // throw new Error('Method not implemented.');
     }
     visitPyramidNode(node: PyramidNode): void {
+        // throw new Error('Method not implemented.');
+    }
+
+    visitTaskbarNode(node: TaskbarNode): void {
         // throw new Error('Method not implemented.');
     }
 

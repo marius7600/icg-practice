@@ -7,8 +7,8 @@ import Visitor from "../visitor";
  * @extends Node
  */
 export default class AABoxNode extends Node {
-  minPoint: Vector;
-  maxPoint: Vector;
+  minPoint: Vector; // The minimum point of the box
+  maxPoint: Vector; // The maximum point of the box
 
   /**
    * Creates an axis aligned box.
@@ -19,7 +19,9 @@ export default class AABoxNode extends Node {
   constructor(public dimensions: Vector, public color: Vector) {
     super();
     this.maxPoint = dimensions.div(2);
+    this.maxPoint.w = 1;
     this.minPoint = this.maxPoint.mul(-1);
+    this.minPoint.w = 1;
   }
 
   /**

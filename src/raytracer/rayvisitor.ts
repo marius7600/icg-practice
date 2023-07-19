@@ -15,6 +15,8 @@ import LightNode from "../nodes/light-node";
 import PyramidNode from "../nodes/pyramid-node";
 import SphereNode from "../nodes/shere-node";
 import TextureBoxNode from "../nodes/texture-box-node";
+import TaskbarNode from "../nodes/taskbar-node";
+import Pyramid from "./pyramid";
 
 interface Intersectable {
   intersect(ray: Ray): Intersection | null;
@@ -144,11 +146,9 @@ export default class RayVisitor implements Visitor {
    */
   visitGroupNode(node: GroupNode) {
     // TODO traverse the graph and build the model matrix
-    let toWorld = this.stack
-      .at(this.stack.length - 1)
-      .mul(node.transform.getMatrix());
-    // this.stack.push({ matrix: wiggse, inverse: wiggse.inverse() });
-    // this.stack.push({ matrix: toWorld, inverse: toWorld.transpose() });   // TODO is this correct?
+    let toWorld = this.stack.at(this.stack.length - 1).mul(node.transform.getMatrix());
+
+
     this.stack.push(toWorld);
     for (let i = 0; i < node.children.length; i++) {
       node.children[i].accept(this); // Je nachdem welche Art von Node: Accept Methode aufrufen im visitor
@@ -162,10 +162,7 @@ export default class RayVisitor implements Visitor {
    */
   visitSphereNode(node: SphereNode) {
     let m = this.stack[this.stack.length - 1]; //translation matrix
-    // console.log(m);
-    // console.log(node.radius)
 
-    //TODO: scale the sphere not hard coded
     let xScale = m.getVal(0, 0);
     let yScale = m.getVal(0, 1);
     let zScale = m.getVal(0, 2);
@@ -178,21 +175,27 @@ export default class RayVisitor implements Visitor {
   }
 
   /**
-   * Visits an axis aligned box node
+   * Visits an axis aligned box node and push it to the objects array
    * @param node The node to visit
    */
   visitAABoxNode(node: AABoxNode) {
-    let m = this.stack[this.stack.length - 1];
-    let min = m.mul(node.minPoint);
-    let max = m.mul(node.maxPoint);
+    // Visit the node and push it to the objects array
+    // this.objects.push(new AABox(node.minPoint, node.maxPoint, node.color));
+
+    // this.stack[0] = Matrix.identity();
+    let mat = this.stack[this.stack.length - 1];
+    let min = mat.mul(node.minPoint);
+    let max = mat.mul(node.maxPoint);
     this.objects.push(new AABox(min, max, node.color));
+
   }
+
 
   /**
    * Visits a textured box node
    * @param node The node to visit
    */
-  visitTextureBoxNode(node: TextureBoxNode) {}
+  visitTextureBoxNode(node: TextureBoxNode) { }
 
   visitCameraNode(node: CameraNode) {
     // Frage an Marius: warum machen wir uns den ganzen aufwand, und verwenden nicht einfach node.eye, node.center, node.up?
@@ -218,9 +221,17 @@ export default class RayVisitor implements Visitor {
    * Visits a camera node
    * @param node The node to visit
    */
-  visitGroupNodeCamera(node: GroupNode) {}
+  visitGroupNodeCamera(node: GroupNode) { }
 
   visitPyramidNode(node: PyramidNode) {
-    // Do nothing :)
+    let mat = this.stack[this.stack.length - 1];
+    let min = mat.mul(node.minPoint);
+    let max = mat.mul(node.maxPoint);
+    this.objects.push(new Pyramid(min, max, node.color));
+
+  }
+
+  visitTaskbarNode(node: TaskbarNode) {
+    node.root.accept(this);
   }
 }

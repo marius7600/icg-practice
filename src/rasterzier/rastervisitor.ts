@@ -15,6 +15,7 @@ import LightNode from "../nodes/light-node";
 import PyramidNode from "../nodes/pyramid-node";
 import SphereNode from "../nodes/shere-node";
 import TextureBoxNode from "../nodes/texture-box-node";
+import TaskbarNode from "../nodes/taskbar-node";
 
 interface Renderable {
   render(shader: Shader): void;
@@ -273,6 +274,10 @@ export class RasterVisitor implements Visitor {
 
     this.renderables.get(node)?.render(shader);
   }
+
+  visitTaskbarNode(node: TaskbarNode) {
+    node.root.accept(this);
+  }
 }
 
 /**
@@ -368,6 +373,10 @@ export class RasterSetupVisitor {
     );
   }
 
+  visitTaskbarNode(node: TaskbarNode) {
+    node.root.accept(this);
+  }
+
   /**
    * Visits a group node in camera traversal
    * @param node The node to visit
@@ -383,4 +392,5 @@ export class RasterSetupVisitor {
   visitLightNode(node: LightNode) {
     console.log("Method visitLightNode not implemented.");
   }
+
 }

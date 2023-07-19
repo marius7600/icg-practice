@@ -31,6 +31,12 @@ export class Translation extends MatrixTransformation {
     }
 }
 
+export class EmptyTransformation extends MatrixTransformation {
+    constructor() {
+        super(Matrix.identity(), Matrix.identity());
+    }
+}
+
 export class Rotation extends MatrixTransformation {
     private _axis: Vector;
     private _angle: number;
