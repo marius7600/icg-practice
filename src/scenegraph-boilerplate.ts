@@ -16,6 +16,7 @@ import LightNode from "./nodes/light-node";
 import PyramidNode from "./nodes/pyramid-node";
 import SphereNode from "./nodes/shere-node";
 import { DriverNode, JumperNode, RotationNode, ScalerNode } from "./nodes/animation-nodes";
+import TaskbarNode from "./nodes/taskbar-node";
 
 import MouseVisitor from "./mousevisitor";
 
@@ -114,15 +115,14 @@ window.addEventListener("load", () => {
   // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, -1, -1, 0)));
 
   const sg = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
-  const gnRotation = new Rotation(new Vector(1, 0, 0, 0), 0);
-  const gn = new GroupNode(gnRotation);
+  const gn = new GroupNode(new Rotation(new Vector(1, 0, 0, 0), 0));
   sg.add(gn);
   const gn1 = new GroupNode(new Translation(new Vector(1.2, 0.5, 0, 0))); //position of the first sphere
   gn.add(gn1);
   // gn1.add(new SphereNode(new Vector(.4, 0, 0, 1), new Vector(0, 0, 0, 1), 1));
   const gn2 = new GroupNode(new Translation(new Vector(-0.8, 1, 1, 0))); //position of the second sphere
   gn.add(gn2);
-  const gn3 = new GroupNode(new Scaling(new Vector(0.4, 0.4, 0.4, 0))); //scaling of the third sphere
+  const gn3 = new GroupNode(new Scaling(new Vector(0.4, 0.4, 0.4, 0))); //scaling of the second sphere
   gn2.add(gn3);
   gn3.add(new SphereNode(new Vector(0, 0, 0.3, 1), new Vector(0, 0, 0, 1), 1));
   // const lightPositions = [
@@ -132,12 +132,12 @@ window.addEventListener("load", () => {
   //Add rasterbox
   const rasterBox = new AABoxNode(
     new Vector(1, 2, 1, 0),
-    new Vector(0, 0, 1, 1)
+    new Vector(1, 0, 1, 1)
   );
   gn1.add(rasterBox);
 
   //Add pyramid
-  const gn4 = new GroupNode(new Translation(new Vector(-1, -2, 1.5, 0))); //position of the second sphere
+  const gn4 = new GroupNode(new Translation(new Vector(-1, -2, 1.5, 0))); //position of the third sphere
   gn3.add(gn4);
   const pyramid = new PyramidNode(
     new Vector(2, 2, 2, 0),
@@ -155,6 +155,10 @@ window.addEventListener("load", () => {
 
   light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 0));
   gn.add(light1);
+
+  // add Taskbar to SceneGraph
+  const taskbar = new TaskbarNode();
+  sg.add(taskbar);
 
   sceneGraph.add(sg);
 
@@ -221,7 +225,7 @@ window.addEventListener("load", () => {
       // console.log("animation loop ended");
       // console.log("animation loop ended");
       // console.log("animation loop ended");
-      animationNode2.simulate(delta);
+      //animationNode2.simulate(delta);
       window.requestAnimationFrame(animate);
     }
     //animationNode.simulate(delta);  
