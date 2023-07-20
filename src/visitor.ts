@@ -5,7 +5,7 @@ import LightNode from "./nodes/light-node";
 import PyramidNode from "./nodes/pyramid-node";
 import SphereNode from "./nodes/shere-node";
 import TextureBoxNode from "./nodes/texture-box-node";
-import TaskbarNode from "./nodes/taskbar-node";
+// import TaskbarNode from "./nodes/taskbar-node";
 
 export default interface Visitor {
   visitLightNode(node: LightNode): void;
@@ -16,5 +16,5 @@ export default interface Visitor {
   visitCameraNode(node: CameraNode): void;
   visitGroupNodeCamera(node: GroupNode): void;
   visitPyramidNode(node: PyramidNode): void;
-  visitTaskbarNode(node: TaskbarNode): void;
+  // visitTaskbarNode(node: TaskbarNode): void;
 }

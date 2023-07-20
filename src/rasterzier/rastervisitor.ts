@@ -1,21 +1,20 @@
-import RasterSphere from "./raster-sphere";
-import RasterBox from "./raster-box";
-import RasterTextureBox from "./raster-texture-box";
-import RasterPyramid from "./raster-Pyramid";
-import Vector from "../vector";
 import Matrix from "../matrix";
-import Visitor from "../visitor";
-import Shader from "../shader/shader";
-import PhongProperties from "../phong-properties";
-import Node from "../nodes/node";
 import AABoxNode from "../nodes/aabox-node";
 import CameraNode from "../nodes/camera-node";
 import GroupNode from "../nodes/group-node";
 import LightNode from "../nodes/light-node";
+import Node from "../nodes/node";
 import PyramidNode from "../nodes/pyramid-node";
 import SphereNode from "../nodes/shere-node";
 import TextureBoxNode from "../nodes/texture-box-node";
-import TaskbarNode from "../nodes/taskbar-node";
+import PhongProperties from "../phong-properties";
+import Shader from "../shader/shader";
+import Vector from "../vector";
+import Visitor from "../visitor";
+import RasterPyramid from "./raster-Pyramid";
+import RasterBox from "./raster-box";
+import RasterSphere from "./raster-sphere";
+import RasterTextureBox from "./raster-texture-box";
 
 interface Renderable {
   render(shader: Shader): void;
@@ -274,10 +273,6 @@ export class RasterVisitor implements Visitor {
 
     this.renderables.get(node)?.render(shader);
   }
-
-  visitTaskbarNode(node: TaskbarNode) {
-    node.root.accept(this);
-  }
 }
 
 /**
@@ -373,9 +368,6 @@ export class RasterSetupVisitor {
     );
   }
 
-  visitTaskbarNode(node: TaskbarNode) {
-    node.root.accept(this);
-  }
 
   /**
    * Visits a group node in camera traversal

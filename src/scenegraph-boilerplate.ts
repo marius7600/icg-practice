@@ -1,24 +1,21 @@
 import "bootstrap";
 import "bootstrap/scss/bootstrap.scss";
-import Vector from "./vector";
-import RayVisitor from "./raytracer/rayvisitor";
-import { Rotation, Scaling, Translation } from "./transformation";
-import { RasterSetupVisitor, RasterVisitor } from "./rasterzier/rastervisitor";
-import Shader from "./shader/shader";
-import phongVertexShader from "./shader/phong-vertex-perspective-shader.glsl";
-import phongFragmentShader from "./shader/phong-fragment-shader.glsl";
-import PhongProperties from "./phong-properties";
-import RasterBox from "./rasterzier/raster-box";
+import MouseVisitor from "./mousevisitor";
 import AABoxNode from "./nodes/aabox-node";
+import { DriverNode, JumperNode, RotationNode, ScalerNode } from "./nodes/animation-nodes";
 import CameraNode from "./nodes/camera-node";
 import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
 import PyramidNode from "./nodes/pyramid-node";
 import SphereNode from "./nodes/shere-node";
-import { DriverNode, JumperNode, RotationNode, ScalerNode } from "./nodes/animation-nodes";
-import TaskbarNode from "./nodes/taskbar-node";
-
-import MouseVisitor from "./mousevisitor";
+import PhongProperties from "./phong-properties";
+import { RasterSetupVisitor, RasterVisitor } from "./rasterzier/rastervisitor";
+import RayVisitor from "./raytracer/rayvisitor";
+import phongFragmentShader from "./shader/phong-fragment-shader.glsl";
+import phongVertexShader from "./shader/phong-vertex-perspective-shader.glsl";
+import Shader from "./shader/shader";
+import { EmptyTransformation, Rotation, Scaling, Translation } from "./transformation";
+import Vector from "./vector";
 
 let rasterizing: boolean = true;
 
@@ -157,8 +154,14 @@ window.addEventListener("load", () => {
   gn.add(light1);
 
   // add Taskbar to SceneGraph
-  const taskbar = new TaskbarNode();
-  sg.add(taskbar);
+  const tasbkarRoot = new GroupNode(new EmptyTransformation());
+  const taskbarBottom = new GroupNode(new Translation(new Vector(0, -3, -2, 0)));
+
+  tasbkarRoot.add(taskbarBottom)
+  const taskBarBox = new AABoxNode(new Vector(10, 1, 1, 0), new Vector(2, 2, 0, 1));
+  taskbarBottom.add(taskBarBox)
+
+  sg.add(tasbkarRoot);
 
   sceneGraph.add(sg);
 

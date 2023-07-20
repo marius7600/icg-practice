@@ -12,7 +12,6 @@ import Intersection from "./raytracer/intersection";
 import Ray from "./raytracer/ray";
 import Sphere from "./raytracer/ray-sphere";
 import Visitor from "./visitor";
-import TaskbarNode from "./nodes/taskbar-node";
 
 interface Intersectable {
     intersect(ray: Ray): Intersection | null;
@@ -111,11 +110,6 @@ export default class MouseVisitor implements Visitor {
     visitPyramidNode(node: PyramidNode): void {
         // throw new Error('Method not implemented.');
     }
-
-    visitTaskbarNode(node: TaskbarNode): void {
-        // throw new Error('Method not implemented.');
-    }
-
 
     /**
      * Calculates the closest node to the mouse position

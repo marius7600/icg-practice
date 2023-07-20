@@ -1,22 +1,21 @@
 import Matrix from "../matrix";
-import Vector from "../vector";
-import Sphere from "./ray-sphere";
-import Intersection from "./intersection";
-import Ray from "./ray";
-import Visitor from "../visitor";
-import phong from "./phong";
-import AABox from "./aabox";
-import PhongProperties from "../phong-properties";
-import Node from "../nodes/node";
 import AABoxNode from "../nodes/aabox-node";
 import CameraNode from "../nodes/camera-node";
 import GroupNode from "../nodes/group-node";
 import LightNode from "../nodes/light-node";
+import Node from "../nodes/node";
 import PyramidNode from "../nodes/pyramid-node";
 import SphereNode from "../nodes/shere-node";
 import TextureBoxNode from "../nodes/texture-box-node";
-import TaskbarNode from "../nodes/taskbar-node";
+import PhongProperties from "../phong-properties";
+import Vector from "../vector";
+import Visitor from "../visitor";
+import AABox from "./aabox";
+import Intersection from "./intersection";
+import phong from "./phong";
 import Pyramid from "./pyramid";
+import Ray from "./ray";
+import Sphere from "./ray-sphere";
 
 interface Intersectable {
   intersect(ray: Ray): Intersection | null;
@@ -229,9 +228,5 @@ export default class RayVisitor implements Visitor {
     let max = mat.mul(node.maxPoint);
     this.objects.push(new Pyramid(min, max, node.color));
 
-  }
-
-  visitTaskbarNode(node: TaskbarNode) {
-    node.root.accept(this);
   }
 }
