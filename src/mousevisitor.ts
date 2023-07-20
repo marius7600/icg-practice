@@ -16,7 +16,6 @@ import Visitor from "./visitor";
 
 interface Intersectable {
     intersect(ray: Ray): Intersection | null;
-    node?: Node;
 }
 
 export default class MouseVisitor implements Visitor {
