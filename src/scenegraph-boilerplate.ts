@@ -57,6 +57,16 @@ window.addEventListener("load", () => {
     }
   });
 
+  canvas_raster.addEventListener("click", function (info) {
+    const x = info.offsetX
+    const y = info.offsetY
+    const mouseVisitor = new MouseVisitor();
+    let selectedNode = mouseVisitor.getSelectedNode(sceneGraph, x, y, ctx_raster);
+    if (selectedNode != null) {
+      console.log(selectedNode);
+    }
+  });
+
 
 
   // Event listeners for the slider changes

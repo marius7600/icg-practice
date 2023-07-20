@@ -18,8 +18,6 @@ interface Intersectable {
     node?: Node;
 }
 
-
-
 export default class MouseVisitor implements Visitor {
     stack: Array<Matrix> = [];
     intersection: Intersection;
@@ -84,7 +82,7 @@ export default class MouseVisitor implements Visitor {
         this.nodes.push(node);
     }
     visitTextureBoxNode(node: TextureBoxNode): void {
-        // throw new Error('Method not implemented.');2
+        // throw new Error('Method not implemented.');
     }
     visitCameraNode(node: CameraNode): void {
         // throw new Error('Method not implemented.');
@@ -116,13 +114,14 @@ export default class MouseVisitor implements Visitor {
      * @param sceneGraph sceneGraph to be rendered
      * @param mouse_x x coordinate of the mouse
      * @param mouse_y y coordinate of the mouse
+     * @param context context of the canvas either CanvasRenderingContext2D or WebGL2RenderingContext
      * @returns the closest node to the mouse position
      */
     getSelectedNode(
         sceneGraph: Node,
         mouse_x: number,
         mouse_y: number,
-        context: CanvasRenderingContext2D
+        context: CanvasRenderingContext2D | WebGL2RenderingContext
     ): Node {
         this.intersection = new Intersection(Infinity, null, null);
         this.intersectables = [];
@@ -133,7 +132,13 @@ export default class MouseVisitor implements Visitor {
 
         sceneGraph.accept(this);
 
-        this.ray = Ray.makeRay(mouse_x, mouse_y, context.canvas.height, context.canvas.width, this.camera);
+        this.ray = Ray.makeRay(
+            mouse_x,
+            mouse_y,
+            context.canvas.height,
+            context.canvas.width,
+            this.camera
+        );
 
         let minIntersection = new Intersection(Infinity, null, null);
         let selectedNode: Node = null;
