@@ -9,6 +9,7 @@ import SphereNode from "./nodes/shere-node";
 import TextureBoxNode from "./nodes/texture-box-node";
 import AABox from "./raytracer/aabox";
 import Intersection from "./raytracer/intersection";
+import Pyramid from "./raytracer/pyramid";
 import Ray from "./raytracer/ray";
 import Sphere from "./raytracer/ray-sphere";
 import Visitor from "./visitor";
@@ -107,6 +108,11 @@ export default class MouseVisitor implements Visitor {
     }
     visitPyramidNode(node: PyramidNode): void {
         // throw new Error('Method not implemented.');
+        let mat = this.stack[this.stack.length - 1];
+        let min = mat.mul(node.minPoint);
+        let max = mat.mul(node.maxPoint);
+        this.intersectables.push(new Pyramid(min, max, node.color));
+        this.nodes.push(node);
     }
 
     /**
