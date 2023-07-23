@@ -139,63 +139,219 @@ export class JumperNode extends AnimationNode {
   }
 }
 
+// /**
+//  * Class representing a Scaler Animation
+//  * @extends AnimationNode
+//  */
+// export class ScalerNode extends AnimationNode {
+//   scalingfactor: number;
+//   newTransformation: Scaling;
+
+//   constructor(scalingGN: GroupNode, private scalingVector: Vector) {
+//     super(scalingGN);
+//     this.scalingfactor = 1;
+//   }
+
+//   simulate(deltaT: number) {
+//     if (this.active) {
+//       const position: Matrix = this.groupNode.transform.getMatrix();
+//       this.scalingfactor += 0.00001 * deltaT;
+
+//       if (this.scalingfactor >= this.scalingVector.length) {
+//         this.active = false;
+//       }
+
+//       // let scale = new Scaling(this.scalingVector.mul(this.scalingfactor)); // upscaling
+//       let scale = new Scaling(this.scalingVector.div(this.scalingfactor));  // downscaling
+//       scale.matrix = position.mul(scale.getMatrix());
+//       this.groupNode.transform = scale;
+
+//       let downScale = new Scaling(this.scalingVector.div(this.scalingfactor));
+
+
+
+//     }
+//   }
+// }
+
+// /**
+//  * Class representing a Scaling Animation
+//  * @extends AnimationNode
+//  */
+// export class ScaleNode extends AnimationNode {
+//   /**
+//    * The scaling factor along each axis
+//    */
+//   scale: Vector;
+//   scalingSpeed: number;
+
+//   /**
+//    * Creates a new ScaleNode
+//    * @param groupNode The group node to attach to
+//    * @param scale The scaling factor along each axis
+//    */
+//   constructor(groupNode: GroupNode, scale: Vector) {
+//     super(groupNode);
+//     this.scale = scale;
+//     this.scalingSpeed = 0.01;
+//   }
+
+//   /**
+//    * Advances the animation by deltaT
+//    * @param deltaT The time difference, the animation is advanced by
+//    */
+//   simulate(deltaT: number) {
+//     if (this.active) {
+//       const scalingFactor = 1 + this.scale.x * deltaT * this.scalingSpeed;
+//       const position = this.groupNode.transform.getMatrix();
+//       const inverse = this.groupNode.transform.getInverseMatrix();
+//       let scaling = new Scaling(new Vector(scalingFactor, scalingFactor, scalingFactor, 1));
+//       scaling.matrix = position.mul(scaling.getMatrix());
+//       scaling.inverse = scaling.getInverseMatrix().mul(inverse);
+//       this.groupNode.transform = scaling;
+//     }
+//   }
+// }
+
+
 /**
- * Class representing a Scaler Animation
+ * Class representing a Scaling Animation
  * @extends AnimationNode
  */
-export class ScalerNode extends AnimationNode {
-  scalingVector: Vector;
-  scalingfactor: number;
-  newTransformation: Scaling;
+export class ScaleNode extends AnimationNode {
+  /**
+   * The scaling factor along each axis
+   */
+  scale: Vector;
+  /**
+   * The target scaling factor along each axis
+   */
+  targetScale: Vector;
+  /**
+   * The duration of the animation in milliseconds
+   */
+  duration: number;
+  /**
+   * The time elapsed since the animation started in milliseconds
+   */
+  elapsedTime: number;
 
-  constructor(scalingGN: GroupNode, scalingVector: Vector) {
-    super(scalingGN);
-    this.scalingVector = scalingVector;
-    this.scalingfactor = 1;
+  /**
+   * Creates a new ScaleNode
+   * @param groupNode The group node to attach to
+   * @param targetScale The target scaling factor along each axis
+   * @param duration The duration of the animation in milliseconds
+   */
+  constructor(groupNode: GroupNode, targetScale: Vector, duration: number) {
+    super(groupNode);
+    this.scale = new Vector(1, 1, 1, 1);
+    this.targetScale = targetScale;
+    this.duration = duration;
+    this.elapsedTime = 0;
   }
 
+
+  // /**
+  //  * Advances the animation by deltaT
+  //  * @param deltaT The time difference, the animation is advanced by
+  //  */
+  // simulate(deltaT: number) {
+  //   // console.log("scale")
+  //   if (this.active) {
+  //     // Update the elapsed time
+  //     this.elapsedTime += deltaT;
+
+  //     // Calculate the progress of the animation (a value between 0 and 1)
+  //     const progress = Math.min(this.elapsedTime / this.duration, 1);
+
+  //     // Interpolate the current scale towards the target scale based on the progress
+  //     this.scale = this.interpolateVector(new Vector(1, 1, 1, 1), this.targetScale, progress);
+
+  //     // Apply the interpolated scale to the group node's transform
+  //     const position = this.groupNode.transform.getMatrix();
+  //     const inverse = this.groupNode.transform.getInverseMatrix();
+  //     const scaling = new Scaling(this.scale);
+  //     scaling.matrix = position.mul(scaling.getMatrix());
+  //     scaling.inverse = scaling.getInverseMatrix().mul(inverse);
+  //     this.groupNode.transform = scaling;
+
+  //     console.log(progress);
+
+  //     // Check if the animation is completed and deactivate it
+  //     if (progress >= 1) {
+  //       this.active = false;
+  //     }
+  //   }
+  // }
+
+
+  /**
+   * Advances the animation by deltaT
+   * @param deltaT The time difference, the animation is advanced by
+   */
   simulate(deltaT: number) {
     if (this.active) {
-      /* Scale the groupnode with the scalingVector on button events*/
-      // window.addEventListener('keydown', (event) => {
-      const position: Matrix = this.groupNode.transform.getMatrix();
-      // if (event.key === '+') {
-      //   position.data[0] += this.scale;
-      //   position.data[5] += this.scale;
-      //   position.data[10] += this.scale;
-      //   console.log("+++++++++++++");
+      // Interpolate the current scale towards the target scale
+      const progress = this.elapsedTime / this.duration;
+      this.scale = this.interpolateVector(new Vector(1, 1, 1, 1), this.targetScale, progress);
 
-      // } else if (event.key === '-') {
-      //   position.data[0] -= this.scale;
-      //   position.data[5] -= this.scale;
-      //   position.data[10] -= this.scale;
-      //   console.log("---------------");
+      console.log(this.targetScale.valueOf());
 
-      // }
-      // });
+      // Apply the interpolated scale to the group node's transform
+      const position = this.groupNode.transform.getMatrix();
+      const inverse = this.groupNode.transform.getInverseMatrix();
+      const scaling = new Scaling(this.scale);
+      scaling.matrix = position.mul(scaling.getMatrix());
+      scaling.inverse = scaling.getInverseMatrix().mul(inverse);
+      this.groupNode.transform = scaling;
 
-      this.scalingfactor += 0.00001 * deltaT;
-      if (this.scalingfactor >= 1.01) {
-        this.active = false;
+      console.log(this.groupNode.transform.getMatrix().print());
+
+      // Update the elapsed time
+      this.elapsedTime += deltaT;
+
+      // Check if the x value of the scale are equal to the target scale values
+      if (this.targetScale.x < 1) {
+        if (scaling.getMatrix().data[0] <= this.targetScale.x + 0.00000000001) {
+          console.log("finished");
+          this.active = false;
+        }
       }
-      // let scale = new Scaling(new Vector(
-      //   this.scalingVector.x * this.scalingfactor,
-      //   this.scalingVector.y * this.scalingfactor,
-      //   this.scalingVector.z * this.scalingfactor,
-      //   1));
-
-      // let scale = new Scaling(this.scalingVector.mul(this.scalingfactor)); // upscaling
-      let scale = new Scaling(this.scalingVector.div(this.scalingfactor));  // downscaling
-      scale.matrix = position.mul(scale.getMatrix());
-      this.groupNode.transform = scale;
-
-      let downScale = new Scaling(this.scalingVector.div(this.scalingfactor));
-
-
-
+      else if (this.targetScale.x > 1) {
+        if (scaling.getMatrix().data[0] >= this.targetScale.x + 0.00000000001) {
+          console.log("finished");
+          this.active = false;
+        }
+      }
     }
   }
+
+
+
+
+  /**
+   * Interpolates between two values based on the given progress
+   * @param startValue The starting value
+   * @param endValue The ending value
+   * @param progress The progress of the interpolation (a value between 0 and 1)
+   * @returns The interpolated value
+   */
+  interpolateVector(startVec: Vector, endVec: Vector, progress: number): Vector {
+    const x = this.interpolateValue(startVec.x, endVec.x, progress);
+    const y = this.interpolateValue(startVec.y, endVec.y, progress);
+    const z = this.interpolateValue(startVec.z, endVec.z, progress);
+    const w = this.interpolateValue(startVec.w, endVec.w, progress);
+    return new Vector(x, y, z, w);
+  }
+
+  interpolateValue(startValue: number, endValue: number, progress: number): number {
+    return startValue + (endValue - startValue) * progress;
+    //return startValue + progress * (endValue - startValue);
+  }
 }
+
+
+
 
 export class DriverNode extends AnimationNode {
 

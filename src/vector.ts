@@ -235,5 +235,6 @@ export default class Vector {
   get length(): number {
     return Math.sqrt(this.data[0] * this.data[0] + this.data[1] * this.data[1] + this.data[2] * this.data[2] + this.data[3] * this.data[3]);
   }
+
 }
 

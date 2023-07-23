@@ -2,7 +2,7 @@ import "bootstrap";
 import "bootstrap/scss/bootstrap.scss";
 import MouseVisitor from "./mousevisitor";
 import AABoxNode from "./nodes/aabox-node";
-import { DriverNode, JumperNode, RotationNode, ScalerNode } from "./nodes/animation-nodes";
+import { DriverNode, JumperNode, RotationNode, ScaleNode } from "./nodes/animation-nodes";
 import CameraNode from "./nodes/camera-node";
 import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
@@ -35,7 +35,7 @@ let animationActivated: boolean = true;
 let phongShader: Shader;
 let textureShader: Shader;
 
-let minimizeAnimation: ScalerNode;
+let minimizeAnimation: ScaleNode;
 
 window.addEventListener("load", () => {
   const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
@@ -72,14 +72,25 @@ window.addEventListener("load", () => {
           console.log("Window 1 minimize");
           // windowGroup1.transform = new Translation(new Vector(222, 0, -1, 0));#
           //   const animationNode3 = new ScalerNode(windowGroup1, new Vector(1, 1, 1, 0));
-          minimizeAnimation = new ScalerNode(windowGroup1, new Vector(1, 1, 1, 0));
+          // Animiere das Fenster so, dass es auf 90% der Originalgröße skaliert wird
+          const originalScale = new Vector(1, 1, 1, 1);
+          const scaleAmout = 0.000000001;
+          const targetScale = originalScale.mul(scaleAmout);
+          const duration = 5000; // in milliseconds
+
+          minimizeAnimation = new ScaleNode(windowGroup1, targetScale, duration);
           minimizeAnimation.toggleActive();
+
         }
         if (selectedNode.color == window2MinimizeSphere.color) {
           console.log("Window 2 minimize");
           // windowGroup2.transform = new Translation(new Vector(-222, 0, -1, 0));
-          minimizeAnimation = new ScalerNode(windowGroup2, new Vector(1, 1, 1, 0));
+          // Animiere das Fenster so, dass es auf 90% der Originalgröße skaliert wird
+          const targetScale = new Vector(0.000000001, 0.000000001, 0.000000001, 1);
+          const duration = 5000; // 2 Sekunden Dauer der Animation
+          minimizeAnimation = new ScaleNode(windowGroup2, targetScale, duration);
           minimizeAnimation.toggleActive();
+
         }
       }
       if (selectedNode instanceof AABoxNode) {
@@ -87,14 +98,14 @@ window.addEventListener("load", () => {
         if (selectedNode.color == taskbarButton1.color) {
           console.log("Taskbar Button 1");
           // windowGroup2.transform = new Translation(new Vector(-222, 0, -1, 0));
-          minimizeAnimation = new ScalerNode(windowGroup1, new Vector(-1, -1, -1, 0));
+          // minimizeAnimation = new ScaleNode(windowGroup1, new Vector(-1, -1, -1, 0));
           //minimizeAnimation.toggleActive();
         }
         if (selectedNode.color == taskbarButton2.color) {
-          console.log("Taskbar Button 2");
-          // windowGroup2.transform = new Translation(new Vector(-222, 0, -1, 0));
-          minimizeAnimation = new ScalerNode(windowGroup2, new Vector(-1, -1, -1, 0));
-          //minimizeAnimation.toggleActive();
+          const targetScale = new Vector(1.01, 1.01, 1.01, 1);
+          const duration = 1; // 2 Sekunden Dauer der Animation
+          minimizeAnimation = new ScaleNode(windowGroup2, targetScale, duration);
+          minimizeAnimation.toggleActive();
         }
       }
     }
@@ -219,8 +230,8 @@ window.addEventListener("load", () => {
   // const animationNode3 = new JumperNode(taskbarButtonGroup2, new Vector(0, 1, 0, 0));
 
   // const animationNode4 = new DriverNode(gn1);
-  const animationNode3 = new ScalerNode(taskbarButtonGroup2, new Vector(-1, -1, -1, 0));
-  animationNode3.toggleActive();
+  // const animationNode3 = new ScaleNode(taskbarButtonGroup2, new Vector(-1, -1, -1, 0));
+  // animationNode3.toggleActive();
 
   /***************************************************************/
   /*********************  END OF SCENE GRAPH *********************/
@@ -292,10 +303,20 @@ window.addEventListener("load", () => {
       //animationNode2.simulate(delta);
       window.requestAnimationFrame(animate);
     }
+
+    // Verlangsamen Sie die Animation, indem Sie den Wert für deltaT teilen
+    const animationSpeedFactor = 0.1; // Probieren Sie verschiedene Werte aus, bis die Animation das gewünschte Verhalten hat
+    const deltaT = animationSpeedFactor * delta; // Verwenden Sie Ihre ursprünglichen deltaT-Werte
+
+    // Jetzt führen Sie die Animation mit dem neuen deltaT aus
+    // minimizeAnimation.simulate(deltaT);
+
     if (minimizeAnimation != null) {
+      // console.log("minimizeAnimation is not null");
       minimizeAnimation.simulate(delta);
     }
-    animationNode3.simulate(delta);
+    //animationNode3.simulate(delta);
+    // minimizeAnimation.simulate(delta);
 
   }
 
