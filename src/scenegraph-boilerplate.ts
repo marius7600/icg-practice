@@ -23,7 +23,7 @@ let phongProperties: PhongProperties;
 let light1: LightNode;
 
 let cameraNode: CameraNode;
-let sceneGraph: GroupNode;
+let rootNode: GroupNode;
 
 let rasterVisitor: RasterVisitor;
 let rayVisitor: RayVisitor;
@@ -34,6 +34,8 @@ let animationActivated: boolean = true;
 
 let phongShader: Shader;
 let textureShader: Shader;
+
+let minimizeAnimation: ScalerNode;
 
 window.addEventListener("load", () => {
   const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
@@ -51,7 +53,7 @@ window.addEventListener("load", () => {
     const x = info.offsetX
     const y = info.offsetY
     const mouseVisitor = new MouseVisitor();
-    let selectedNode = mouseVisitor.getSelectedNode(sceneGraph, x, y, ctx_ray);
+    let selectedNode = mouseVisitor.getSelectedNode(rootNode, x, y, ctx_ray);
     if (selectedNode != null) {
       console.log(selectedNode);
     }
@@ -61,9 +63,40 @@ window.addEventListener("load", () => {
     const x = info.offsetX
     const y = info.offsetY
     const mouseVisitor = new MouseVisitor();
-    let selectedNode = mouseVisitor.getSelectedNode(sceneGraph, x, y, ctx_raster);
+    let selectedNode = mouseVisitor.getSelectedNode(rootNode, x, y, ctx_raster);
     if (selectedNode != null) {
       console.log(selectedNode);
+      if (selectedNode instanceof SphereNode) {
+        console.log(selectedNode.color);
+        if (selectedNode.color == window1minimizeSphere.color) {
+          console.log("Window 1 minimize");
+          // windowGroup1.transform = new Translation(new Vector(222, 0, -1, 0));#
+          //   const animationNode3 = new ScalerNode(windowGroup1, new Vector(1, 1, 1, 0));
+          minimizeAnimation = new ScalerNode(windowGroup1, new Vector(1, 1, 1, 0));
+          minimizeAnimation.toggleActive();
+        }
+        if (selectedNode.color == window2MinimizeSphere.color) {
+          console.log("Window 2 minimize");
+          // windowGroup2.transform = new Translation(new Vector(-222, 0, -1, 0));
+          minimizeAnimation = new ScalerNode(windowGroup2, new Vector(1, 1, 1, 0));
+          minimizeAnimation.toggleActive();
+        }
+      }
+      if (selectedNode instanceof AABoxNode) {
+        console.log(selectedNode.color);
+        if (selectedNode.color == taskbarButton1.color) {
+          console.log("Taskbar Button 1");
+          // windowGroup2.transform = new Translation(new Vector(-222, 0, -1, 0));
+          minimizeAnimation = new ScalerNode(windowGroup1, new Vector(-1, -1, -1, 0));
+          //minimizeAnimation.toggleActive();
+        }
+        if (selectedNode.color == taskbarButton2.color) {
+          console.log("Taskbar Button 2");
+          // windowGroup2.transform = new Translation(new Vector(-222, 0, -1, 0));
+          minimizeAnimation = new ScalerNode(windowGroup2, new Vector(-1, -1, -1, 0));
+          //minimizeAnimation.toggleActive();
+        }
+      }
     }
   });
 
@@ -88,7 +121,7 @@ window.addEventListener("load", () => {
   phongProperties = new PhongProperties();
 
   /* Create the scenegraph */
-  sceneGraph = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
+  rootNode = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
   cameraNode = new CameraNode(
     new Vector(0, 0, 0, 1), // eye
     new Vector(0, 0, -1, 1), // center
@@ -98,82 +131,100 @@ window.addEventListener("load", () => {
     0.1, // near
     100
   ); // far
-  sceneGraph.add(cameraNode);
-  // const gn = new GroupNode(new Translation(new Vector(-1, -1, -4, 0)));
-  // sceneGraph.add(gn);
-  // gn.add(new SphereNode(new Vector(.4, 0, 0, 1), new Vector(1, 1, 1, 1), 1));
-  // gn.add(new SphereNode(new Vector(.4, .7, 0, 1), new Vector(0, 0, 0, 1), 1));
-  // gn.add(new SphereNode(new Vector(.4, -.7, .420, 1), new Vector(2, 1, 0, 1), 1));
-  // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 0, 0, 1)));
-  // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, 1, 1)));
-  // let light1, light2, light3;
-  // light1= new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 0, 0, 1));
-  // sceneGraph.add(light1);
-  // light2 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, 1, 1));
-  // light3 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 1));
+  rootNode.add(cameraNode);
 
-  // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 0)));
-  // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, -1, 0)));
-  // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, 1, 0)));
-  // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, -1, -1, 0)));
-  // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, 1, 1, 0)));
-  // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, 1, -1, 0)));
-  // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, -1, 1, 0)));
-  // sceneGraph.add(new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(-1, -1, -1, 0)));
+  // add group node
+  const groupNode1 = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
+  rootNode.add(groupNode1);
 
-  const sg = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
-  const gn = new GroupNode(new Rotation(new Vector(1, 0, 0, 0), 0));
-  sg.add(gn);
-  const gn1 = new GroupNode(new Translation(new Vector(1.2, 0.5, 0, 0))); //position of the first sphere
-  gn.add(gn1);
-  // gn1.add(new SphereNode(new Vector(.4, 0, 0, 1), new Vector(0, 0, 0, 1), 1));
-  const gn2 = new GroupNode(new Translation(new Vector(-0.8, 1, 1, 0))); //position of the second sphere
-  gn.add(gn2);
-  const gn3 = new GroupNode(new Scaling(new Vector(0.4, 0.4, 0.4, 0))); //scaling of the second sphere
-  gn2.add(gn3);
-  gn3.add(new SphereNode(new Vector(0, 0, 0.3, 1), new Vector(0, 0, 0, 1), 1));
-  // const lightPositions = [
-  //     new Vector(1, 1, 1, 1)
-  // ];
+  // add light node
+  light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 4, -2, 0));
+  groupNode1.add(light1);
 
-  //Add rasterbox
-  const rasterBox = new AABoxNode(
-    new Vector(1, 2, 1, 0),
-    new Vector(1, 0, 1, 1)
-  );
-  gn1.add(rasterBox);
 
-  //Add pyramid
-  const gn4 = new GroupNode(new Translation(new Vector(-1, -2, 1.5, 0))); //position of the third sphere
-  gn3.add(gn4);
-  const pyramid = new PyramidNode(
-    new Vector(2, 2, 2, 0),
-    new Vector(1, 0, 1, 1)
-  );
-  gn4.add(pyramid);
-
-  //Add animation node
-  const animationNode = new RotationNode(gn1, new Vector(0, 1, 0, 0));
-  const animationNode2 = new JumperNode(gn1, new Vector(0, 1, 0, 0));
-  const animationNode3 = new ScalerNode(gn1, new Vector(1, 1, 1, 0));
-  const animationNode4 = new DriverNode(gn1);
-
-  //animationNode.toggleActive();
-
-  light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(1, 1, 1, 0));
-  gn.add(light1);
+  const taskbarButtonDimension = new Vector(.7, .7, .3, 0);
+  const taskbarButtonColor = new Vector(0, 2, 0, 1);
 
   // add Taskbar to SceneGraph
-  const tasbkarRoot = new GroupNode(new EmptyTransformation());
-  const taskbarBottom = new GroupNode(new Translation(new Vector(0, -3, -2, 0)));
+  const taskbarGroup = new GroupNode(new Translation(new Vector(0, -3.3, -1, 0)));
+  groupNode1.add(taskbarGroup);
 
-  tasbkarRoot.add(taskbarBottom)
-  const taskBarBox = new AABoxNode(new Vector(10, 1, 1, 0), new Vector(2, 2, 0, 1));
-  taskbarBottom.add(taskBarBox)
+  const taskBarBackground = new AABoxNode(new Vector(10, .2, .3, 0), new Vector(2, 2, 0, 1));
+  taskbarGroup.add(taskBarBackground)
 
-  sg.add(tasbkarRoot);
+  // add Taskbar Buttons
+  const taskbarButtonGroup1 = new GroupNode(new Translation(new Vector(-2, .45, 0, 0)));
+  const taskbarButton1 = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
+  taskbarButtonGroup1.add(taskbarButton1)
+  taskbarGroup.add(taskbarButtonGroup1)
 
-  sceneGraph.add(sg);
+  //add Taskbar Button 2
+  const taskbarButtonGroup2 = new GroupNode(new Translation(new Vector(2, .45, 0, 0)));
+  const taskbarButton2 = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
+  taskbarButtonGroup2.add(taskbarButton2)
+  taskbarGroup.add(taskbarButtonGroup2)
+
+
+  // variables for the windows
+  const windowDimension = new Vector(3, 3, 0, 1);
+  const windowBackgroundColor = new Vector(0.8, 0.8, 0.8, 1);
+
+  const windowMenuDimension = new Vector(3, 0.5, 0.01, 1);
+  const windowMenuBackgroundColor = new Vector(0, 0, 1, 1);
+
+  const minimizeSphereDimension = new Vector(1.3, 0, 0, 1);
+  const minimizeSphereRadius = 0.13;
+  const minimizeSphereColor = new Vector(0.9, 0.7, 0.3, 1);
+
+  // groupNode for the first application window
+  const windowGroup1 = new GroupNode(new Translation(new Vector(1.8, 0, -1, 0)));
+  groupNode1.add(windowGroup1);
+
+  // add background for windowGroup1
+  const window1Background = new AABoxNode(windowDimension, windowBackgroundColor);
+  windowGroup1.add(window1Background);
+
+  const window1Menu = new GroupNode(new Translation(new Vector(0, 1.5, 0, 0)));
+  const window1MenuBackground = new AABoxNode(windowMenuDimension, windowMenuBackgroundColor);
+  window1Menu.add(window1MenuBackground);
+
+  const window1minimizeSphere = new SphereNode(minimizeSphereColor, minimizeSphereDimension, minimizeSphereRadius);
+  window1Menu.add(window1minimizeSphere);
+
+  windowGroup1.add(window1Menu);
+
+  // groupNode for the secound application window
+  const windowGroup2 = new GroupNode(new Translation(new Vector(-1.8, 0, -1, 0)));
+  groupNode1.add(windowGroup2);
+
+  // add background for windowGroup2
+  const window2Background = new AABoxNode(windowDimension, windowBackgroundColor);
+  windowGroup2.add(window2Background);
+
+  const window2Menu = new GroupNode(new Translation(new Vector(0, 1.5, 0, 0)));
+  windowGroup2.add(window2Menu);
+
+  // Add menue bar on window 2 
+  const window2MenuBackground = new AABoxNode(windowMenuDimension, windowMenuBackgroundColor);
+  window2Menu.add(window2MenuBackground);
+
+  // Add minimize sphere on window 2
+  // const window2MinimizeSphere = new SphereNode(minimizeSphereColor, minimizeSphereDimension, minimizeSphereRadius);
+  const window2MinimizeSphere = new SphereNode(new Vector(0.9001, 0.7, 0.3, 1), minimizeSphereDimension, minimizeSphereRadius);
+  window2Menu.add(window2MinimizeSphere);
+
+
+  //Add animation node
+  // const animationNode = new RotationNode(gn1, new Vector(0, 1, 0, 0));
+  // const animationNode3 = new JumperNode(taskbarButtonGroup2, new Vector(0, 1, 0, 0));
+
+  // const animationNode4 = new DriverNode(gn1);
+  const animationNode3 = new ScalerNode(taskbarButtonGroup2, new Vector(-1, -1, -1, 0));
+  animationNode3.toggleActive();
+
+  /***************************************************************/
+  /*********************  END OF SCENE GRAPH *********************/
+  /***************************************************************/
 
   // let myBox = new AABoxNode(new Vector(50, 0.8, 0.8, 1));
   // sceneGraph.add(myBox);
@@ -183,7 +234,7 @@ window.addEventListener("load", () => {
 
   // setup for raster rendering
   const rasterSetupVisitor = new RasterSetupVisitor(ctx_raster);
-  rasterSetupVisitor.setup(sceneGraph);
+  rasterSetupVisitor.setup(rootNode);
 
   phongShader = new Shader(ctx_raster, phongVertexShader, phongFragmentShader);
 
@@ -228,11 +279,11 @@ window.addEventListener("load", () => {
       lastTimestamp = timestamp;
       if (rasterizing) {
         // rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
-        rasterVisitor.render(sceneGraph, cameraNode);
+        rasterVisitor.render(rootNode, cameraNode);
       } else {
         // rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
         // rayVisitor.render(sceneGraph, cameraNode, phongProperties);
-        rayVisitor.render(sceneGraph, phongProperties);
+        rayVisitor.render(rootNode, phongProperties);
       }
       //requestAnimationFrame(animate);
       // console.log("animation loop ended");
@@ -241,8 +292,10 @@ window.addEventListener("load", () => {
       //animationNode2.simulate(delta);
       window.requestAnimationFrame(animate);
     }
-    //animationNode.simulate(delta);  
-    //animationNode2.simulate(delta);
+    if (minimizeAnimation != null) {
+      minimizeAnimation.simulate(delta);
+    }
+    animationNode3.simulate(delta);
 
   }
 

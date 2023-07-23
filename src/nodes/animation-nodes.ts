@@ -18,7 +18,7 @@ class AnimationNode {
    * @param groupNode The GroupNode to attach to
    */
   constructor(public groupNode: GroupNode) {
-    this.active = true;
+    this.active = false;
   }
 
   /**
@@ -147,27 +147,52 @@ export class ScalerNode extends AnimationNode {
   scalingVector: Vector;
   scalingfactor: number;
   newTransformation: Scaling;
-  scale: number = 0.00001;
 
   constructor(scalingGN: GroupNode, scalingVector: Vector) {
     super(scalingGN);
     this.scalingVector = scalingVector;
+    this.scalingfactor = 1;
   }
 
   simulate(deltaT: number) {
     if (this.active) {
-      window.addEventListener('keydown', (event) => {
-        const position: Matrix = this.groupNode.transform.getMatrix();
-        if (event.key === '+') {
-          position.data[0] += this.scale;
-          position.data[5] += this.scale;
-          position.data[10] += this.scale;
-        } else if (event.key === '-') {
-          position.data[0] -= this.scale;
-          position.data[5] -= this.scale;
-          position.data[10] -= this.scale;
-        }
-      });
+      /* Scale the groupnode with the scalingVector on button events*/
+      // window.addEventListener('keydown', (event) => {
+      const position: Matrix = this.groupNode.transform.getMatrix();
+      // if (event.key === '+') {
+      //   position.data[0] += this.scale;
+      //   position.data[5] += this.scale;
+      //   position.data[10] += this.scale;
+      //   console.log("+++++++++++++");
+
+      // } else if (event.key === '-') {
+      //   position.data[0] -= this.scale;
+      //   position.data[5] -= this.scale;
+      //   position.data[10] -= this.scale;
+      //   console.log("---------------");
+
+      // }
+      // });
+
+      this.scalingfactor += 0.00001 * deltaT;
+      if (this.scalingfactor >= 1.01) {
+        this.active = false;
+      }
+      // let scale = new Scaling(new Vector(
+      //   this.scalingVector.x * this.scalingfactor,
+      //   this.scalingVector.y * this.scalingfactor,
+      //   this.scalingVector.z * this.scalingfactor,
+      //   1));
+
+      // let scale = new Scaling(this.scalingVector.mul(this.scalingfactor)); // upscaling
+      let scale = new Scaling(this.scalingVector.div(this.scalingfactor));  // downscaling
+      scale.matrix = position.mul(scale.getMatrix());
+      this.groupNode.transform = scale;
+
+      let downScale = new Scaling(this.scalingVector.div(this.scalingfactor));
+
+
+
     }
   }
 }
