@@ -74,7 +74,7 @@ window.addEventListener("load", () => {
           //   const animationNode3 = new ScalerNode(windowGroup1, new Vector(1, 1, 1, 0));
           // Animiere das Fenster so, dass es auf 90% der Originalgröße skaliert wird
           const originalScale = new Vector(1, 1, 1, 1);
-          const scaleAmout = 0.000000001;
+          const scaleAmout = 0.001;
           const targetScale = originalScale.mul(scaleAmout);
           const duration = 5000; // in milliseconds
 
@@ -86,8 +86,11 @@ window.addEventListener("load", () => {
           console.log("Window 2 minimize");
           // windowGroup2.transform = new Translation(new Vector(-222, 0, -1, 0));
           // Animiere das Fenster so, dass es auf 90% der Originalgröße skaliert wird
-          const targetScale = new Vector(0.000000001, 0.000000001, 0.000000001, 1);
-          const duration = 5000; // 2 Sekunden Dauer der Animation
+          const originalScale = new Vector(1, 1, 1, 1);
+          const scaleAmout = 0.001;
+          const targetScale = originalScale.mul(scaleAmout);
+          const duration = 5000; // in milliseconds
+
           minimizeAnimation = new ScaleNode(windowGroup2, targetScale, duration);
           minimizeAnimation.toggleActive();
 
@@ -96,14 +99,15 @@ window.addEventListener("load", () => {
       if (selectedNode instanceof AABoxNode) {
         console.log(selectedNode.color);
         if (selectedNode.color == taskbarButton1.color) {
-          console.log("Taskbar Button 1");
-          // windowGroup2.transform = new Translation(new Vector(-222, 0, -1, 0));
-          // minimizeAnimation = new ScaleNode(windowGroup1, new Vector(-1, -1, -1, 0));
-          //minimizeAnimation.toggleActive();
+          const targetScale = new Vector(1.001, 1.001, 1.001, 1);
+          const duration = 2; // 2 Sekunden Dauer der Animation
+          minimizeAnimation = new ScaleNode(windowGroup1, targetScale, duration);
+          minimizeAnimation.toggleActive();
         }
+
         if (selectedNode.color == taskbarButton2.color) {
-          const targetScale = new Vector(1.01, 1.01, 1.01, 1);
-          const duration = 1; // 2 Sekunden Dauer der Animation
+          const targetScale = new Vector(1.001, 1.001, 1.001, 1);
+          const duration = 2; // 2 Sekunden Dauer der Animation
           minimizeAnimation = new ScaleNode(windowGroup2, targetScale, duration);
           minimizeAnimation.toggleActive();
         }
@@ -163,18 +167,17 @@ window.addEventListener("load", () => {
   const taskBarBackground = new AABoxNode(new Vector(10, .2, .3, 0), new Vector(2, 2, 0, 1));
   taskbarGroup.add(taskBarBackground)
 
-  // add Taskbar Buttons
-  const taskbarButtonGroup1 = new GroupNode(new Translation(new Vector(-2, .45, 0, 0)));
-  const taskbarButton1 = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
+  //add Taskbar Button 1
+  const taskbarButtonGroup1 = new GroupNode(new Translation(new Vector(2, .45, 0, 0)));
+  const taskbarButton1 = new AABoxNode(taskbarButtonDimension, new Vector(0, 2.001, 0, 1));
   taskbarButtonGroup1.add(taskbarButton1)
   taskbarGroup.add(taskbarButtonGroup1)
 
-  //add Taskbar Button 2
-  const taskbarButtonGroup2 = new GroupNode(new Translation(new Vector(2, .45, 0, 0)));
-  const taskbarButton2 = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
+  // add Taskbar Buttons 2
+  const taskbarButtonGroup2 = new GroupNode(new Translation(new Vector(-2, .45, 0, 0)));
+  const taskbarButton2 = new AABoxNode(taskbarButtonDimension, new Vector(0, 2, 0, 1));
   taskbarButtonGroup2.add(taskbarButton2)
   taskbarGroup.add(taskbarButtonGroup2)
-
 
   // variables for the windows
   const windowDimension = new Vector(3, 3, 0, 1);

@@ -312,15 +312,25 @@ export class ScaleNode extends AnimationNode {
 
       // Check if the x value of the scale are equal to the target scale values
       if (this.targetScale.x < 1) {
-        if (scaling.getMatrix().data[0] <= this.targetScale.x + 0.00000000001) {
+        if (scaling.getMatrix().data[0] <= this.targetScale.x) {
           console.log("finished");
           this.active = false;
+          scaling.matrix.data[0] = this.targetScale.x;
+          scaling.matrix.data[5] = this.targetScale.y;
+          scaling.matrix.data[10] = this.targetScale.z;
+
+          this.groupNode.transform = scaling;
         }
       }
       else if (this.targetScale.x > 1) {
-        if (scaling.getMatrix().data[0] >= this.targetScale.x + 0.00000000001) {
+        if (scaling.getMatrix().data[0] >= this.targetScale.x) {
           console.log("finished");
           this.active = false;
+          scaling.matrix.data[0] = this.targetScale.x;
+          scaling.matrix.data[5] = this.targetScale.y;
+          scaling.matrix.data[10] = this.targetScale.z;
+
+          this.groupNode.transform = scaling;
         }
       }
     }
