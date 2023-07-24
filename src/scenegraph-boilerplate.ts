@@ -16,6 +16,9 @@ import phongVertexShader from "./shader/phong-vertex-perspective-shader.glsl";
 import Shader from "./shader/shader";
 import { EmptyTransformation, Rotation, Scaling, Translation } from "./transformation";
 import Vector from "./vector";
+import TextureBoxNode from "./nodes/texture-box-node";
+import textureVertexShader from "./shader/texture-vertex-perspective-shader.glsl";
+import textureFragmentShader from "./shader/texture-fragment-shader.glsl";
 
 let rasterizing: boolean = true;
 
@@ -234,6 +237,12 @@ window.addEventListener("load", () => {
   const window2MinimizeSphere = new SphereNode(new Vector(0.9001, 0.7, 0.3, 1), minimizeSphereDimension, minimizeSphereRadius);
   window2Menu.add(window2MinimizeSphere);
 
+  // Add Texture box to SceneGraph
+  const textureBoxGroup = new GroupNode(new Translation(new Vector(-1, -1, 1, 0)));
+  windowGroup1.add(textureBoxGroup);
+  const textureBox = new TextureBoxNode("source-missing-texture.png", new Vector(0.5, 0.5, 0.5, 1), new Vector(1, 1, 1, 1), "brickwall-normal.png");
+  textureBoxGroup.add(textureBox);
+
 
   //Add animation node
   // const animationNode = new RotationNode(gn1, new Vector(0, 1, 0, 0));
@@ -262,8 +271,8 @@ window.addEventListener("load", () => {
   textureShader = new Shader(
     ctx_raster,
     //TODO add texture shader
-    phongVertexShader,
-    phongFragmentShader
+    textureVertexShader,
+    textureFragmentShader
   );
 
   rasterVisitor = new RasterVisitor(
@@ -274,6 +283,7 @@ window.addEventListener("load", () => {
     phongProperties
   );
   phongShader.load();
+  textureShader.load();
   rasterVisitor.setupCamera(cameraNode);
 
 

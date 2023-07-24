@@ -1,5 +1,6 @@
 import Node from "./node";
 import Visitor from "../visitor";
+import Vector from "../vector";
 
 /**
  * Class representing a Textured Axis Aligned Box in the Scenegraph
@@ -12,7 +13,7 @@ export default class TextureBoxNode extends Node {
    * with all edges of length 1
    * @param texture The image filename for the texture
    */
-  constructor(public texture: string) {
+  constructor(public texture: string, public minPoint: Vector, public maxPoint: Vector, public normal?: string) {
     super();
   }
 

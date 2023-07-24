@@ -27,7 +27,7 @@ varying vec3 v_normal;
 // TODO
 varying vec3 v_position;
 
-// Pass the phon shading coefficients
+// Pass the phong shading coefficients
 // to the fragment shader
 uniform float u_ka;
 uniform float u_kd;

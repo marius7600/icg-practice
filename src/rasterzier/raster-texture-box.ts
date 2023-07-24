@@ -124,7 +124,7 @@ export default class RasterTextureBox {
 
         // Bind the texture coordinates in this.texCoords
         // to their attribute in the shader
-        // TODO
+
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoords);
         const texCoordLocation = shader.getAttributeLocation("a_texCoord");
         this.gl.enableVertexAttribArray(texCoordLocation);
@@ -136,7 +136,6 @@ export default class RasterTextureBox {
         this.gl.drawArrays(this.gl.TRIANGLES, 0, this.elements);
 
         this.gl.disableVertexAttribArray(positionLocation);
-        // TODO disable texture vertex attrib array
         this.gl.disableVertexAttribArray(texCoordLocation);
     }
 }

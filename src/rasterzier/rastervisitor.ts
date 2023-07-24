@@ -139,28 +139,7 @@ export class RasterVisitor implements Visitor {
    * @param  {TextureBoxNode} node - The node to visit
    */
   visitTextureBoxNode(node: TextureBoxNode) {
-    this.textureshader.use();
-    let shader = this.textureshader;
-
-    let toWorld = Matrix.identity();
-    // TODO calculate the model matrix for the box
-    for (let i = 0; i < this.stack.length; i++) {
-      toWorld = toWorld.mul(this.stack[i].traverse);
-    }
-
-    shader.getUniformFloat("u_ka").set(this.phongProperties.ambient);
-    shader.getUniformFloat("u_kd").set(this.phongProperties.diffuse);
-    shader.getUniformFloat("u_ks").set(this.phongProperties.specular);
-    shader.getUniformFloat("u_shininess").set(this.phongProperties.shininess);
-
-    shader.getUniformMatrix("M").set(toWorld);
-    let P = shader.getUniformMatrix("P");
-    if (P && this.perspective) {
-      P.set(this.perspective);
-    }
-    shader.getUniformMatrix("V").set(this.lookat);
-
-    this.renderables.get(node).render(shader);
+    this.visitNode(node);
   }
 
   /**
@@ -221,16 +200,18 @@ export class RasterVisitor implements Visitor {
   }
 
   private visitNode(node: Node) {
-    const shader = this.shader;
+    let shader = this.shader;
+    if (node instanceof TextureBoxNode) {
+      shader = this.textureshader;
+    }
     shader.use();
-    // let shader = this.shader;
-    // shader.use();
+
     let toWorld = Matrix.identity();
     let fromWorld = Matrix.identity();
     // TODO Calculate the model matrix for the box
     for (let i = 0; i < this.stack.length; i++) {
       toWorld = toWorld.mul(this.stack[i].traverse);
-      fromWorld = this.stack[i].inverse.mul(fromWorld);
+      fromWorld = this.stack[i].inverse.mul(toWorld);
     }
 
     shader.getUniformMatrix("M").set(toWorld);
@@ -245,7 +226,9 @@ export class RasterVisitor implements Visitor {
     }
 
     let N = shader.getUniformMatrix("N");
-    let normal = this.lookat.mul(fromWorld).transpose(); // erst invert dann transpose
+    //let normal = this.lookat.mul(fromWorld).transpose(); // erst invert dann transpose
+    let normal = fromWorld.transpose();
+
     if (N && normal) {
       N.set(normal); // pass to shader
     }
@@ -265,11 +248,6 @@ export class RasterVisitor implements Visitor {
         .getUniformVec3("u_light_colors[" + i + "]")
         .set(this.lightNodes[i].color);
     }
-
-    toWorld.transpose();
-    toWorld.setVal(3, 0, 0);
-    toWorld.setVal(3, 1, 0);
-    toWorld.setVal(3, 2, 0);
 
     this.renderables.get(node)?.render(shader);
   }
@@ -354,8 +332,8 @@ export class RasterSetupVisitor {
       node,
       new RasterTextureBox(
         this.gl,
-        new Vector(-0.5, -0.5, -0.5, 1),
-        new Vector(0.5, 0.5, 0.5, 1),
+        node.minPoint,
+        node.maxPoint,
         node.texture
       )
     );
