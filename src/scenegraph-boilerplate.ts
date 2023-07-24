@@ -60,23 +60,37 @@ window.addEventListener("load", () => {
     }
   });
 
+  // Add a click event listener to the canvas
   canvas_raster.addEventListener("click", function (info) {
+    // Get the x and y coordinates of the click
     const x = info.offsetX
     const y = info.offsetY
+    // Create a new mouse visitor
     const mouseVisitor = new MouseVisitor();
+    // Use the mouse visitor to get the selected node
     let selectedNode = mouseVisitor.getSelectedNode(rootNode, x, y, ctx_raster);
+    // If a node was selected
     if (selectedNode != null) {
+      // If the selected node is a sphere
       if (selectedNode instanceof SphereNode) {
+        // Determine which window was clicked, dependiung on the color of the sphere
         if (selectedNode.color == window1minimizeSphere.color) {
+          // Minimize window 1
           minimize(windowGroup1);
+          // Jump the taskbar button
           jumpAnimation(taskbarButtonGroup1);
         }
+        // Determine which window was clicked, dependiung on the color of the sphere
         if (selectedNode.color == window2MinimizeSphere.color) {
+          // Minimize window 2
           minimize(windowGroup2);
+          // Jump the taskbar button
           jumpAnimation(taskbarButtonGroup2);
         }
       }
+      // If the selected node is an AA box
       if (selectedNode instanceof AABoxNode) {
+        // Determine which taskbar button was clicked, depending on the color of the box
         if (selectedNode.color == taskbarButton1.color) {
           // If the window is minimized, maximize it
           if (Math.floor(windowGroup1.getTransformation().getMatrix().data[0]) == 0) {
@@ -87,10 +101,11 @@ window.addEventListener("load", () => {
             minimize(windowGroup1);
           }
 
+          // Jump the taskbar button
           jumpAnimation(taskbarButtonGroup1);
-
         }
 
+        // Determine which taskbar button was clicked, depending on the color of the box
         if (selectedNode.color == taskbarButton2.color) {
           // If the window is minimized, maximize it
           if (Math.floor(windowGroup2.getTransformation().getMatrix().data[0]) == 0) {
@@ -100,9 +115,8 @@ window.addEventListener("load", () => {
           else {
             minimize(windowGroup2);
           }
-
+          // Jump the taskbar button
           jumpAnimation(taskbarButtonGroup2);
-
         }
       }
     }
