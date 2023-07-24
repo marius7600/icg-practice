@@ -21,7 +21,7 @@ vec3 specularLight=vec3(0, 0, 0);
 const vec3 lightColor=vec3(0.8, 0.8, 0.8);
 const vec4 viewPosition=vec4(0, 0, 0, 1);
 
-uniform vec3 LightPositions[8];
+uniform vec3 u_light_positions[8];
 uniform int amtLights;
 
 // quelle: https://learnopengl.com/Lighting/Basic-Lighting
@@ -53,7 +53,7 @@ void main(void) {
         if (i >= amtLights){ break; }
 
         //diffuse
-        vec3 lightDir = normalize(LightPositions[i] - v_position);
+        vec3 lightDir = normalize(u_light_positions[i] - v_position);
         float diffuse = max(dot(lightDir, norm), 0.0);
         diffuseLight += diffuse * texelColor * u_kd;
 
