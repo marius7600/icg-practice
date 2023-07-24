@@ -66,63 +66,42 @@ window.addEventListener("load", () => {
     const mouseVisitor = new MouseVisitor();
     let selectedNode = mouseVisitor.getSelectedNode(rootNode, x, y, ctx_raster);
     if (selectedNode != null) {
-      console.log(selectedNode);
       if (selectedNode instanceof SphereNode) {
-        console.log(selectedNode.color);
         if (selectedNode.color == window1minimizeSphere.color) {
-          console.log("Window 1 minimize");
-          // windowGroup1.transform = new Translation(new Vector(222, 0, -1, 0));#
-          //   const animationNode3 = new ScalerNode(windowGroup1, new Vector(1, 1, 1, 0));
-          // Animiere das Fenster so, dass es auf 90% der Originalgröße skaliert wird
-          const originalScale = new Vector(1, 1, 1, 1);
-          const scaleAmout = 0.001;
-          const targetScale = originalScale.mul(scaleAmout);
-          const duration = 5000; // in milliseconds
-
-          minMaxAnimation = new ScaleNode(windowGroup1, targetScale, duration);
-          minMaxAnimation.toggleActive();
-
-          boxBounce = new JumperNode(taskbarButtonGroup1, new Vector(0, 1, 0, 0), taskbarButtonGroup1.getTransformation().getMatrix());
-          boxBounce.toggleActive();
+          minimize(windowGroup1);
+          jumpAnimation(taskbarButtonGroup1);
         }
         if (selectedNode.color == window2MinimizeSphere.color) {
-          console.log("Window 2 minimize");
-          // windowGroup2.transform = new Translation(new Vector(-222, 0, -1, 0));
-          // Animiere das Fenster so, dass es auf 90% der Originalgröße skaliert wird
-          const originalScale = new Vector(1, 1, 1, 1);
-          const scaleAmout = 0.001;
-          const targetScale = originalScale.mul(scaleAmout);
-          const duration = 5000; // in milliseconds
-
-          minMaxAnimation = new ScaleNode(windowGroup2, targetScale, duration);
-          minMaxAnimation.toggleActive();
-
-          boxBounce = new JumperNode(taskbarButtonGroup2, new Vector(0, 1, 0, 0), taskbarButtonGroup2.getTransformation().getMatrix());
-          boxBounce.toggleActive();
-
+          minimize(windowGroup2);
+          jumpAnimation(taskbarButtonGroup2);
         }
       }
       if (selectedNode instanceof AABoxNode) {
-        console.log(selectedNode.color);
         if (selectedNode.color == taskbarButton1.color) {
-          const targetScale = new Vector(1.001, 1.001, 1.001, 1);
-          const duration = 2; // 2 Sekunden Dauer der Animation
-          minMaxAnimation = new ScaleNode(windowGroup1, targetScale, duration);
-          minMaxAnimation.toggleActive();
+          // If the window is minimized, maximize it
+          if (Math.floor(windowGroup1.getTransformation().getMatrix().data[0]) == 0) {
+            maximize(windowGroup1);
+          }
+          // If the window is maximized, minimize it
+          else {
+            minimize(windowGroup1);
+          }
 
-          boxBounce = new JumperNode(taskbarButtonGroup1, new Vector(0, 1, 0, 0), taskbarButtonGroup1.getTransformation().getMatrix());
-          boxBounce.toggleActive();
+          jumpAnimation(taskbarButtonGroup1);
 
         }
 
         if (selectedNode.color == taskbarButton2.color) {
-          const targetScale = new Vector(1.001, 1.001, 1.001, 1);
-          const duration = 2; // 2 Sekunden Dauer der Animation
-          minMaxAnimation = new ScaleNode(windowGroup2, targetScale, duration);
-          minMaxAnimation.toggleActive();
+          // If the window is minimized, maximize it
+          if (Math.floor(windowGroup2.getTransformation().getMatrix().data[0]) == 0) {
+            maximize(windowGroup2);
+          }
+          // If the window is maximized, minimize it
+          else {
+            minimize(windowGroup2);
+          }
 
-          boxBounce = new JumperNode(taskbarButtonGroup2, new Vector(0, 1, 0, 0), taskbarButtonGroup2.getTransformation().getMatrix());
-          boxBounce.toggleActive();
+          jumpAnimation(taskbarButtonGroup2);
 
         }
       }
@@ -397,6 +376,28 @@ window.addEventListener("load", () => {
   //     "click", () => cancelAnimationFrame(animationHandle));
 });
 
+
+function jumpAnimation(taskbarButtonGroup1: GroupNode) {
+  boxBounce = new JumperNode(taskbarButtonGroup1, new Vector(0, 1, 0, 0), taskbarButtonGroup1.getTransformation().getMatrix());
+  boxBounce.toggleActive();
+}
+
+function minimize(windowGroup1: GroupNode) {
+  const originalScale = new Vector(1, 1, 1, 1);
+  const scaleAmout = 0.001;
+  const targetScale = originalScale.mul(scaleAmout);
+  const duration = 5000; // in milliseconds
+
+  minMaxAnimation = new ScaleNode(windowGroup1, targetScale, duration);
+  minMaxAnimation.toggleActive();
+}
+
+function maximize(windowGroup1: GroupNode) {
+  const targetScale = new Vector(1.001, 1.001, 1.001, 1);
+  const duration = 2; // 2 Sekunden Dauer der Animation
+  minMaxAnimation = new ScaleNode(windowGroup1, targetScale, duration);
+  minMaxAnimation.toggleActive();
+}
 
 /* Toggle visability between the raytracer and rasterizer canvas */
 function toggleFigure() {
