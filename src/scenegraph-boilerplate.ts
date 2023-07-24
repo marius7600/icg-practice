@@ -35,7 +35,8 @@ let animationActivated: boolean = true;
 let phongShader: Shader;
 let textureShader: Shader;
 
-let minimizeAnimation: ScaleNode;
+let minMaxAnimation: ScaleNode;
+let boxBounce: JumperNode;
 
 window.addEventListener("load", () => {
   const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
@@ -78,9 +79,11 @@ window.addEventListener("load", () => {
           const targetScale = originalScale.mul(scaleAmout);
           const duration = 5000; // in milliseconds
 
-          minimizeAnimation = new ScaleNode(windowGroup1, targetScale, duration);
-          minimizeAnimation.toggleActive();
+          minMaxAnimation = new ScaleNode(windowGroup1, targetScale, duration);
+          minMaxAnimation.toggleActive();
 
+          boxBounce = new JumperNode(taskbarButtonGroup1, new Vector(0, 1, 0, 0), taskbarButtonGroup1.getTransformation().getMatrix());
+          boxBounce.toggleActive();
         }
         if (selectedNode.color == window2MinimizeSphere.color) {
           console.log("Window 2 minimize");
@@ -91,8 +94,11 @@ window.addEventListener("load", () => {
           const targetScale = originalScale.mul(scaleAmout);
           const duration = 5000; // in milliseconds
 
-          minimizeAnimation = new ScaleNode(windowGroup2, targetScale, duration);
-          minimizeAnimation.toggleActive();
+          minMaxAnimation = new ScaleNode(windowGroup2, targetScale, duration);
+          minMaxAnimation.toggleActive();
+
+          boxBounce = new JumperNode(taskbarButtonGroup2, new Vector(0, 1, 0, 0), taskbarButtonGroup2.getTransformation().getMatrix());
+          boxBounce.toggleActive();
 
         }
       }
@@ -101,15 +107,23 @@ window.addEventListener("load", () => {
         if (selectedNode.color == taskbarButton1.color) {
           const targetScale = new Vector(1.001, 1.001, 1.001, 1);
           const duration = 2; // 2 Sekunden Dauer der Animation
-          minimizeAnimation = new ScaleNode(windowGroup1, targetScale, duration);
-          minimizeAnimation.toggleActive();
+          minMaxAnimation = new ScaleNode(windowGroup1, targetScale, duration);
+          minMaxAnimation.toggleActive();
+
+          boxBounce = new JumperNode(taskbarButtonGroup1, new Vector(0, 1, 0, 0), taskbarButtonGroup1.getTransformation().getMatrix());
+          boxBounce.toggleActive();
+
         }
 
         if (selectedNode.color == taskbarButton2.color) {
           const targetScale = new Vector(1.001, 1.001, 1.001, 1);
           const duration = 2; // 2 Sekunden Dauer der Animation
-          minimizeAnimation = new ScaleNode(windowGroup2, targetScale, duration);
-          minimizeAnimation.toggleActive();
+          minMaxAnimation = new ScaleNode(windowGroup2, targetScale, duration);
+          minMaxAnimation.toggleActive();
+
+          boxBounce = new JumperNode(taskbarButtonGroup2, new Vector(0, 1, 0, 0), taskbarButtonGroup2.getTransformation().getMatrix());
+          boxBounce.toggleActive();
+
         }
       }
     }
@@ -314,9 +328,13 @@ window.addEventListener("load", () => {
     // Jetzt führen Sie die Animation mit dem neuen deltaT aus
     // minimizeAnimation.simulate(deltaT);
 
-    if (minimizeAnimation != null) {
+    if (minMaxAnimation != null) {
       // console.log("minimizeAnimation is not null");
-      minimizeAnimation.simulate(delta);
+      minMaxAnimation.simulate(delta);
+    }
+    if (boxBounce != null) {
+      // console.log("minimizeAnimation is null");
+      boxBounce.simulate(delta);
     }
     //animationNode3.simulate(delta);
     // minimizeAnimation.simulate(delta);

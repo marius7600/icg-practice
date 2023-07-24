@@ -90,14 +90,17 @@ export class JumperNode extends AnimationNode {
    */
   number: number;
 
+  startingPos: Matrix;
+
   /**
    *
    * @param groupNode the GroupNode that has to jump
    * @param translation the applied translation
    */
-  constructor(groupNode: GroupNode, translation: Vector) {
+  constructor(groupNode: GroupNode, translation: Vector, startingPos: Matrix) {
     super(groupNode);
     this.translation = translation;
+    this.startingPos = startingPos;
     this.number = 1;
   }
 
@@ -108,15 +111,23 @@ export class JumperNode extends AnimationNode {
   simulate(deltaT: number) {
     if (this.active) {
       //pause anmiation if key 'p' is pressed, continue on 'c'
-      window.addEventListener('keydown', (event) => {
-        if (event.key === 'p' && this.active) {
-          this.active = false;
-        } else if (event.key === 'c' && !this.active) {
-          this.active = true;
-        }
-      });
+      // window.addEventListener('keydown', (event) => {
+      //   if (event.key === 'p' && this.active) {
+      //     this.active = false;
+      //   } else if (event.key === 'c' && !this.active) {
+      //     this.active = true;
+      //   }
+      // });
 
-      this.number += 0.003 * deltaT;
+
+
+      this.number += 0.007 * deltaT;
+      // Get the starting position of the groupnode only at the start of the animation 
+
+
+
+      console.log(this.startingPos.print());
+
 
       const position = this.groupNode.transform.getMatrix();
 
@@ -128,6 +139,21 @@ export class JumperNode extends AnimationNode {
 
       trans.matrix = position.mul(trans.getMatrix());
       this.groupNode.transform = trans;
+      console.log(trans.matrix.print());
+
+      // Stop the animation if the group node has reached its original position
+      if (this.groupNode.transform.getMatrix().data[13] <= this.startingPos.data[13]) {
+        this.active = false;
+        this.groupNode.transform = new Translation(new Vector(
+          this.startingPos.data[12],
+          this.startingPos.data[13],
+          this.startingPos.data[14],
+          1));
+      }
+
+
+
+
 
 
       // this.groupNode.transform = new Translation(new Vector(
@@ -295,8 +321,6 @@ export class ScaleNode extends AnimationNode {
       const progress = this.elapsedTime / this.duration;
       this.scale = this.interpolateVector(new Vector(1, 1, 1, 1), this.targetScale, progress);
 
-      console.log(this.targetScale.valueOf());
-
       // Apply the interpolated scale to the group node's transform
       const position = this.groupNode.transform.getMatrix();
       const inverse = this.groupNode.transform.getInverseMatrix();
@@ -304,8 +328,6 @@ export class ScaleNode extends AnimationNode {
       scaling.matrix = position.mul(scaling.getMatrix());
       scaling.inverse = scaling.getInverseMatrix().mul(inverse);
       this.groupNode.transform = scaling;
-
-      console.log(this.groupNode.transform.getMatrix().print());
 
       // Update the elapsed time
       this.elapsedTime += deltaT;

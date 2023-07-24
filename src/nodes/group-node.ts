@@ -25,6 +25,14 @@ export default class GroupNode extends Node {
   }
 
   /**
+   * Method to get the current transformation of the group node
+   */
+  getTransformation(): Transformation {
+
+    return this.transform;
+  }
+
+  /**
    * Accepts a visitor according to the visitor pattern
    * @param visitor The visitor
    */
