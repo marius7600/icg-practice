@@ -72,8 +72,8 @@ export default class RayVisitor implements Visitor {
    */
   render(
     rootNode: Node,
-    // camera: CameraNode,
-    phongProperties: PhongProperties
+    phongProperties: PhongProperties,
+    numSamples: number
   ) {
     // clear
     let data = this.imageData.data;
@@ -89,51 +89,61 @@ export default class RayVisitor implements Visitor {
     const height = this.imageData.height;
 
     //For schleife für alle Pixel
-    for (let x = 0; x < width; x++) {
-      for (let y = 0; y < height; y++) {
-        const ray = Ray.makeRay(x, y, height, width, this.camera); // ray = new Ray(origin, direction)
+    for (let i = 0; i < numSamples; i++) {
+      const x = Math.floor(Math.random() * width);
+      const y = Math.floor(Math.random() * height);
 
-        let minIntersection = new Intersection(Infinity, null, null);
-        let minObj = null; // minObj is the closest object to the camera
+      const ray = Ray.makeRay(x, y, height, width, this.camera); // ray = new Ray(origin, direction)
 
-        for (let shape of this.objects) {
-          //This.objects wird in der Visit Methode gefüllt (enhält sphere und aabox)
-          const intersection = shape.intersect(ray);
-          if (intersection && intersection.closerThan(minIntersection)) {
-            // if intersection != null
-            minIntersection = intersection;
-            minObj = shape;
-          }
+      let minIntersection = new Intersection(Infinity, null, null);
+      let minObj = null; // minObj is the closest object to the camera
+
+      for (let shape of this.objects) {
+        //This.objects wird in der Visit Methode gefüllt (enhält sphere und aabox)
+        const intersection = shape.intersect(ray);
+        if (intersection && intersection.closerThan(minIntersection)) {
+          // if intersection != null
+          minIntersection = intersection;
+          minObj = shape;
         }
+      }
 
-        if (minObj) {
-          if (!minObj.color) {
-            // if no color is given then set pixel to black , else calculate color with phong
-            data[4 * (width * y + x) + 0] = 0;
-            data[4 * (width * y + x) + 1] = 0;
-            data[4 * (width * y + x) + 2] = 0;
-            data[4 * (width * y + x) + 3] = 255;
-          } else {
-            // let color = phong(minObj.color, minIntersection, this.lightNodes, camera.eye, phongProperties);
-            let color = phong(
-              minObj.color,
-              minIntersection,
-              this.lightNodes,
-              this.camera.center,
-              phongProperties
-            );
+      if (minObj) {
+        if (!minObj.color) {
+          // if no color is given then set pixel to black , else calculate color with phong
+          data[4 * (width * y + x) + 0] = 0;
+          data[4 * (width * y + x) + 1] = 0;
+          data[4 * (width * y + x) + 2] = 0;
+          data[4 * (width * y + x) + 3] = 255;
+        } else {
+          let color = phong(
+            minObj.color,
+            minIntersection,
+            this.lightNodes,
+            this.camera.center,
+            phongProperties
+          );
 
-            // Tino
-            // let allLightNodes: Array<LightNode> = new Array();
-            // allLightNodes.push(new LightNode(new Vector(.8, .8, .8, 0), new Vector(1, 1, 1, 1)));
-            // let color = phong(minObj.color, minIntersection, allLightNodes, this.camera.center, phongProperties);
-
-            data[4 * (width * y + x) + 0] = color.r * 255;
-            data[4 * (width * y + x) + 1] = color.g * 255;
-            data[4 * (width * y + x) + 2] = color.b * 255;
-            data[4 * (width * y + x) + 3] = 255;
-          }
+          data[4 * (width * y + x) + 0] += color.r * 255;
+          data[4 * (width * y + x) + 1] += color.g * 255;
+          data[4 * (width * y + x) + 2] += color.b * 255;
+          data[4 * (width * y + x) + 3] = 255;
         }
+      }
+    }
+
+    // Accumulate old to the new data
+    let myImageData = this.context.getImageData(0, 0, width, height);
+    for (let i = 0; i < myImageData.data.length; i += 4) {
+      if (myImageData.data[i] != 0 // For all old non-empty pixels 
+        && myImageData.data[i + 1] != 0
+        && myImageData.data[i + 2] != 0
+        && myImageData.data[i + 3] != 0
+      ) { // Uebernimm alle alten Pixel falls vorhanden
+        this.imageData.data[i] = myImageData.data[i];
+        this.imageData.data[i + 1] = myImageData.data[i + 1];
+        this.imageData.data[i + 2] = myImageData.data[i + 2];
+        this.imageData.data[i + 3] = myImageData.data[i + 3];
       }
     }
     this.context.putImageData(this.imageData, 0, 0); // put the image data to the context (canvas)

@@ -68,32 +68,28 @@ export default class AABox {
   }
 
   /**
-   * Calculates the intersection of the AAbox with the given ray
-   * @param ray The ray to intersect with
-   * @return The intersection if there is one, null if there is none
-   */
+     * Calculates the intersection of the AAbox with the given ray
+     * @param ray The ray to intersect with
+     * @return The intersection if there is one, null if there is none
+     */
   intersect(ray: Ray): Intersection | null {
 
     let closestIntersection: Intersection = null;
-    let minIntersection = new Intersection(Infinity, null, null);
+    let shortestT = Number.MAX_VALUE
     for (let i = 0; i < this.indices.length; i += 3) {
       const point1 = this.vertices[this.indices[i]]
       const point2 = this.vertices[this.indices[i + 1]]
       const point3 = this.vertices[this.indices[i + 2]]
-
-      // create polygon
-      let myPolygon = new Polygon(point1, point2, point3);
-
-      // find intersection
-      const intersection = myPolygon.intersect(ray);
-
-      // check if intersection exists and if it's closer than the current closest intersection
-      if (intersection && intersection.closerThan(minIntersection)) {
-        closestIntersection = intersection;
-        minIntersection = intersection;
+      const intersection = Polygon.intersect2(ray, point1, point2, point3, shortestT);
+      if (intersection) {
+        if (!closestIntersection || intersection.closerThan(closestIntersection)) {
+          closestIntersection = intersection
+          shortestT = intersection.t
+        }
       }
     }
-    return closestIntersection;
+    return closestIntersection
+
   }
 
   toString(): string {

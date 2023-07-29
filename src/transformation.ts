@@ -16,6 +16,11 @@ class MatrixTransformation implements Transformation {
         this.inverse = inverse;
     }
 
+    //Constructor that constructs a transformation given a translation vector and rotation matrix
+    // static fromTranslationAndRotation(translation: Vector, rotation: Matrix) {
+    //     return new MatrixTransformation(Matrix.translation(translation).mul(rotation), rotation.transpose().mul(Matrix.translation(translation.mul(-1))));
+    // }
+
     getMatrix(): Matrix {
         return this.matrix;
     }
@@ -25,6 +30,11 @@ class MatrixTransformation implements Transformation {
     }
 }
 
+export class Transform4x4 extends MatrixTransformation {
+    constructor(translation: Vector, rotation: Rotation) {
+        super(Matrix.translation(translation).mul(rotation.getMatrix()), rotation.getMatrix().transpose().mul(Matrix.translation(translation.mul(-1))));
+    }
+}
 export class Translation extends MatrixTransformation {
     constructor(translation: Vector) {
         super(Matrix.translation(translation), Matrix.translation(translation.mul(-1)));

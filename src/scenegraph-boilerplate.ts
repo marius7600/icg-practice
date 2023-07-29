@@ -14,7 +14,7 @@ import RayVisitor from "./raytracer/rayvisitor";
 import phongFragmentShader from "./shader/phong-fragment-shader.glsl";
 import phongVertexShader from "./shader/phong-vertex-perspective-shader.glsl";
 import Shader from "./shader/shader";
-import { EmptyTransformation, Rotation, Scaling, Translation } from "./transformation";
+import { EmptyTransformation, Rotation, Scaling, Transform4x4, Translation } from "./transformation";
 import Vector from "./vector";
 import TextureBoxNode from "./nodes/texture-box-node";
 import textureVertexShader from "./shader/texture-vertex-perspective-shader.glsl";
@@ -54,75 +54,31 @@ window.addEventListener("load", () => {
   // });
 
   canvas_ray.addEventListener("click", function (info) {
-    const x = info.offsetX
-    const y = info.offsetY
-    const mouseVisitor = new MouseVisitor();
-    let selectedNode = mouseVisitor.getSelectedNode(rootNode, x, y, ctx_ray);
-    if (selectedNode != null) {
-      console.log(selectedNode);
-    }
+    setupWindow(info,
+      ctx_raster,
+      window1minimizeSphere,
+      windowGroup1,
+      taskbarButtonGroup1,
+      window2MinimizeSphere,
+      windowGroup2,
+      taskbarButtonGroup2,
+      taskbarButton1,
+      taskbarButton2);
   });
 
   // Add a click event listener to the canvas
   canvas_raster.addEventListener("click", function (info) {
     // Get the x and y coordinates of the click
-    const x = info.offsetX
-    const y = info.offsetY
-    // Create a new mouse visitor
-    const mouseVisitor = new MouseVisitor();
-    // Use the mouse visitor to get the selected node
-    let selectedNode = mouseVisitor.getSelectedNode(rootNode, x, y, ctx_raster);
-    // If a node was selected
-    if (selectedNode != null) {
-      // If the selected node is a sphere
-      if (selectedNode instanceof SphereNode) {
-        // Determine which window was clicked, dependiung on the color of the sphere
-        if (selectedNode.color == window1minimizeSphere.color) {
-          // Minimize window 1
-          minimize(windowGroup1);
-          // Jump the taskbar button
-          jumpAnimation(taskbarButtonGroup1);
-        }
-        // Determine which window was clicked, dependiung on the color of the sphere
-        if (selectedNode.color == window2MinimizeSphere.color) {
-          // Minimize window 2
-          minimize(windowGroup2);
-          // Jump the taskbar button
-          jumpAnimation(taskbarButtonGroup2);
-        }
-      }
-      // If the selected node is an AA box
-      if (selectedNode instanceof AABoxNode) {
-        // Determine which taskbar button was clicked, depending on the color of the box
-        if (selectedNode.color == taskbarButton1.color) {
-          // If the window is minimized, maximize it
-          if (Math.floor(windowGroup1.getTransformation().getMatrix().data[0]) == 0) {
-            maximize(windowGroup1);
-          }
-          // If the window is maximized, minimize it
-          else {
-            minimize(windowGroup1);
-          }
-
-          // Jump the taskbar button
-          jumpAnimation(taskbarButtonGroup1);
-        }
-
-        // Determine which taskbar button was clicked, depending on the color of the box
-        if (selectedNode.color == taskbarButton2.color) {
-          // If the window is minimized, maximize it
-          if (Math.floor(windowGroup2.getTransformation().getMatrix().data[0]) == 0) {
-            maximize(windowGroup2);
-          }
-          // If the window is maximized, minimize it
-          else {
-            minimize(windowGroup2);
-          }
-          // Jump the taskbar button
-          jumpAnimation(taskbarButtonGroup2);
-        }
-      }
-    }
+    setupWindow(info,
+      ctx_raster,
+      window1minimizeSphere,
+      windowGroup1,
+      taskbarButtonGroup1,
+      window2MinimizeSphere,
+      windowGroup2,
+      taskbarButtonGroup2,
+      taskbarButton1,
+      taskbarButton2);
   });
 
 
@@ -168,7 +124,7 @@ window.addEventListener("load", () => {
 
 
   const taskbarButtonDimension = new Vector(.7, .7, .3, 0);
-  const taskbarButtonColor = new Vector(0, 2, 0, 1);
+  const taskbarButtonColor = new Vector(0, 1, 0, 1);
 
   // add Taskbar to SceneGraph
   const taskbarGroup = new GroupNode(new Translation(new Vector(0, -3.3, -1, 0)));
@@ -179,13 +135,13 @@ window.addEventListener("load", () => {
 
   //add Taskbar Button 1
   const taskbarButtonGroup1 = new GroupNode(new Translation(new Vector(2, .45, 0, 0)));
-  const taskbarButton1 = new AABoxNode(taskbarButtonDimension, new Vector(0, 2.001, 0, 1));
+  const taskbarButton1 = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
   taskbarButtonGroup1.add(taskbarButton1)
   taskbarGroup.add(taskbarButtonGroup1)
 
   // add Taskbar Buttons 2
-  const taskbarButtonGroup2 = new GroupNode(new Translation(new Vector(-2, .45, 0, 0)));
-  const taskbarButton2 = new AABoxNode(taskbarButtonDimension, new Vector(0, 2, 0, 1));
+  const taskbarButtonGroup2 = new GroupNode(new Transform4x4(new Vector(-2, .45, 0, 0), new Rotation(new Vector(0, 1, 0, 0), Math.PI)));
+  const taskbarButton2 = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
   taskbarButtonGroup2.add(taskbarButton2)
   taskbarGroup.add(taskbarButtonGroup2)
 
@@ -233,8 +189,7 @@ window.addEventListener("load", () => {
   window2Menu.add(window2MenuBackground);
 
   // Add minimize sphere on window 2
-  // const window2MinimizeSphere = new SphereNode(minimizeSphereColor, minimizeSphereDimension, minimizeSphereRadius);
-  const window2MinimizeSphere = new SphereNode(new Vector(0.9001, 0.7, 0.3, 1), minimizeSphereDimension, minimizeSphereRadius);
+  const window2MinimizeSphere = new SphereNode(minimizeSphereColor, minimizeSphereDimension, minimizeSphereRadius);
   window2Menu.add(window2MinimizeSphere);
 
   // Add Texture box to SceneGraph
@@ -314,7 +269,7 @@ window.addEventListener("load", () => {
       } else {
         // rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
         // rayVisitor.render(sceneGraph, cameraNode, phongProperties);
-        rayVisitor.render(rootNode, phongProperties);
+        rayVisitor.render(rootNode, phongProperties, 5000);
       }
       //requestAnimationFrame(animate);
       // console.log("animation loop ended");
@@ -400,6 +355,72 @@ window.addEventListener("load", () => {
   //     "click", () => cancelAnimationFrame(animationHandle));
 });
 
+
+function setupWindow(info: MouseEvent,
+  ctx_raster: WebGL2RenderingContext,
+  window1minimizeSphere: SphereNode,
+  windowGroup1: GroupNode,
+  taskbarButtonGroup1: GroupNode,
+  window2MinimizeSphere: SphereNode,
+  windowGroup2: GroupNode,
+  taskbarButtonGroup2: GroupNode,
+  taskbarButton1: AABoxNode,
+  taskbarButton2: AABoxNode) {
+  const x = info.offsetX;
+  const y = info.offsetY;
+  // Create a new mouse visitor
+  const mouseVisitor = new MouseVisitor();
+  // Use the mouse visitor to get the selected node
+  let selectedNode = mouseVisitor.getSelectedNode(rootNode, x, y, ctx_raster);
+  // If a node was selected
+  if (selectedNode != null) {
+    // If the selected node is a sphere
+    if (selectedNode instanceof SphereNode) {
+      // If x is smaller than half the canvas width, minimize windowGroup1, otherwise minimize windowGroup2
+      if (x > ctx_raster.canvas.width / 2) {
+        // Minimize window 1
+        minimize(windowGroup1);
+        // Jump the taskbar button
+        jumpAnimation(taskbarButtonGroup1);
+      } else {
+        // Minimize window 2
+        minimize(windowGroup2);
+        // Jump the taskbar button
+        jumpAnimation(taskbarButtonGroup2);
+      }
+    }
+    // If the selected node is an AA box
+    if (selectedNode instanceof AABoxNode) {
+      // Determine which taskbar button was clicked, depending on the color of the box
+      if (x > ctx_raster.canvas.width / 2) {
+        // If the window is minimized, maximize it
+        if (Math.floor(windowGroup1.getTransformation().getMatrix().data[0]) == 0) {
+          maximize(windowGroup1);
+        }
+
+        // If the window is maximized, minimize it
+        else {
+          minimize(windowGroup1);
+        }
+
+        // Jump the taskbar button
+        jumpAnimation(taskbarButtonGroup1);
+      } else {
+        // If the window is minimized, maximize it
+        if (Math.floor(windowGroup2.getTransformation().getMatrix().data[0]) == 0) {
+          maximize(windowGroup2);
+        }
+
+        // If the window is maximized, minimize it
+        else {
+          minimize(windowGroup2);
+        }
+        // Jump the taskbar button
+        jumpAnimation(taskbarButtonGroup2);
+      }
+    }
+  }
+}
 
 function jumpAnimation(taskbarButtonGroup1: GroupNode) {
   boxBounce = new JumperNode(taskbarButtonGroup1, new Vector(0, 1, 0, 0), taskbarButtonGroup1.getTransformation().getMatrix());
