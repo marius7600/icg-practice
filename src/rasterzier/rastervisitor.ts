@@ -7,6 +7,7 @@ import Node from "../nodes/node";
 import PyramidNode from "../nodes/pyramid-node";
 import SphereNode from "../nodes/shere-node";
 import TextureBoxNode from "../nodes/texture-box-node";
+import TextureVideoBoxNode from "../nodes/texture-video-box-node";
 import PhongProperties from "../phong-properties";
 import Shader from "../shader/shader";
 import Vector from "../vector";
@@ -15,6 +16,7 @@ import RasterPyramid from "./raster-Pyramid";
 import RasterBox from "./raster-box";
 import RasterSphere from "./raster-sphere";
 import RasterTextureBox from "./raster-texture-box";
+import RasterVideoTextureBox from "./raster-texture-box-video";
 
 interface Renderable {
   render(shader: Shader): void;
@@ -142,6 +144,10 @@ export class RasterVisitor implements Visitor {
     this.visitNode(node);
   }
 
+  visitTextureVideoBoxNode(node: TextureVideoBoxNode) {
+    this.visitNode(node);
+  }
+
   /**
    * Visits a group node in the camera traversal used in GroupNode Base Class
    * searches für Camera, if found visitCameraNode() is called
@@ -202,6 +208,8 @@ export class RasterVisitor implements Visitor {
   private visitNode(node: Node) {
     let shader = this.shader;
     if (node instanceof TextureBoxNode) {
+      shader = this.textureshader;
+    } if (node instanceof TextureVideoBoxNode) {
       shader = this.textureshader;
     }
     shader.use();
@@ -336,6 +344,17 @@ export class RasterSetupVisitor {
         node.maxPoint,
         node.texture
       )
+    );
+  }
+
+  visitTextureVideoBoxNode(node: TextureVideoBoxNode) {
+    let normalMap = "normalneutral.png";
+    if (node.normal) {
+      normalMap = node.normal;
+    }
+    this.objects.set(
+      node,
+      new RasterVideoTextureBox(this.gl, node.minPoint, node.maxPoint, node.texture)
     );
   }
 

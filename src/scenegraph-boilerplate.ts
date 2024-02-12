@@ -9,6 +9,7 @@ import LightNode from "./nodes/light-node";
 import PyramidNode from "./nodes/pyramid-node";
 import SphereNode from "./nodes/shere-node";
 import PhongProperties from "./phong-properties";
+import TextureVideoBoxNode from "./nodes/texture-video-box-node";
 import { RasterSetupVisitor, RasterVisitor } from "./rasterzier/rastervisitor";
 import RayVisitor from "./raytracer/rayvisitor";
 import phongFragmentShader from "./shader/phong-fragment-shader.glsl";
@@ -19,6 +20,7 @@ import Vector from "./vector";
 import TextureBoxNode from "./nodes/texture-box-node";
 import textureVertexShader from "./shader/texture-vertex-perspective-shader.glsl";
 import textureFragmentShader from "./shader/texture-fragment-shader.glsl";
+import Matrix from "./matrix";
 
 let rasterizing: boolean = true;
 
@@ -48,10 +50,24 @@ window.addEventListener("load", () => {
   const canvas_raster = document.getElementById("rasterizer") as HTMLCanvasElement;
   const ctx_raster = canvas_raster.getContext("webgl2");
 
-  // canvas_raster.addEventListener("mousemove", function (info) {
-  //   const x = info.x
-  //   const y = info.y
-  // });
+  // Method for magnifying glass effect
+
+  let magnifyingGroup = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
+  let magnifyingObject = new TextureBoxNode("source-missing-texture.png", new Vector(0.5, 0.5, 0, 1), new Vector(1.5, 1.5, 0, 1), "brickwall-normal.png")
+  magnifyingGroup.add(magnifyingObject);
+
+  canvas_raster.addEventListener("mousemove", function (info) {
+    const rect = canvas_raster.getBoundingClientRect();
+
+    // Adjust the mouse coordinates to the center of the canvas
+    const x = (info.x - rect.left) / rect.width * 5 - 2.5;
+    const y = (info.y - rect.top) / rect.height * -5 + 2.5;
+
+    //Set the magnifyingGroup position to the mouse position
+    magnifyingGroup.transform = new Translation(new Vector(x, y, -4, 0));
+
+    ctx_raster.bindFramebuffer(ctx_raster.FRAMEBUFFER, null);
+  });
 
   canvas_ray.addEventListener("click", function (info) {
     setupWindow(info,
@@ -101,7 +117,9 @@ window.addEventListener("load", () => {
   // initialize the phong properties
   phongProperties = new PhongProperties();
 
-  /* Create the scenegraph */
+  /***************************************************************/
+  /*********************  START OF SCENEGRAPH *********************/
+  /***************************************************************/
   rootNode = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
   cameraNode = new CameraNode(
     new Vector(0, 0, 0, 1), // eye
@@ -193,19 +211,26 @@ window.addEventListener("load", () => {
   window2Menu.add(window2MinimizeSphere);
 
   // Add Texture box to SceneGraph
-  const textureBoxGroup = new GroupNode(new Translation(new Vector(-1, -1, 1, 0)));
+  const textureBoxGroup = new GroupNode(new Translation(new Vector(-2, -1, 1, 0)));
   windowGroup1.add(textureBoxGroup);
-  const textureBox = new TextureBoxNode("source-missing-texture.png", new Vector(0.5, 0.5, 0.5, 1), new Vector(1, 1, 1, 1), "brickwall-normal.png");
-  textureBoxGroup.add(textureBox);
+  //const textureBox = new TextureBoxNode("source-missing-texture.png", new Vector(0.5, 0.5, 0.5, 1), new Vector(1, 1, 1, 1), "brickwall-normal.png");
+  const textureVideoBox = new TextureVideoBoxNode("assitoni.mp4", new Vector(-0.5, -0.5, -0.5, 1), new Vector(.5, .5, .5, 1));
 
+  const textureVideoBoxGroup = new GroupNode(new EmptyTransformation);
+  let rotation = rotateWithPosition(textureVideoBoxGroup);
+  textureVideoBoxGroup.transform = rotation;
 
+  textureBoxGroup.add(textureVideoBoxGroup);
+  textureVideoBoxGroup.add(textureVideoBox);
+
+  rootNode.add(magnifyingGroup);
   //Add animation node
-  // const animationNode = new RotationNode(gn1, new Vector(0, 1, 0, 0));
+  const animationNode = new RotationNode(textureBoxGroup, new Vector(1, 0, 0, 0));
   // const animationNode3 = new JumperNode(taskbarButtonGroup2, new Vector(0, 1, 0, 0));
 
   // const animationNode4 = new DriverNode(gn1);
   // const animationNode3 = new ScaleNode(taskbarButtonGroup2, new Vector(-1, -1, -1, 0));
-  // animationNode3.toggleActive();
+  //animationNode.toggleActive();
 
   /***************************************************************/
   /*********************  END OF SCENE GRAPH *********************/
@@ -269,13 +294,13 @@ window.addEventListener("load", () => {
       } else {
         // rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
         // rayVisitor.render(sceneGraph, cameraNode, phongProperties);
-        rayVisitor.render(rootNode, phongProperties, 5000);
+        rayVisitor.render(rootNode, phongProperties, 50000);
       }
       //requestAnimationFrame(animate);
       // console.log("animation loop ended");
       // console.log("animation loop ended");
       // console.log("animation loop ended");
-      //animationNode2.simulate(delta);
+      animationNode.simulate(delta);
       window.requestAnimationFrame(animate);
     }
 
@@ -355,6 +380,15 @@ window.addEventListener("load", () => {
   //     "click", () => cancelAnimationFrame(animationHandle));
 });
 
+
+function rotateWithPosition(textureVideoBoxGroup: GroupNode) {
+  const position = textureVideoBoxGroup.transform.getMatrix();
+  const inverse = textureVideoBoxGroup.transform.getInverseMatrix();
+  let rotation = new Rotation(new Vector(1, 0, 0, 0), 9.25); //Weird rotation ich raffs garnicht????
+  rotation.matrix = position.mul(rotation.getMatrix());
+  rotation.inverse = rotation.getInverseMatrix().mul(inverse);
+  return rotation;
+}
 
 function setupWindow(info: MouseEvent,
   ctx_raster: WebGL2RenderingContext,

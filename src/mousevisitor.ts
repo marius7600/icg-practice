@@ -7,6 +7,7 @@ import Node from "./nodes/node";
 import PyramidNode from "./nodes/pyramid-node";
 import SphereNode from "./nodes/shere-node";
 import TextureBoxNode from "./nodes/texture-box-node";
+import TextureVideoBoxNode from "./nodes/texture-video-box-node";
 import AABox from "./raytracer/aabox";
 import Intersection from "./raytracer/intersection";
 import Pyramid from "./raytracer/pyramid";
@@ -28,6 +29,7 @@ export default class MouseVisitor implements Visitor {
     lightNodes: Array<LightNode> = [];
 
     ray: Ray;
+
 
     constructor() {
         this.stack.push(Matrix.identity());
@@ -84,6 +86,9 @@ export default class MouseVisitor implements Visitor {
     visitTextureBoxNode(node: TextureBoxNode): void {
         // throw new Error('Method not implemented.');
     }
+
+    visitTextureVideoBoxNode(node: TextureVideoBoxNode): void { }
+
     visitCameraNode(node: CameraNode): void {
         // throw new Error('Method not implemented.');
 
