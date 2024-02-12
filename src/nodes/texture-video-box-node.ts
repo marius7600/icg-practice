@@ -4,6 +4,7 @@ import Vector from "../vector";
 
 
 export default class TextureVideoBoxNode extends Node {
+    // TODO: video is mirrored
     constructor(public texture: string, public minPoint: Vector, public maxPoint: Vector, public normal?: string) {
         super();
     }

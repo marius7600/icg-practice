@@ -384,7 +384,8 @@ window.addEventListener("load", () => {
 function rotateWithPosition(textureVideoBoxGroup: GroupNode) {
   const position = textureVideoBoxGroup.transform.getMatrix();
   const inverse = textureVideoBoxGroup.transform.getInverseMatrix();
-  let rotation = new Rotation(new Vector(1, 0, 0, 0), 9.25); //Weird rotation ich raffs garnicht????
+  // let rotation = new Rotation(new Vector(1, 0, 0, 0), 9.25); //Weird rotation ich raffs garnicht????
+  let rotation = new Rotation(new Vector(1, 0, 0, 0), 180); //Weird rotation ich raffs garnicht????
   rotation.matrix = position.mul(rotation.getMatrix());
   rotation.inverse = rotation.getInverseMatrix().mul(inverse);
   return rotation;

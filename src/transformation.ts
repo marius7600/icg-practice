@@ -51,10 +51,17 @@ export class Rotation extends MatrixTransformation {
     private _axis: Vector;
     private _angle: number;
 
+
+    /**
+     * Creates a new Rotation object.
+     * @param axis The axis of rotation.
+     * @param angle The angle of rotation in degrees.
+     */
     constructor(axis: Vector, angle: number) {
         super(Matrix.rotation(axis, angle), Matrix.rotation(axis, -angle));
         this._axis = axis;
-        this._angle = angle;
+        // this._angle = angle;
+        this.angle = angle * (Math.PI / 180);
     }
 
     set axis(axis: Vector) {
