@@ -7,6 +7,7 @@ import Node from "../nodes/node";
 import PyramidNode from "../nodes/pyramid-node";
 import SphereNode from "../nodes/shere-node";
 import TextureBoxNode from "../nodes/texture-box-node";
+import TextureTextBoxNode from "../nodes/texture-text-box-node";
 import TextureVideoBoxNode from "../nodes/texture-video-box-node";
 import PhongProperties from "../phong-properties";
 import Vector from "../vector";
@@ -208,6 +209,10 @@ export default class RayVisitor implements Visitor {
   visitTextureBoxNode(node: TextureBoxNode) { }
 
   visitTextureVideoBoxNode(node: TextureVideoBoxNode): void { }
+
+  visitTextureTextBoxNode(node: TextureTextBoxNode): void {
+
+  }
 
   visitCameraNode(node: CameraNode) {
     // Frage an Marius: warum machen wir uns den ganzen aufwand, und verwenden nicht einfach node.eye, node.center, node.up?

@@ -33,17 +33,27 @@
     </nav>
     <br>
     <div class="container">
-        <!-- Raytracer Canvas -->
-        <figure id="raytracer_fig" style="display:none">
-            <canvas id="raytracer" class="figure-img mx-auto d-block rounded" width="500" height="500"></canvas>
-            <figcaption class="figure-caption text-center">Raytracer</figcaption>
-        </figure>
-        <!-- Rasterizer Canvas -->
-        <figure id="rasterizer_fig">
-            <canvas id="rasterizer" class="figure-img mx-auto d-block rounded" width="500" height="500"></canvas>
-            <figcaption class="figure-caption text-center">Rasterizer</figcaption>
-        </figure>
-        <div>
+        <!-- Canvases Container -->
+        <div style="display: flex; justify-content: flex-start; align-items: flex-start;">
+            <!-- Raytracer Canvas -->
+            <figure id="raytracer_fig" style="display:none">
+                <canvas id="raytracer" class="figure-img mx-auto d-block rounded canvas" width="500" height="500"></canvas>
+                <figcaption class="figure-caption text-center">Raytracer</figcaption>
+            </figure>
+            <!-- Rasterizer Canvas -->
+            <figure id="rasterizer_fig">
+                <canvas id="rasterizer" class="figure-img mx-auto d-block rounded canvas" width="500" height="500"></canvas>
+                <figcaption class="figure-caption text-center">Rasterizer</figcaption>
+            </figure>
+            <!-- Drawing canvas with blue background -->
+            <div style="display:flex; justify-content: center; align-items: center;">
+                <figure style="margin-top:150px">
+                    <canvas id="drawing" class="figure-img mx-auto d-block rounded" width="200" height="200" style="background-color: #0000ff;"></canvas> 
+                   <!-- Button to clear the canvas -->
+                    <button id="clearCanvas" style="margin-top:10px">Clear Canvas</button>
+                </figure>
+            </div>
+        </div>
         <!-- Animation on/off -->
         <div class="animation-toggle">
             <div id="animation-toggle">

@@ -3,18 +3,18 @@ import Visitor from "../visitor";
 import Vector from "../vector";
 
 
-export default class TextureVideoBoxNode extends Node {
-    constructor(public texture: string, public minPoint: Vector, public maxPoint: Vector, public normal?: string) {
+export default class TextureTextBoxNode extends Node {
+    constructor(public texture: string, public minPoint: Vector, public maxPoint: Vector, public id?: number, public normal?: string) {
         super();
     }
 
     accept(visitor: Visitor) {
-        visitor.visitTextureVideoBoxNode(this);
+        visitor.visitTextureTextBoxNode(this);
     }
 
     toJSON() {
         return {
-            TextureVideoBoxNode: {
+            TextureTextBoxNode: {
                 texture: this.texture,
                 normal: this.normal,
             },

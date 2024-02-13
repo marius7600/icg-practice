@@ -64,7 +64,7 @@ export class RotationNode extends AnimationNode {
       this.angle = Math.PI * 4;
       const position = this.groupNode.transform.getMatrix();
       const inverse = this.groupNode.transform.getInverseMatrix();
-      let rotation = new Rotation(this.axis, this.angle * deltaT / 10000);
+      let rotation = new Rotation(this.axis, this.angle * deltaT / 700);
       rotation.matrix = position.mul(rotation.getMatrix());
       rotation.inverse = rotation.getInverseMatrix().mul(inverse);
       this.groupNode.transform = rotation;

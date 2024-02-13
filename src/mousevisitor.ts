@@ -7,12 +7,15 @@ import Node from "./nodes/node";
 import PyramidNode from "./nodes/pyramid-node";
 import SphereNode from "./nodes/shere-node";
 import TextureBoxNode from "./nodes/texture-box-node";
+import TextureTextBoxNode from "./nodes/texture-text-box-node";
 import TextureVideoBoxNode from "./nodes/texture-video-box-node";
+import RasterTextTextureBox from "./rasterzier/raster-texture-box-text";
 import AABox from "./raytracer/aabox";
 import Intersection from "./raytracer/intersection";
 import Pyramid from "./raytracer/pyramid";
 import Ray from "./raytracer/ray";
 import Sphere from "./raytracer/ray-sphere";
+import Vector from "./vector";
 import Visitor from "./visitor";
 
 interface Intersectable {
@@ -89,6 +92,24 @@ export default class MouseVisitor implements Visitor {
 
     visitTextureVideoBoxNode(node: TextureVideoBoxNode): void { }
 
+    visitTextureTextBoxNode(node: TextureTextBoxNode): void {
+        // Get the transformation matrix for the current node
+        let m = this.stack[this.stack.length - 1];
+
+        // Transform the min and max points of the node
+        let min = m.mul(node.minPoint);
+        let max = m.mul(node.maxPoint);
+
+        // Create an AABox that represents the bounding box of the node
+        let box = new AABox(min, max, new Vector(0, 0, 0, 1));
+
+        // Add the box to the intersectables array
+        this.intersectables.push(box);
+
+        // Add the node to the nodes array
+        this.nodes.push(node);
+    }
+
     visitCameraNode(node: CameraNode): void {
         // throw new Error('Method not implemented.');
 
@@ -127,7 +148,7 @@ export default class MouseVisitor implements Visitor {
      * @param context context of the canvas either CanvasRenderingContext2D or WebGL2RenderingContext
      * @returns the closest node to the mouse position
      */
-    getSelectedNode(
+    public getSelectedNode(
         sceneGraph: Node,
         mouse_x: number,
         mouse_y: number,
@@ -152,6 +173,8 @@ export default class MouseVisitor implements Visitor {
 
         let minIntersection = new Intersection(Infinity, null, null);
         let selectedNode: Node = null;
+        console.log(this.intersectables);
+
         for (
             let i = 0;
             i < this.intersectables.length && i < this.nodes.length;
@@ -169,6 +192,8 @@ export default class MouseVisitor implements Visitor {
                 selectedNode = this.nodes[i];
             }
         }
+        //console.log("Selected node is:", selectedNode);
+
         return selectedNode;
     }
 }

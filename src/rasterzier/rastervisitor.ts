@@ -7,6 +7,7 @@ import Node from "../nodes/node";
 import PyramidNode from "../nodes/pyramid-node";
 import SphereNode from "../nodes/shere-node";
 import TextureBoxNode from "../nodes/texture-box-node";
+import TextureTextBoxNode from "../nodes/texture-text-box-node";
 import TextureVideoBoxNode from "../nodes/texture-video-box-node";
 import PhongProperties from "../phong-properties";
 import Shader from "../shader/shader";
@@ -16,6 +17,7 @@ import RasterPyramid from "./raster-Pyramid";
 import RasterBox from "./raster-box";
 import RasterSphere from "./raster-sphere";
 import RasterTextureBox from "./raster-texture-box";
+import RasterTextTextureBox from "./raster-texture-box-text";
 import RasterVideoTextureBox from "./raster-texture-box-video";
 
 interface Renderable {
@@ -142,10 +144,17 @@ export class RasterVisitor implements Visitor {
    */
   visitTextureBoxNode(node: TextureBoxNode) {
     this.visitNode(node);
+    // DONT FORGET TO SET THE TEXTURE IN VISIT NODE
   }
 
   visitTextureVideoBoxNode(node: TextureVideoBoxNode) {
     this.visitNode(node);
+    // DONT FORGET TO SET THE TEXTURE IN VISIT NODE
+  }
+
+  visitTextureTextBoxNode(node: TextureTextBoxNode): void {
+    this.visitNode(node);
+    // DONT FORGET TO SET THE TEXTURE IN VISIT NODE
   }
 
   /**
@@ -210,6 +219,8 @@ export class RasterVisitor implements Visitor {
     if (node instanceof TextureBoxNode) {
       shader = this.textureshader;
     } if (node instanceof TextureVideoBoxNode) {
+      shader = this.textureshader;
+    } if (node instanceof TextureTextBoxNode) {
       shader = this.textureshader;
     }
     shader.use();
@@ -344,6 +355,17 @@ export class RasterSetupVisitor {
         node.maxPoint,
         node.texture
       )
+    );
+  }
+
+  visitTextureTextBoxNode(node: TextureTextBoxNode) {
+    let normalMap = "normalneutral.png";
+    if (node.normal) {
+      normalMap = node.normal;
+    }
+    this.objects.set(
+      node,
+      new RasterTextTextureBox(this.gl, node.minPoint, node.maxPoint, node.texture)
     );
   }
 

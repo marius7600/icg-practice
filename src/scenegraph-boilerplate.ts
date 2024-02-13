@@ -15,12 +15,14 @@ import RayVisitor from "./raytracer/rayvisitor";
 import phongFragmentShader from "./shader/phong-fragment-shader.glsl";
 import phongVertexShader from "./shader/phong-vertex-perspective-shader.glsl";
 import Shader from "./shader/shader";
-import { EmptyTransformation, RotateWithPosition, Rotation, Scaling, Transform4x4, Translation } from "./transformation";
+import { EmptyTransformation, Rotation, Scaling, Transform4x4, Translation } from "./transformation";
 import Vector from "./vector";
 import TextureBoxNode from "./nodes/texture-box-node";
 import textureVertexShader from "./shader/texture-vertex-perspective-shader.glsl";
 import textureFragmentShader from "./shader/texture-fragment-shader.glsl";
 import Matrix from "./matrix";
+import TextureTextBoxNode from "./nodes/texture-text-box-node";
+import Node from "./nodes/node";
 
 let rasterizing: boolean = true;
 
@@ -43,6 +45,10 @@ let textureShader: Shader;
 let minMaxAnimation: ScaleNode;
 let boxBounce: JumperNode;
 
+let selectedNode: Node;
+
+let currentPlayer = true; // true = X, false = O
+
 window.addEventListener("load", () => {
   const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
   const ctx_ray = canvas_ray.getContext("2d");
@@ -50,24 +56,60 @@ window.addEventListener("load", () => {
   const canvas_raster = document.getElementById("rasterizer") as HTMLCanvasElement;
   const ctx_raster = canvas_raster.getContext("webgl2");
 
+  const mouseVisitor = new MouseVisitor();
+
   // Method for magnifying glass effect
 
-  let magnifyingGroup = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
-  let magnifyingObject = new TextureBoxNode("source-missing-texture.png", new Vector(0.5, 0.5, 0, 1), new Vector(1.5, 1.5, 0, 1), "brickwall-normal.png")
-  magnifyingGroup.add(magnifyingObject);
+  // let magnifyingGroup = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
+  // let magnifyingObject = new TextureBoxNode("source-missing-texture.png", new Vector(0.5, 0.5, 0, 1), new Vector(1.5, 1.5, 0, 1), "brickwall-normal.png")
+  // magnifyingGroup.add(magnifyingObject);
 
-  canvas_raster.addEventListener("mousemove", function (info) {
-    const rect = canvas_raster.getBoundingClientRect();
+  // Get a reference to the canvas and its context
+  const canvas = document.getElementById('drawing') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d');
 
-    // Adjust the mouse coordinates to the center of the canvas
-    const x = (info.x - rect.left) / rect.width * 5 - 2.5;
-    const y = (info.y - rect.top) / rect.height * -5 + 2.5;
+  // Set the fill color to black
+  ctx.fillStyle = 'white';
 
-    //Set the magnifyingGroup position to the mouse position
-    magnifyingGroup.transform = new Translation(new Vector(x, y, -4, 0));
+  // Flag to keep track of whether the mouse button is down
+  let isDrawing = false;
 
-    ctx_raster.bindFramebuffer(ctx_raster.FRAMEBUFFER, null);
+  // Function to start drawing
+  canvas.addEventListener('mousedown', function () {
+    isDrawing = true;
   });
+
+  // Function to stop drawing
+  canvas.addEventListener('mouseup', function () {
+    isDrawing = false;
+  });
+
+  // Function to draw a pixel at the mouse position
+  canvas.addEventListener('mousemove', function (e) {
+    if (!isDrawing) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    ctx.fillRect(x, y, 3, 3);
+  });
+
+  // Function to clear the canvas
+  document.getElementById('clearCanvas')?.addEventListener('click', function () {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+
+  // canvas_raster.addEventListener("mousemove", function (info) {
+  //   const rect = canvas_raster.getBoundingClientRect();
+
+  //   // Adjust the mouse coordinates to the center of the canvas
+  //   const x = (info.x - rect.left) / rect.width * 5 - 2.5;
+  //   const y = (info.y - rect.top) / rect.height * -5 + 2.5;
+
+  //   //Set the magnifyingGroup position to the mouse position
+  //   magnifyingGroup.transform = new Translation(new Vector(x, y, -4, 0));
+
+  //   ctx_raster.bindFramebuffer(ctx_raster.FRAMEBUFFER, null);
+  // });
 
   canvas_ray.addEventListener("click", function (info) {
     setupWindow(info,
@@ -80,6 +122,10 @@ window.addEventListener("load", () => {
       taskbarButtonGroup2,
       taskbarButton1,
       taskbarButton2);
+    //Playing tik tak toe
+    selectedNode = mouseVisitor.getSelectedNode(rootNode, info.offsetX, info.offsetY, ctx_raster);
+    CheckTikTakToeField(currentPlayer, selectedNode);
+    currentPlayer = !currentPlayer;
   });
 
   // Add a click event listener to the canvas
@@ -94,7 +140,12 @@ window.addEventListener("load", () => {
       windowGroup2,
       taskbarButtonGroup2,
       taskbarButton1,
-      taskbarButton2);
+      taskbarButton2,
+    );
+    //Playing tik tak toe
+    selectedNode = mouseVisitor.getSelectedNode(rootNode, info.offsetX, info.offsetY, ctx_raster);
+    CheckTikTakToeField(currentPlayer, selectedNode);
+    currentPlayer = !currentPlayer;
   });
 
 
@@ -217,15 +268,16 @@ window.addEventListener("load", () => {
   const textureVideoBox = new TextureVideoBoxNode("assitoni.mp4", new Vector(-0.5, -0.5, -0.5, 1), new Vector(.5, .5, .5, 1));
 
   const textureVideoBoxGroup = new GroupNode(new EmptyTransformation);
-  //let rot = new Rotation(new Vector(1, 0, 0, 0), 180);
-  //let rotation = rot.RotateWithPosition(textureVideoBoxGroup, rot);
-  let rotation = new RotateWithPosition(textureVideoBoxGroup, new Rotation(new Vector(1, 0, 0, 0), 180));
+  let rotation = rotateWithPosition(textureVideoBoxGroup);
   textureVideoBoxGroup.transform = rotation;
 
   textureBoxGroup.add(textureVideoBoxGroup);
   textureVideoBoxGroup.add(textureVideoBox);
 
-  rootNode.add(magnifyingGroup);
+  const ticTacToeRoot = new GroupNode(new Translation(new Vector(2.3, -1.4, 0, 0)));
+  ticTacToeRoot.add(createTicTacToe());
+  windowGroup2.add(ticTacToeRoot);
+
   //Add animation node
   const animationNode = new RotationNode(textureBoxGroup, new Vector(1, 0, 0, 0));
   // const animationNode3 = new JumperNode(taskbarButtonGroup2, new Vector(0, 1, 0, 0));
@@ -240,6 +292,54 @@ window.addEventListener("load", () => {
 
   // let myBox = new AABoxNode(new Vector(50, 0.8, 0.8, 1));
   // sceneGraph.add(myBox);
+
+  function createTicTacToe() {
+    // Scale the size of the cubes
+    const ticTacToeScaling = new GroupNode(new Scaling(new Vector(1.5, 1.5, 1.5, 1)));
+    //Add the cubes to the scaler
+    let idCounter = 0;
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        //Position of the cubes in the tic tac toe
+        const position = new GroupNode(new Translation(new Vector(i * 0.6, j * 0.6, 0, 1)));
+        let cube = new TextureTextBoxNode("", new Vector(0, 0, 0, 1), new Vector(0.5, 0.5, 0.1, 1), idCounter);
+        position.add(cube);
+        ticTacToeScaling.add(position);
+        idCounter++;
+      }
+    }
+    return ticTacToeScaling;
+  }
+
+  function CheckTikTakToeField(currentPlayer: boolean, selectedNode: Node) {
+    if (currentPlayer) {
+      if (selectedNode instanceof TextureTextBoxNode) {
+        if (selectedNode.texture == "X") {
+          selectedNode.texture = "O";
+          rasterSetupVisitor.setup(rootNode);
+        } else if (selectedNode.texture == "O") {
+          selectedNode.texture = "";
+          rasterSetupVisitor.setup(rootNode);
+        } else {
+          selectedNode.texture = "X";
+          rasterSetupVisitor.setup(rootNode);
+        }
+      }
+    } else {
+      if (selectedNode instanceof TextureTextBoxNode) {
+        if (selectedNode.texture == "O") {
+          selectedNode.texture = "X";
+          rasterSetupVisitor.setup(rootNode);
+        } else if (selectedNode.texture == "X") {
+          selectedNode.texture = "";
+          rasterSetupVisitor.setup(rootNode);
+        } else {
+          selectedNode.texture = "O";
+          rasterSetupVisitor.setup(rootNode);
+        }
+      }
+    }
+  }
 
   // setup for raytracing rendering
   rayVisitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
@@ -381,6 +481,17 @@ window.addEventListener("load", () => {
   // document.getElementById("stopAnimationBtn").addEventListener(
   //     "click", () => cancelAnimationFrame(animationHandle));
 });
+
+
+function rotateWithPosition(textureVideoBoxGroup: GroupNode) {
+  const position = textureVideoBoxGroup.transform.getMatrix();
+  const inverse = textureVideoBoxGroup.transform.getInverseMatrix();
+  // let rotation = new Rotation(new Vector(1, 0, 0, 0), 9.25); //Weird rotation ich raffs garnicht????
+  let rotation = new Rotation(new Vector(1, 0, 0, 0), 180); //Weird rotation ich raffs garnicht????
+  rotation.matrix = position.mul(rotation.getMatrix());
+  rotation.inverse = rotation.getInverseMatrix().mul(inverse);
+  return rotation;
+}
 
 function setupWindow(info: MouseEvent,
   ctx_raster: WebGL2RenderingContext,
