@@ -25,4 +25,13 @@ export default class TextureBoxNode extends Node {
     // TODO
     visitor.visitTextureBoxNode(this);
   }
+
+  toJSON() {
+    return {
+      TextureBoxNode: {
+        texture: this.texture,
+        normal: this.normal,
+      },
+    };
+  }
 }

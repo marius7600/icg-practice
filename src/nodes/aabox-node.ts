@@ -36,4 +36,13 @@ export default class AABoxNode extends Node {
   toString() {
     return `AABoxNode: ${this.color}`;
   }
+
+  toJSON() {
+    return {
+      AABoxNode: {
+        color: this.color,
+      },
+    };
+  }
+
 }

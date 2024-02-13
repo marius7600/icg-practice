@@ -9,6 +9,7 @@ import Vector from "./vector";
 export interface Transformation {
     getMatrix(): Matrix;
     getInverseMatrix(): Matrix;
+    toJSON(): any;
 }
 
 class MatrixTransformation implements Transformation {
@@ -31,6 +32,33 @@ class MatrixTransformation implements Transformation {
 
     getInverseMatrix(): Matrix {
         return this.inverse;
+    }
+
+    toJSON() {
+        let transform;
+        if (this instanceof Translation) {
+            transform = {
+                Translation: {
+                    matrix: this.matrix.toJSON(),
+                    inverse: this.inverse.toJSON(),
+                },
+            };
+        } else if (this instanceof Rotation) {
+            transform = {
+                Rotation: {
+                    matrix: this.matrix.toJSON(),
+                    inverse: this.inverse.toJSON(),
+                },
+            };
+        } else if (this instanceof Scaling) {
+            transform = {
+                Scaling: {
+                    matrix: this.matrix.toJSON(),
+                    inverse: this.inverse.toJSON(),
+                },
+            };
+        }
+        return transform;
     }
 }
 

@@ -23,4 +23,12 @@ export default class PyramidNode extends Node {
   accept(visitor: Visitor) {
     visitor.visitPyramidNode(this);
   }
+
+  toJSON() {
+    return {
+      PyramidNode: {
+        color: this.color,
+      },
+    };
+  }
 }

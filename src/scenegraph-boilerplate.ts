@@ -43,6 +43,19 @@ let textureShader: Shader;
 let minMaxAnimation: ScaleNode;
 let boxBounce: JumperNode;
 
+interface SceneObj {
+  rootNode: GroupNode;
+  nodes: any[];
+  phongValues: PhongValues;
+}
+
+export default interface PhongValues {
+  ambient: number;
+  diffuse: number;
+  specular: number;
+  shininess: number;
+}
+
 window.addEventListener("load", () => {
   const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
   const ctx_ray = canvas_ray.getContext("2d");
@@ -120,6 +133,11 @@ window.addEventListener("load", () => {
   /***************************************************************/
   /*********************  START OF SCENEGRAPH *********************/
   /***************************************************************/
+
+  let scene: SceneObj;
+
+  let nodes: any[] = [];
+
   rootNode = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
   cameraNode = new CameraNode(
     new Vector(0, 0, 0, 1), // eye
@@ -339,6 +357,20 @@ window.addEventListener("load", () => {
       lastTimestamp = 0;
     }
   }
+
+  let downloadButton = document.getElementById("downloadButton");
+  downloadButton.onclick = () => {
+    scene = {
+      rootNode: rootNode,
+      nodes: nodes,
+      phongValues: phongProperties,
+    };
+    var anchor = document.createElement("a");
+    var file = new Blob([JSON.stringify(scene)], { type: "JSON" });
+    anchor.href = URL.createObjectURL(file);
+    anchor.download = "scene";
+    anchor.click();
+  };
 
 
 

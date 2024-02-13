@@ -34,4 +34,10 @@ export default class CameraNode extends Node {
   accept(visitor: Visitor) {
     visitor.visitCameraNode(this);
   }
+
+  toJSON() {
+    return {
+      CameraNode: {},
+    };
+  }
 }
