@@ -1,4 +1,8 @@
 import Matrix from "./matrix";
+import AABoxNode from "./nodes/aabox-node";
+import GroupNode from "./nodes/group-node";
+import TextureBoxNode from "./nodes/texture-box-node";
+import TextureVideoBoxNode from "./nodes/texture-video-box-node";
 import Vector from "./vector";
 // import Quaternion from './quaternion';
 
@@ -61,7 +65,7 @@ export class Rotation extends MatrixTransformation {
         super(Matrix.rotation(axis, angle), Matrix.rotation(axis, -angle));
         this._axis = axis;
         // this._angle = angle;
-        this.angle = angle * (Math.PI / 180);
+        this.angle = angle * (Math.PI / 180); //Convert to radians, because Math.sin and Math.cos expect radians
     }
 
     set axis(axis: Vector) {
@@ -79,6 +83,13 @@ export class Rotation extends MatrixTransformation {
         this.inverse = Matrix.rotation(this._axis, -this._angle);
     }
 }
+
+export class RotateWithPosition extends MatrixTransformation {
+    constructor(node: GroupNode, rotation: Rotation) {
+        super(node.transform.getMatrix().mul(rotation.getMatrix()), rotation.getInverseMatrix().mul(node.transform.getInverseMatrix()));
+    }
+}
+
 
 export class Scaling extends MatrixTransformation {
     constructor(scale: Vector) {

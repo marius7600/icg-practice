@@ -15,7 +15,7 @@ import RayVisitor from "./raytracer/rayvisitor";
 import phongFragmentShader from "./shader/phong-fragment-shader.glsl";
 import phongVertexShader from "./shader/phong-vertex-perspective-shader.glsl";
 import Shader from "./shader/shader";
-import { EmptyTransformation, Rotation, Scaling, Transform4x4, Translation } from "./transformation";
+import { EmptyTransformation, RotateWithPosition, Rotation, Scaling, Transform4x4, Translation } from "./transformation";
 import Vector from "./vector";
 import TextureBoxNode from "./nodes/texture-box-node";
 import textureVertexShader from "./shader/texture-vertex-perspective-shader.glsl";
@@ -217,7 +217,9 @@ window.addEventListener("load", () => {
   const textureVideoBox = new TextureVideoBoxNode("assitoni.mp4", new Vector(-0.5, -0.5, -0.5, 1), new Vector(.5, .5, .5, 1));
 
   const textureVideoBoxGroup = new GroupNode(new EmptyTransformation);
-  let rotation = rotateWithPosition(textureVideoBoxGroup);
+  //let rot = new Rotation(new Vector(1, 0, 0, 0), 180);
+  //let rotation = rot.RotateWithPosition(textureVideoBoxGroup, rot);
+  let rotation = new RotateWithPosition(textureVideoBoxGroup, new Rotation(new Vector(1, 0, 0, 0), 180));
   textureVideoBoxGroup.transform = rotation;
 
   textureBoxGroup.add(textureVideoBoxGroup);
@@ -379,17 +381,6 @@ window.addEventListener("load", () => {
   // document.getElementById("stopAnimationBtn").addEventListener(
   //     "click", () => cancelAnimationFrame(animationHandle));
 });
-
-
-function rotateWithPosition(textureVideoBoxGroup: GroupNode) {
-  const position = textureVideoBoxGroup.transform.getMatrix();
-  const inverse = textureVideoBoxGroup.transform.getInverseMatrix();
-  // let rotation = new Rotation(new Vector(1, 0, 0, 0), 9.25); //Weird rotation ich raffs garnicht????
-  let rotation = new Rotation(new Vector(1, 0, 0, 0), 180); //Weird rotation ich raffs garnicht????
-  rotation.matrix = position.mul(rotation.getMatrix());
-  rotation.inverse = rotation.getInverseMatrix().mul(inverse);
-  return rotation;
-}
 
 function setupWindow(info: MouseEvent,
   ctx_raster: WebGL2RenderingContext,
