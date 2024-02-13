@@ -358,6 +358,7 @@ window.addEventListener("load", () => {
     }
   }
 
+  // dowload scene as JSON file
   let downloadButton = document.getElementById("downloadButton");
   downloadButton.onclick = () => {
     scene = {
@@ -371,6 +372,27 @@ window.addEventListener("load", () => {
     anchor.download = "scene.json";
     anchor.click();
   };
+
+  // upload scene from JSON file
+  let uploadButton = document.getElementById("uploadButton");
+  uploadButton.onclick = () => {
+    let fileSelector = document.createElement("input");
+    fileSelector.setAttribute("type", "file");
+    fileSelector.onchange = () => {
+      let file = fileSelector.files[0];
+      let reader = new FileReader();
+      reader.onload = (event) => {
+        let scene = JSON.parse(event.target.result as string);
+        rootNode = scene.rootNode;
+        nodes = scene.nodes;
+        phongProperties = scene.phongValues;
+      };
+      reader.readAsText(file);
+    };
+    fileSelector.click();
+  };
+
+
 
 
 
