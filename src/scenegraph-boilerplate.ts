@@ -366,9 +366,9 @@ window.addEventListener("load", () => {
       phongValues: phongProperties,
     };
     var anchor = document.createElement("a");
-    var file = new Blob([JSON.stringify(scene)], { type: "JSON" });
+    var file = new Blob([JSON.stringify(scene)], { type: "application/json" });
     anchor.href = URL.createObjectURL(file);
-    anchor.download = "scene";
+    anchor.download = "scene.json";
     anchor.click();
   };
 
