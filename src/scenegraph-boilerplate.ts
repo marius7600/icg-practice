@@ -93,9 +93,21 @@ window.addEventListener("load", () => {
     ctx.fillRect(x, y, 3, 3);
   });
 
-  // Function to clear the canvas
+  // Function to clear the drawable canvas
   document.getElementById('clearCanvas')?.addEventListener('click', function () {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+
+  // Function to clear the game
+  document.getElementById('clearGame')?.addEventListener('click', function () {
+    ticTacToeRoot.children = [];
+    const newTicTacToe = new GroupNode(new Translation(new Vector(-1.3, -1.4, 0, 0)));
+    newTicTacToe.add(createTicTacToe());
+    //Remove the old game and add a new one
+    rightWindowGroup.children.pop();
+    rightWindowGroup.add(newTicTacToe);
+    rasterSetupVisitor.setup(rootNode);
+    currentPlayer = true;
   });
 
   // canvas_raster.addEventListener("mousemove", function (info) {
@@ -114,11 +126,11 @@ window.addEventListener("load", () => {
   canvas_ray.addEventListener("click", function (info) {
     setupWindow(info,
       ctx_raster,
-      window1minimizeSphere,
-      windowGroup1,
+      rightWindowMinimizeSphere,
+      rightWindowGroup,
       taskbarButtonGroup1,
-      window2MinimizeSphere,
-      windowGroup2,
+      leftWindowMinimizeSphere,
+      leftWindowGroup,
       taskbarButtonGroup2,
       taskbarButton1,
       taskbarButton2);
@@ -133,11 +145,11 @@ window.addEventListener("load", () => {
     // Get the x and y coordinates of the click
     setupWindow(info,
       ctx_raster,
-      window1minimizeSphere,
-      windowGroup1,
+      rightWindowMinimizeSphere,
+      rightWindowGroup,
       taskbarButtonGroup1,
-      window2MinimizeSphere,
-      windowGroup2,
+      leftWindowMinimizeSphere,
+      leftWindowGroup,
       taskbarButtonGroup2,
       taskbarButton1,
       taskbarButton2,
@@ -184,20 +196,20 @@ window.addEventListener("load", () => {
   rootNode.add(cameraNode);
 
   // add group node
-  const groupNode1 = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
-  rootNode.add(groupNode1);
+  const groupNodeUnderRoot = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
+  rootNode.add(groupNodeUnderRoot);
 
   // add light node
   light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 4, -2, 0));
-  groupNode1.add(light1);
+  groupNodeUnderRoot.add(light1);
 
-
+  ///////////// ===== ADD TASKBAR ===== /////////////
   const taskbarButtonDimension = new Vector(.7, .7, .3, 0);
   const taskbarButtonColor = new Vector(0, 1, 0, 1);
 
   // add Taskbar to SceneGraph
   const taskbarGroup = new GroupNode(new Translation(new Vector(0, -3.3, -1, 0)));
-  groupNode1.add(taskbarGroup);
+  groupNodeUnderRoot.add(taskbarGroup);
 
   const taskBarBackground = new AABoxNode(new Vector(10, .2, .3, 0), new Vector(2, 2, 0, 1));
   taskbarGroup.add(taskBarBackground)
@@ -214,6 +226,7 @@ window.addEventListener("load", () => {
   taskbarButtonGroup2.add(taskbarButton2)
   taskbarGroup.add(taskbarButtonGroup2)
 
+  ///////////// ===== WINDOW VARIABLES ===== /////////////
   // variables for the windows
   const windowDimension = new Vector(3, 3, 0, 1);
   const windowBackgroundColor = new Vector(0.8, 0.8, 0.8, 1);
@@ -225,47 +238,55 @@ window.addEventListener("load", () => {
   const minimizeSphereRadius = 0.13;
   const minimizeSphereColor = new Vector(0.9, 0.7, 0.3, 1);
 
+  ///////////// ===== ADD RIGHT WINDOW ===== /////////////
   // groupNode for the first application window
-  const windowGroup1 = new GroupNode(new Translation(new Vector(1.8, 0, -1, 0)));
-  groupNode1.add(windowGroup1);
+  const rightWindowGroup = new GroupNode(new Translation(new Vector(1.8, 0, -1, 0)));
+  groupNodeUnderRoot.add(rightWindowGroup);
 
-  // add background for windowGroup1
-  const window1Background = new AABoxNode(windowDimension, windowBackgroundColor);
-  windowGroup1.add(window1Background);
+  // add background for rightWindowGroup
+  const rightWindowBackground = new AABoxNode(windowDimension, windowBackgroundColor);
+  rightWindowGroup.add(rightWindowBackground);
 
-  const window1Menu = new GroupNode(new Translation(new Vector(0, 1.5, 0, 0)));
-  const window1MenuBackground = new AABoxNode(windowMenuDimension, windowMenuBackgroundColor);
-  window1Menu.add(window1MenuBackground);
+  const rightWindowMenu = new GroupNode(new Translation(new Vector(0, 1.5, 0, 0)));
+  const rightWindowMenuBackground = new AABoxNode(windowMenuDimension, windowMenuBackgroundColor);
+  rightWindowMenu.add(rightWindowMenuBackground);
 
-  const window1minimizeSphere = new SphereNode(minimizeSphereColor, minimizeSphereDimension, minimizeSphereRadius);
-  window1Menu.add(window1minimizeSphere);
+  const rightWindowMinimizeSphere = new SphereNode(minimizeSphereColor, minimizeSphereDimension, minimizeSphereRadius);
+  rightWindowMenu.add(rightWindowMinimizeSphere);
 
-  windowGroup1.add(window1Menu);
+  rightWindowGroup.add(rightWindowMenu);
 
+  // Add ticTacToe to the right window
+  const ticTacToeRoot = new GroupNode(new Translation(new Vector(-1.3, -1.4, 0, 0)));
+  ticTacToeRoot.add(createTicTacToe());
+  rightWindowGroup.add(ticTacToeRoot);
+
+  ///////////// ===== ADD LEFT WINDOW ===== /////////////
   // groupNode for the secound application window
-  const windowGroup2 = new GroupNode(new Translation(new Vector(-1.8, 0, -1, 0)));
-  groupNode1.add(windowGroup2);
+  const leftWindowGroup = new GroupNode(new Translation(new Vector(-1.8, 0, -1, 0)));
+  groupNodeUnderRoot.add(leftWindowGroup);
 
-  // add background for windowGroup2
+  // add background for leftWindowGroup
   const window2Background = new AABoxNode(windowDimension, windowBackgroundColor);
-  windowGroup2.add(window2Background);
+  leftWindowGroup.add(window2Background);
 
-  const window2Menu = new GroupNode(new Translation(new Vector(0, 1.5, 0, 0)));
-  windowGroup2.add(window2Menu);
+  // add menue bar for leftWindowGroup
+  const leftWindowMenu = new GroupNode(new Translation(new Vector(0, 1.5, 0, 0)));
+  leftWindowGroup.add(leftWindowMenu);
 
   // Add menue bar on window 2 
-  const window2MenuBackground = new AABoxNode(windowMenuDimension, windowMenuBackgroundColor);
-  window2Menu.add(window2MenuBackground);
+  const leftWindowMenuBackground = new AABoxNode(windowMenuDimension, windowMenuBackgroundColor);
+  leftWindowMenu.add(leftWindowMenuBackground);
 
   // Add minimize sphere on window 2
-  const window2MinimizeSphere = new SphereNode(minimizeSphereColor, minimizeSphereDimension, minimizeSphereRadius);
-  window2Menu.add(window2MinimizeSphere);
+  const leftWindowMinimizeSphere = new SphereNode(minimizeSphereColor, minimizeSphereDimension, minimizeSphereRadius);
+  leftWindowMenu.add(leftWindowMinimizeSphere);
 
-  // Add Texture box to SceneGraph
-  const textureBoxGroup = new GroupNode(new Translation(new Vector(-2, -1, 1, 0)));
-  windowGroup1.add(textureBoxGroup);
+  // Add Texture box to the left window
+  const textureBoxGroup = new GroupNode(new Translation(new Vector(-1.5, 1.2, 0, 0)));
+  leftWindowGroup.add(textureBoxGroup);
   //const textureBox = new TextureBoxNode("source-missing-texture.png", new Vector(0.5, 0.5, 0.5, 1), new Vector(1, 1, 1, 1), "brickwall-normal.png");
-  const textureVideoBox = new TextureVideoBoxNode("assitoni.mp4", new Vector(-0.5, -0.5, -0.5, 1), new Vector(.5, .5, .5, 1));
+  const textureVideoBox = new TextureVideoBoxNode("assitoni.mp4", new Vector(0, 0, 0, 1), new Vector(3, 1.5, 0.1, 1));
 
   const textureVideoBoxGroup = new GroupNode(new EmptyTransformation);
   let rotation = rotateWithPosition(textureVideoBoxGroup);
@@ -273,10 +294,6 @@ window.addEventListener("load", () => {
 
   textureBoxGroup.add(textureVideoBoxGroup);
   textureVideoBoxGroup.add(textureVideoBox);
-
-  const ticTacToeRoot = new GroupNode(new Translation(new Vector(2.3, -1.4, 0, 0)));
-  ticTacToeRoot.add(createTicTacToe());
-  windowGroup2.add(ticTacToeRoot);
 
   //Add animation node
   const animationNode = new RotationNode(textureBoxGroup, new Vector(1, 0, 0, 0));
@@ -289,9 +306,6 @@ window.addEventListener("load", () => {
   /***************************************************************/
   /*********************  END OF SCENE GRAPH *********************/
   /***************************************************************/
-
-  // let myBox = new AABoxNode(new Vector(50, 0.8, 0.8, 1));
-  // sceneGraph.add(myBox);
 
   function createTicTacToe() {
     // Scale the size of the cubes
@@ -495,11 +509,11 @@ function rotateWithPosition(textureVideoBoxGroup: GroupNode) {
 
 function setupWindow(info: MouseEvent,
   ctx_raster: WebGL2RenderingContext,
-  window1minimizeSphere: SphereNode,
-  windowGroup1: GroupNode,
+  rightWindowMinimizeSphere: SphereNode,
+  rightWindowGroup: GroupNode,
   taskbarButtonGroup1: GroupNode,
-  window2MinimizeSphere: SphereNode,
-  windowGroup2: GroupNode,
+  leftWindowMinimizeSphere: SphereNode,
+  leftWindowGroup: GroupNode,
   taskbarButtonGroup2: GroupNode,
   taskbarButton1: AABoxNode,
   taskbarButton2: AABoxNode) {
@@ -513,15 +527,15 @@ function setupWindow(info: MouseEvent,
   if (selectedNode != null) {
     // If the selected node is a sphere
     if (selectedNode instanceof SphereNode) {
-      // If x is smaller than half the canvas width, minimize windowGroup1, otherwise minimize windowGroup2
+      // If x is smaller than half the canvas width, minimize rightWindowGroup, otherwise minimize leftWindowGroup
       if (x > ctx_raster.canvas.width / 2) {
         // Minimize window 1
-        minimize(windowGroup1);
+        minimize(rightWindowGroup);
         // Jump the taskbar button
         jumpAnimation(taskbarButtonGroup1);
       } else {
         // Minimize window 2
-        minimize(windowGroup2);
+        minimize(leftWindowGroup);
         // Jump the taskbar button
         jumpAnimation(taskbarButtonGroup2);
       }
@@ -531,26 +545,26 @@ function setupWindow(info: MouseEvent,
       // Determine which taskbar button was clicked, depending on the color of the box
       if (x > ctx_raster.canvas.width / 2) {
         // If the window is minimized, maximize it
-        if (Math.floor(windowGroup1.getTransformation().getMatrix().data[0]) == 0) {
-          maximize(windowGroup1);
+        if (Math.floor(rightWindowGroup.getTransformation().getMatrix().data[0]) == 0) {
+          maximize(rightWindowGroup);
         }
 
         // If the window is maximized, minimize it
         else {
-          minimize(windowGroup1);
+          minimize(rightWindowGroup);
         }
 
         // Jump the taskbar button
         jumpAnimation(taskbarButtonGroup1);
       } else {
         // If the window is minimized, maximize it
-        if (Math.floor(windowGroup2.getTransformation().getMatrix().data[0]) == 0) {
-          maximize(windowGroup2);
+        if (Math.floor(leftWindowGroup.getTransformation().getMatrix().data[0]) == 0) {
+          maximize(leftWindowGroup);
         }
 
         // If the window is maximized, minimize it
         else {
-          minimize(windowGroup2);
+          minimize(leftWindowGroup);
         }
         // Jump the taskbar button
         jumpAnimation(taskbarButtonGroup2);
@@ -564,20 +578,20 @@ function jumpAnimation(taskbarButtonGroup1: GroupNode) {
   boxBounce.toggleActive();
 }
 
-function minimize(windowGroup1: GroupNode) {
+function minimize(rightWindowGroup: GroupNode) {
   const originalScale = new Vector(1, 1, 1, 1);
   const scaleAmout = 0.001;
   const targetScale = originalScale.mul(scaleAmout);
   const duration = 5000; // in milliseconds
 
-  minMaxAnimation = new ScaleNode(windowGroup1, targetScale, duration);
+  minMaxAnimation = new ScaleNode(rightWindowGroup, targetScale, duration);
   minMaxAnimation.toggleActive();
 }
 
-function maximize(windowGroup1: GroupNode) {
+function maximize(rightWindowGroup: GroupNode) {
   const targetScale = new Vector(1.001, 1.001, 1.001, 1);
   const duration = 2; // 2 Sekunden Dauer der Animation
-  minMaxAnimation = new ScaleNode(windowGroup1, targetScale, duration);
+  minMaxAnimation = new ScaleNode(rightWindowGroup, targetScale, duration);
   minMaxAnimation.toggleActive();
 }
 
