@@ -69,7 +69,6 @@ export class RasterVisitor implements Visitor {
     this.getLightNodes(rootNode);
 
     // traverse and render
-    console.log("Root Node im Visitor: ", rootNode);
     rootNode.accept(this);
   }
 

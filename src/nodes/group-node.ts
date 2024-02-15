@@ -66,7 +66,7 @@ export default class GroupNode extends Node {
 
   toJSON() {
     const json = super.toJSON();
-    json["childNodes"] = []
+    json["childCodes"] = []
     json["transform"] = { type: this.transform.constructor.name, transformation: this.transform }
     return json
   }

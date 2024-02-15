@@ -63,11 +63,6 @@ window.addEventListener("load", () => {
   //!!!create scene graph!!!
   Scenegraph.createProjectGraph(canvas_raster.width, canvas_raster.height);
 
-  // Method for magnifying glass effect
-
-  let magnifyingGroup = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
-  let magnifyingObject = new TextureBoxNode("source-missing-texture.png", new Vector(0.5, 0.5, 0, 1), new Vector(1.5, 1.5, 0, 1), "brickwall-normal.png")
-  magnifyingGroup.add(magnifyingObject);
 
   canvas_raster.addEventListener("mousemove", function (info) {
     const rect = canvas_raster.getBoundingClientRect();
@@ -75,9 +70,6 @@ window.addEventListener("load", () => {
     // Adjust the mouse coordinates to the center of the canvas
     const x = (info.x - rect.left) / rect.width * 5 - 2.5;
     const y = (info.y - rect.top) / rect.height * -5 + 2.5;
-
-    //Set the magnifyingGroup position to the mouse position
-    magnifyingGroup.transform = new Translation(new Vector(x, y, -4, 0));
 
     ctx_raster.bindFramebuffer(ctx_raster.FRAMEBUFFER, null);
   });
