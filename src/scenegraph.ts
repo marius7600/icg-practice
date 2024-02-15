@@ -1,5 +1,6 @@
 import JsonVisitor from "./jsonVisitor";
 import AnimationNode, { DriverNode } from "./nodes/animation-nodes";
+import CameraNode from "./nodes/camera-node";
 import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
 import SphereNode from "./nodes/shere-node";
@@ -11,6 +12,7 @@ export class Scenegraph {
     private static sceneGraph: GroupNode;
     private static animationNodes: AnimationNode[] = [];
     private static driver: DriverNode;
+    private static camera: CameraNode;
 
     static getGraph() {
         if (!this.sceneGraph) {
@@ -34,6 +36,14 @@ export class Scenegraph {
 
     static getDriver() {
         return this.driver
+    }
+
+    static getCamera() {
+        return this.camera;
+    }
+
+    static setCamera(camera: CameraNode) {
+        this.camera = camera;
     }
 
     static toJSON() {
