@@ -17,6 +17,7 @@ import RasterBox from "./raster-box";
 import RasterSphere from "./raster-sphere";
 import RasterTextureBox from "./raster-texture-box";
 import RasterVideoTextureBox from "./raster-texture-box-video";
+import AnimationNode from "../nodes/animation-nodes";
 
 interface Renderable {
   render(shader: Shader): void;
@@ -68,6 +69,7 @@ export class RasterVisitor implements Visitor {
     this.getLightNodes(rootNode);
 
     // traverse and render
+    console.log("Root Node im Visitor: ", rootNode);
     rootNode.accept(this);
   }
 
@@ -259,6 +261,10 @@ export class RasterVisitor implements Visitor {
 
     this.renderables.get(node)?.render(shader);
   }
+
+  visitAnimationNode(node: AnimationNode): void {
+
+  }
 }
 
 /**
@@ -364,6 +370,11 @@ export class RasterSetupVisitor {
       new RasterPyramid(this.gl, node.minPoint, node.maxPoint, node.color)
     );
   }
+
+  visitAnimationNode(node: AnimationNode): void {
+    console.log("Method visitAnimationNode not implemented.");
+  }
+
 
 
   /**

@@ -37,12 +37,11 @@ export default class AABoxNode extends Node {
     return `AABoxNode: ${this.color}`;
   }
 
-  toJSON() {
-    return {
-      AABoxNode: {
-        color: this.color,
-      },
-    };
-  }
-
+  toJSON(): any {
+    const json = super.toJSON();
+    json["minPoint"] = this.minPoint;
+    json["maxPoint"] = this.maxPoint;
+    json["color"] = this.color;
+    return json;
+  };
 }

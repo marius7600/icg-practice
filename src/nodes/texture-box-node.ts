@@ -26,12 +26,13 @@ export default class TextureBoxNode extends Node {
     visitor.visitTextureBoxNode(this);
   }
 
-  toJSON() {
-    return {
-      TextureBoxNode: {
-        texture: this.texture,
-        normal: this.normal,
-      },
-    };
+  toJSON(): any {
+    const json = super.toJSON();
+    json["texture"] = this.texture;
+    json["minPoint"] = this.minPoint;
+    json["maxPoint"] = this.maxPoint;
+    json["normal"] = this.normal;
+    return json;
+
   }
 }

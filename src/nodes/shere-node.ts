@@ -26,11 +26,11 @@ export default class SphereNode extends Node {
     visitor.visitSphereNode(this);
   }
 
-  toJSON() {
-    return {
-      SphereNode: {
-        color: this.color,
-      },
-    };
+  toJSON(): any {
+    const json = super.toJSON();
+    json["color"] = this.color;
+    json["center"] = this.center;
+    json["radius"] = this.radius;
+    return json;
   }
 }

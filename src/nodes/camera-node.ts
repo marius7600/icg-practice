@@ -36,8 +36,14 @@ export default class CameraNode extends Node {
   }
 
   toJSON() {
-    return {
-      CameraNode: {},
-    };
+    const json = super.toJSON();
+    json["eye"] = this.eye;
+    json["center"] = this.center;
+    json["up"] = this.up;
+    json["fovy"] = this.fovy;
+    json["aspect"] = this.aspect;
+    json["near"] = this.near;
+    json["far"] = this.far;
+    return json;
   }
 }

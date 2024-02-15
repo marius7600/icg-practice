@@ -1,13 +1,15 @@
 import Vector from '../vector';
+import Node from './node';
 import GroupNode from './group-node';
 import { Rotation } from '../transformation';
 import { Translation, Scaling } from '../transformation';
 import Matrix from '../matrix';
+import Visitor from '../visitor';
 
 /**
  * Class representing an Animation
  */
-class AnimationNode {
+export default class AnimationNode extends Node {
   /**
    * Describes if the animation is running
    */
@@ -18,6 +20,7 @@ class AnimationNode {
    * @param groupNode The GroupNode to attach to
    */
   constructor(public groupNode: GroupNode) {
+    super()
     this.active = false;
   }
 
@@ -26,6 +29,18 @@ class AnimationNode {
    */
   toggleActive() {
     this.active = !this.active;
+  }
+
+  accept(visitor: Visitor) {
+    visitor.visitAnimationNode(this);
+  }
+
+  toJSON(): any {
+    const json = super.toJSON()
+    json["active"] = this.active
+    json["childNodes"] = []
+    return json
+
   }
 
 }
@@ -70,6 +85,13 @@ export class RotationNode extends AnimationNode {
       this.groupNode.transform = rotation;
 
     }
+  }
+
+  toJSON(): any {
+    const json = super.toJSON();
+    json["angle"] = this.angle
+    json["axis"] = this.axis
+    return json
   }
 
 }
@@ -163,7 +185,16 @@ export class JumperNode extends AnimationNode {
       //   1));
     }
   }
+
+  toJSON(): any {
+    const json = super.toJSON();
+    json["translation"] = this.translation
+    json["number"] = this.number
+    return json
+  }
 }
+
+
 
 // /**
 //  * Class representing a Scaler Animation
@@ -380,6 +411,13 @@ export class ScaleNode extends AnimationNode {
     return startValue + (endValue - startValue) * progress;
     //return startValue + progress * (endValue - startValue);
   }
+
+  toJSON(): any {
+    const json = super.toJSON();
+    json["scale"] = this.scale
+    json["targetScale"] = this.targetScale
+    return json
+  }
 }
 
 
@@ -415,6 +453,12 @@ export class DriverNode extends AnimationNode {
         }
       });
     }
+  }
+
+  toJSON(): any {
+    const json = super.toJSON();
+    json["newTranslation"] = this.newTranslation
+    return json
   }
 }
 

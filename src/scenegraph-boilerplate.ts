@@ -44,8 +44,7 @@ let minMaxAnimation: ScaleNode;
 let boxBounce: JumperNode;
 
 interface SceneObj {
-  rootNode: GroupNode;
-  nodes: any[];
+  groupNode: GroupNode;
   phongValues: PhongValues;
 }
 
@@ -135,8 +134,6 @@ window.addEventListener("load", () => {
   /***************************************************************/
 
   let scene: SceneObj;
-
-  let nodes: any[] = [];
 
   rootNode = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
   cameraNode = new CameraNode(
@@ -362,10 +359,10 @@ window.addEventListener("load", () => {
   let downloadButton = document.getElementById("downloadButton");
   downloadButton.onclick = () => {
     scene = {
-      rootNode: rootNode,
-      nodes: nodes,
+      groupNode: rootNode as GroupNode,
       phongValues: phongProperties,
     };
+    console.log("Szene bei download: ", scene);
     var anchor = document.createElement("a");
     var file = new Blob([JSON.stringify(scene)], { type: "application/json" });
     anchor.href = URL.createObjectURL(file);
@@ -383,9 +380,11 @@ window.addEventListener("load", () => {
       let reader = new FileReader();
       reader.onload = (event) => {
         let scene = JSON.parse(event.target.result as string);
-        rootNode = scene.rootNode;
-        nodes = scene.nodes;
+        console.log("Szene bei Upload", scene);
+        rootNode = scene.groupNode as GroupNode;
+        console.log("Upload root node : ", rootNode)
         phongProperties = scene.phongValues;
+        console.log("Upload phong properties", phongProperties);
       };
       reader.readAsText(file);
     };
