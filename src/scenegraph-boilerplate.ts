@@ -21,6 +21,8 @@ import TextureBoxNode from "./nodes/texture-box-node";
 import textureVertexShader from "./shader/texture-vertex-perspective-shader.glsl";
 import textureFragmentShader from "./shader/texture-fragment-shader.glsl";
 import Matrix from "./matrix";
+import { Scenegraph } from "./scenegraph";
+import JsonVisitor from "./jsonVisitor";
 
 let rasterizing: boolean = true;
 
@@ -356,19 +358,9 @@ window.addEventListener("load", () => {
   }
 
   // dowload scene as JSON file
-  let downloadButton = document.getElementById("downloadButton");
-  downloadButton.onclick = () => {
-    scene = {
-      groupNode: rootNode as GroupNode,
-      phongValues: phongProperties,
-    };
-    console.log("Szene bei download: ", scene);
-    var anchor = document.createElement("a");
-    var file = new Blob([JSON.stringify(scene)], { type: "application/json" });
-    anchor.href = URL.createObjectURL(file);
-    anchor.download = "scene.json";
-    anchor.click();
-  };
+  document.getElementById('downloadButton').addEventListener("click", () => {
+    new JsonVisitor().saveSceneGraph(Scenegraph.getGraph())
+  })
 
   // upload scene from JSON file
   let uploadButton = document.getElementById("uploadButton");

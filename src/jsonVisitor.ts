@@ -10,6 +10,7 @@ import TextureBoxNode from "./nodes/texture-box-node";
 import Node from "./nodes/node";
 import CameraNode from "./nodes/camera-node";
 import TextureVideoBoxNode from "./nodes/texture-video-box-node";
+import { Scenegraph } from "./scenegraph";
 
 
 export default class JsonVisitor implements Visitor {
@@ -17,6 +18,7 @@ export default class JsonVisitor implements Visitor {
     lastCode: number
     parentCodeStack: string[]
     animationsNodes: AnimationNode[]
+    camera: CameraNode;
 
 
     saveSceneGraph(sceneGraph: Scenegraph) {
@@ -26,7 +28,7 @@ export default class JsonVisitor implements Visitor {
         const code = this.nextCode();
         this.serialScene = {}
         this.serialScene["root"] = { childCodes: [] }
-        //this.serialScene["camera"] = Renderer.getInstance().camera
+        this.serialScene["camera"] = this.camera
         this.parentCodeStack = ["root"]
         root.accept(this)
         const serialScene = JSON.stringify(this.serialScene);
