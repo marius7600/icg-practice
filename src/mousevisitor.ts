@@ -3,6 +3,7 @@ import AABoxNode from "./nodes/aabox-node";
 import CameraNode from "./nodes/camera-node";
 import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
+import MeshNode from "./nodes/mesh-node";
 import Node from "./nodes/node";
 import PyramidNode from "./nodes/pyramid-node";
 import SphereNode from "./nodes/shere-node";
@@ -89,6 +90,8 @@ export default class MouseVisitor implements Visitor {
     visitTextureBoxNode(node: TextureBoxNode): void {
         // throw new Error('Method not implemented.');
     }
+
+    visitMeshNode(node: MeshNode): void { }
 
     visitTextureVideoBoxNode(node: TextureVideoBoxNode): void { }
 

@@ -3,6 +3,7 @@ import AABoxNode from "../nodes/aabox-node";
 import CameraNode from "../nodes/camera-node";
 import GroupNode from "../nodes/group-node";
 import LightNode from "../nodes/light-node";
+import MeshNode from "../nodes/mesh-node";
 import Node from "../nodes/node";
 import PyramidNode from "../nodes/pyramid-node";
 import SphereNode from "../nodes/shere-node";
@@ -15,6 +16,7 @@ import Vector from "../vector";
 import Visitor from "../visitor";
 import RasterPyramid from "./raster-Pyramid";
 import RasterBox from "./raster-box";
+import RasterMeshObject from "./raster-mesh-object";
 import RasterSphere from "./raster-sphere";
 import RasterTextureBox from "./raster-texture-box";
 import RasterTextTextureBox from "./raster-texture-box-text";
@@ -127,7 +129,7 @@ export class RasterVisitor implements Visitor {
    * @param node The node to visit
    */
   visitSphereNode(node: SphereNode) {
-    this.visitNode(node);
+    this.visitNode(node, this.shader);
   }
 
   /**
@@ -135,7 +137,7 @@ export class RasterVisitor implements Visitor {
    * @param  {AABoxNode} node - The node to visit
    */
   visitAABoxNode(node: AABoxNode) {
-    this.visitNode(node);
+    this.visitNode(node, this.shader);
   }
 
   /**
@@ -143,18 +145,22 @@ export class RasterVisitor implements Visitor {
    * @param  {TextureBoxNode} node - The node to visit
    */
   visitTextureBoxNode(node: TextureBoxNode) {
-    this.visitNode(node);
+    this.visitNode(node, this.textureshader);
     // DONT FORGET TO SET THE TEXTURE IN VISIT NODE
   }
 
   visitTextureVideoBoxNode(node: TextureVideoBoxNode) {
-    this.visitNode(node);
+    this.visitNode(node, this.textureshader);
     // DONT FORGET TO SET THE TEXTURE IN VISIT NODE
   }
 
   visitTextureTextBoxNode(node: TextureTextBoxNode): void {
-    this.visitNode(node);
+    this.visitNode(node, this.textureshader);
     // DONT FORGET TO SET THE TEXTURE IN VISIT NODE
+  }
+
+  visitMeshNode(node: MeshNode): void {
+    this.visitNode(node, this.shader);
   }
 
   /**
@@ -211,18 +217,18 @@ export class RasterVisitor implements Visitor {
   }
 
   visitPyramidNode(node: PyramidNode) {
-    this.visitNode(node);
+    this.visitNode(node, this.shader);
   }
 
-  private visitNode(node: Node) {
-    let shader = this.shader;
-    if (node instanceof TextureBoxNode) {
-      shader = this.textureshader;
-    } if (node instanceof TextureVideoBoxNode) {
-      shader = this.textureshader;
-    } if (node instanceof TextureTextBoxNode) {
-      shader = this.textureshader;
-    }
+  private visitNode(node: Node, shader: Shader) {
+    //let shader = this.shader;
+    // if (node instanceof TextureBoxNode) {
+    //   shader = this.textureshader;
+    // } if (node instanceof TextureVideoBoxNode) {
+    //   shader = this.textureshader;
+    // } if (node instanceof TextureTextBoxNode) {
+    //   shader = this.textureshader;
+    // }
     shader.use();
 
     let toWorld = Matrix.identity();
@@ -385,6 +391,10 @@ export class RasterSetupVisitor {
       node,
       new RasterPyramid(this.gl, node.minPoint, node.maxPoint, node.color)
     );
+  }
+
+  visitMeshNode(node: MeshNode) {
+    this.objects.set(node, new RasterMeshObject(this.gl, node.vertices, node.normals, node.color));
   }
 
 

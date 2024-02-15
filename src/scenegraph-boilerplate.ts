@@ -15,7 +15,7 @@ import RayVisitor from "./raytracer/rayvisitor";
 import phongFragmentShader from "./shader/phong-fragment-shader.glsl";
 import phongVertexShader from "./shader/phong-vertex-perspective-shader.glsl";
 import Shader from "./shader/shader";
-import { EmptyTransformation, Rotation, Scaling, Transform4x4, Translation } from "./transformation";
+import { EmptyTransformation, RotateWithPosition, Rotation, Scaling, Transform4x4, Translation } from "./transformation";
 import Vector from "./vector";
 import TextureBoxNode from "./nodes/texture-box-node";
 import textureVertexShader from "./shader/texture-vertex-perspective-shader.glsl";
@@ -23,6 +23,7 @@ import textureFragmentShader from "./shader/texture-fragment-shader.glsl";
 import Matrix from "./matrix";
 import TextureTextBoxNode from "./nodes/texture-text-box-node";
 import Node from "./nodes/node";
+import MeshNode from "./nodes/mesh-node";
 
 let rasterizing: boolean = true;
 
@@ -46,6 +47,7 @@ let minMaxAnimation: ScaleNode;
 let boxBounce: JumperNode;
 
 let selectedNode: Node;
+let object: MeshNode | null = null;
 
 let currentPlayer = true; // true = X, false = O
 
@@ -289,23 +291,59 @@ window.addEventListener("load", () => {
   const textureVideoBox = new TextureVideoBoxNode("assitoni.mp4", new Vector(0, 0, 0, 1), new Vector(3, 1.5, 0.1, 1));
 
   const textureVideoBoxGroup = new GroupNode(new EmptyTransformation);
-  let rotation = rotateWithPosition(textureVideoBoxGroup);
+  let rotation = rotateWithPosition(textureVideoBoxGroup, 180);
   textureVideoBoxGroup.transform = rotation;
 
   textureBoxGroup.add(textureVideoBoxGroup);
   textureVideoBoxGroup.add(textureVideoBox);
 
+  const meshPosition = new GroupNode(new Transform4x4(new Vector(0.8, 0.8, 0, 0), new Rotation(new Vector(1, 0, 0, 0), -90)));
+  const meshScale = new GroupNode(new Scaling(new Vector(0.04, 0.04, 0.04, 1)));
+  meshPosition.add(meshScale);
+
+  (async () => {
+    try {
+      object = await loadOBJ();
+      console.log("Finished importing", object);
+      meshScale.add(object);
+      taskbarGroup.add(meshPosition);
+      object.accept(rasterSetupVisitor);
+    } catch (error) {
+      console.log(error);
+    }
+  })();
+  // const cube = new TextureBoxNode("source-missing-texture.png", new Vector(0, 0, 0, 1), new Vector(0.5, 0.5, 0.5, 1), "brickwall-normal.png");
+  // meshPosition.add(cube);
+  // leftWindowGroup.add(meshPosition);
+
+  //const object = await MeshNode.getNode("monkey.obj", new Vector(1, 0, 0, 0));
+  // let object = null;
+  // MeshNode.getNode("monkey.obj", new Vector(1, 0, 0, 0)).then(monkey => {
+  //   object = monkey;
+  // }).catch(error => {
+  //   // Handle any errors here
+  //   console.log(error);
+
+  // });
+  // meshPosition.add(object);
+  // leftWindowGroup.add(meshPosition);
+
   //Add animation node
-  const animationNode = new RotationNode(textureBoxGroup, new Vector(1, 0, 0, 0));
+  const animationNode = new RotationNode(meshPosition, new Vector(0, 1, 0, 0));
   // const animationNode3 = new JumperNode(taskbarButtonGroup2, new Vector(0, 1, 0, 0));
 
   // const animationNode4 = new DriverNode(gn1);
   // const animationNode3 = new ScaleNode(taskbarButtonGroup2, new Vector(-1, -1, -1, 0));
-  //animationNode.toggleActive();
+  animationNode.toggleActive();
 
   /***************************************************************/
   /*********************  END OF SCENE GRAPH *********************/
   /***************************************************************/
+
+  async function loadOBJ() {
+    const object = await MeshNode.getNode("towelie.obj", new Vector(0, 0.2, 1, 0));
+    return object;
+  }
 
   function createTicTacToe() {
     // Scale the size of the cubes
@@ -497,11 +535,11 @@ window.addEventListener("load", () => {
 });
 
 
-function rotateWithPosition(textureVideoBoxGroup: GroupNode) {
+function rotateWithPosition(textureVideoBoxGroup: GroupNode, angle: number) {
   const position = textureVideoBoxGroup.transform.getMatrix();
   const inverse = textureVideoBoxGroup.transform.getInverseMatrix();
   // let rotation = new Rotation(new Vector(1, 0, 0, 0), 9.25); //Weird rotation ich raffs garnicht????
-  let rotation = new Rotation(new Vector(1, 0, 0, 0), 180); //Weird rotation ich raffs garnicht????
+  let rotation = new Rotation(new Vector(1, 0, 0, 0), angle); //Weird rotation ich raffs garnicht????
   rotation.matrix = position.mul(rotation.getMatrix());
   rotation.inverse = rotation.getInverseMatrix().mul(inverse);
   return rotation;

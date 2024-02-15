@@ -2,6 +2,7 @@ import AABoxNode from "./nodes/aabox-node";
 import CameraNode from "./nodes/camera-node";
 import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
+import MeshNode from "./nodes/mesh-node";
 import PyramidNode from "./nodes/pyramid-node";
 import SphereNode from "./nodes/shere-node";
 import TextureBoxNode from "./nodes/texture-box-node";
@@ -20,5 +21,6 @@ export default interface Visitor {
   visitPyramidNode(node: PyramidNode): void;
   visitTextureVideoBoxNode(node: TextureVideoBoxNode): void;
   visitTextureTextBoxNode(node: TextureTextBoxNode): void;
+  visitMeshNode(node: MeshNode): void;
   // visitTaskbarNode(node: TaskbarNode): void;
 }

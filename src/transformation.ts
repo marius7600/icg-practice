@@ -86,6 +86,7 @@ export class Rotation extends MatrixTransformation {
 
 export class RotateWithPosition extends MatrixTransformation {
     constructor(node: GroupNode, rotation: Rotation) {
+        rotation.angle = rotation.angle * (Math.PI / 180);
         super(node.transform.getMatrix().mul(rotation.getMatrix()), rotation.getInverseMatrix().mul(node.transform.getInverseMatrix()));
     }
 }
