@@ -1,5 +1,6 @@
 import Matrix from "../matrix";
 import AABoxNode from "../nodes/aabox-node";
+import AnimationNode from "../nodes/animation-nodes";
 import CameraNode from "../nodes/camera-node";
 import GroupNode from "../nodes/group-node";
 import LightNode from "../nodes/light-node";
@@ -240,6 +241,12 @@ export default class RayVisitor implements Visitor {
     let min = mat.mul(node.minPoint);
     let max = mat.mul(node.maxPoint);
     this.objects.push(new Pyramid(min, max, node.color));
+
+  }
+
+  visitAnimationNode(node: AnimationNode): void {
+    //TODO-Animation
+    console.log("AnimationNode visited; not implemented yet");
 
   }
 }

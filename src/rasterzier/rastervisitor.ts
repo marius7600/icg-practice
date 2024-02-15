@@ -263,6 +263,8 @@ export class RasterVisitor implements Visitor {
   }
 
   visitAnimationNode(node: AnimationNode): void {
+    //TODO-Animation
+    console.log("Method visitAnimationNode not implemented.");
 
   }
 }
@@ -271,7 +273,7 @@ export class RasterVisitor implements Visitor {
  * Class representing a Visitor that sets up buffers
  * for use by the RasterVisitor
  * */
-export class RasterSetupVisitor {
+export class RasterSetupVisitor implements Visitor {
   /**
    * The created render objects
    */
@@ -372,6 +374,7 @@ export class RasterSetupVisitor {
   }
 
   visitAnimationNode(node: AnimationNode): void {
+    //TODO-Animation
     console.log("Method visitAnimationNode not implemented.");
   }
 

@@ -247,7 +247,7 @@ window.addEventListener("load", () => {
 
   // const animationNode4 = new DriverNode(gn1);
   // const animationNode3 = new ScaleNode(taskbarButtonGroup2, new Vector(-1, -1, -1, 0));
-  //animationNode.toggleActive();
+  animationNode.toggleActive();
 
   /***************************************************************/
   /*********************  END OF SCENE GRAPH *********************/

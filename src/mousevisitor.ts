@@ -1,5 +1,6 @@
 import Matrix from "./matrix";
 import AABoxNode from "./nodes/aabox-node";
+import AnimationNode from "./nodes/animation-nodes";
 import CameraNode from "./nodes/camera-node";
 import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
@@ -117,6 +118,10 @@ export default class MouseVisitor implements Visitor {
         let max = mat.mul(node.maxPoint);
         this.intersectables.push(new Pyramid(min, max, node.color));
         this.nodes.push(node);
+    }
+
+    visitAnimationNode(node: AnimationNode): void {
+        console.log("AnimationNode  in MouseVisitor");
     }
 
     /**
