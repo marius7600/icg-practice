@@ -18,7 +18,7 @@ export default class JsonVisitor implements Visitor {
     lastCode: number
     parentCodeStack: string[]
     animationsNodes: AnimationNode[]
-    camera: CameraNode;
+
 
 
     saveSceneGraph(sceneGraph: Scenegraph) {
@@ -27,8 +27,8 @@ export default class JsonVisitor implements Visitor {
         this.lastCode = 0
         const code = this.nextCode();
         this.serialScene = {}
-        this.serialScene["root"] = { childCodes: [] }
-        this.serialScene["camera"] = this.camera
+        this.serialScene["root"] = { childNodes: [] }
+        this.serialScene["camera"] = Scenegraph.getCamera()
         this.parentCodeStack = ["root"]
         root.accept(this)
         const serialScene = JSON.stringify(this.serialScene);

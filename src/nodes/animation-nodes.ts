@@ -35,6 +35,9 @@ export default class AnimationNode extends Node {
     visitor.visitAnimationNode(this);
   }
 
+  simulate(deltaT: number) {
+  }
+
   toJSON(): any {
     const json = super.toJSON()
     json["active"] = this.active
