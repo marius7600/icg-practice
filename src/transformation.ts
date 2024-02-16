@@ -12,7 +12,7 @@ export interface Transformation {
     toJSON(): any;
 }
 
-class MatrixTransformation implements Transformation {
+export class MatrixTransformation implements Transformation {
     matrix: Matrix;
     inverse: Matrix;
 

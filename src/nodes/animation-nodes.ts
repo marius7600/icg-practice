@@ -428,9 +428,10 @@ export class ScaleNode extends AnimationNode {
 
 export class DriverNode extends AnimationNode {
 
-  newTranslation: Translation;
-  constructor(groupNode: GroupNode) {
+  translation: Translation;
+  constructor(groupNode: GroupNode, translationVector: Vector) {
     super(groupNode);
+    this.translation = new Translation(translationVector);
   }
 
   // This function is used to simulate the movement of the groupnode
@@ -460,7 +461,7 @@ export class DriverNode extends AnimationNode {
 
   toJSON(): any {
     const json = super.toJSON();
-    json["newTranslation"] = this.newTranslation
+    json["ranslation"] = this.translation
     return json
   }
 }
