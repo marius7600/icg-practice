@@ -44,7 +44,7 @@ export default class RasterSphere {
         let normals = [];
 
         let colours = [];
-        
+
         let ringsize = 30;
         for (let ring = 0; ring < ringsize; ring++) {
             for (let ring2 = 0; ring2 < ringsize; ring2++) {
@@ -136,6 +136,6 @@ export default class RasterSphere {
         this.gl.disableVertexAttribArray(colorLocation);
         // TODO disable normal vertex attrib array
         this.gl.disableVertexAttribArray(normalLocation);
-        
+
     }
 }

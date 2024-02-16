@@ -65,11 +65,12 @@ export class RasterVisitor implements Visitor {
   render(rootNode: Node, camera: CameraNode) {
     // clear
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+    this.stack = [{ traverse: Matrix.identity(), inverse: Matrix.identity() }];
     this.lightNodes = [];
 
     this.setupCamera(camera);
 
-    this.getLightNodes(rootNode);
+    //this.getLightNodes(rootNode);
 
     // traverse and render
     rootNode.accept(this);
@@ -84,7 +85,23 @@ export class RasterVisitor implements Visitor {
     if (node instanceof LightNode) {
       // this.lights.push(new LightNode(node.color, this.matrix.mulVec(node.position)));
       // this.lightNodes.push(new LightNode(node.color, this.stack.at(this.stack.length - 1).traverse.mulVec(node.position)));
-      // node.position = this.stack.at(this.stack.length - 1).traverse.mulVec(node.position);
+      //node.position = this.stack.at(this.stack.length - 1).traverse.mulVec(node.position);
+      //this.lightNodes.push(node);
+      // Get the current transformation matrix
+      // let m = this.stack[this.stack.length - 1].traverse;
+      // //console.log(m.print());
+
+      // // Transform the position of the light
+      // let transformedPosition = m.mul(node.position);
+
+      // // Create a new LightNode with the transformed position
+      // let transformedNode = new LightNode(node.color, transformedPosition);
+      // //console.log(transformedNode.position.y);
+
+
+      // // Push the transformed node into the lightNodes array
+      // this.lightNodes.push(transformedNode);
+      //node.position = this.stack.at(this.stack.length - 1).traverse.mul(node.position);
       this.lightNodes.push(node);
     } else if (node instanceof GroupNode) {
       for (let i = 0; i < node.children.length; i++) {
@@ -211,9 +228,36 @@ export class RasterVisitor implements Visitor {
   }
 
   visitLightNode(node: LightNode): void {
-    // TODO implement this
-    // console.log('Method visitLightNode not implemented');
-    this.stack.at(this.stack.length - 1).traverse.mul(node.position);
+    //Set the light position in the world coordinate system and update with its position
+    // //node.position = this.stack.at(this.stack.length - 1).traverse.mul(new Vector(0, 0, 0, 1));
+    // let m = this.stack.at(this.stack.length - 1).traverse;
+    // node.position = m.mul(new Vector(0, 0, 0, 1));
+    // //node.position = m.mul(node.position);
+    // //console.log("Light position: ", node.position.y);
+
+    // this.lightNodes.push(node);
+    // this.visitNode(node, this.shader);
+
+    // Get the current transformation matrix
+    let m = this.stack.at(this.stack.length - 1).traverse;
+
+    // Transform the position of the light
+    let transformedPosition = m.mul(node.position);
+
+    // Create a new LightNode with the transformed position
+    let transformedNode = new LightNode(node.color, transformedPosition);
+
+    // Push the transformed node into the lightNodes array
+    this.lightNodes.push(transformedNode);
+
+    // Visit the node with the shader
+    this.visitNode(node, this.shader);
+
+    // let m = this.stack.at(this.stack.length - 1).traverse;
+    // let transformedPosition = m.mul(new Vector(0, 0, 0, 1)); //Transform to local position origin
+    // let transformedNode = new LightNode(node.color, transformedPosition);
+    // this.lightNodes.push(transformedNode);
+    // this.visitNode(node, this.shader);
   }
 
   visitPyramidNode(node: PyramidNode) {
@@ -229,11 +273,12 @@ export class RasterVisitor implements Visitor {
     // } if (node instanceof TextureTextBoxNode) {
     //   shader = this.textureshader;
     // }
+
     shader.use();
 
     let toWorld = Matrix.identity();
     let fromWorld = Matrix.identity();
-    // TODO Calculate the model matrix for the box
+    // TODO Calculate the model matrix
     for (let i = 0; i < this.stack.length; i++) {
       toWorld = toWorld.mul(this.stack[i].traverse);
       fromWorld = this.stack[i].inverse.mul(toWorld);
@@ -266,12 +311,8 @@ export class RasterVisitor implements Visitor {
 
     shader.getUniformInt("u_number_of_lights").set(this.lightNodes.length);
     for (let i = 0; i < this.lightNodes.length; i++) {
-      shader
-        .getUniformVec3("u_light_positions[" + i + "]")
-        .set(this.lightNodes[i].position); //unschön aber funktioniert
-      shader
-        .getUniformVec3("u_light_colors[" + i + "]")
-        .set(this.lightNodes[i].color);
+      shader.getUniformVec3("u_light_positions[" + i + "]").set(this.lightNodes[i].position); //unschön aber funktioniert
+      shader.getUniformVec3("u_light_colors[" + i + "]").set(this.lightNodes[i].color);
     }
 
     this.renderables.get(node)?.render(shader);
@@ -411,7 +452,6 @@ export class RasterSetupVisitor {
   }
 
   visitLightNode(node: LightNode) {
-    console.log("Method visitLightNode not implemented.");
   }
 
 }

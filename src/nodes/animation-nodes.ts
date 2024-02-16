@@ -388,7 +388,7 @@ export class ScaleNode extends AnimationNode {
 
 
 
-export class DriverNode extends AnimationNode {
+export class DriverNodeMouse extends AnimationNode {
 
   newTranslation: Translation;
   constructor(groupNode: GroupNode) {
@@ -417,6 +417,46 @@ export class DriverNode extends AnimationNode {
           position.data[12] += 0.0001;
         }
       });
+    }
+  }
+}
+
+export class DriverNode extends AnimationNode {
+  distanceToGoal: number;
+  speed: number;
+  direction: Vector;
+  dirChange: boolean = true;
+  distanceCovered: number = 0;
+
+  constructor(groupNode: GroupNode, direction: Vector, speed?: number) {
+    super(groupNode);
+    this.direction = direction;
+    this.distanceToGoal = direction.length;
+    this.speed = speed || 0.0001;
+  }
+
+  simulate(deltaT: number) {
+    if (this.active) {
+      const position = this.groupNode.transform.getMatrix();
+      const movement = this.direction.mul(this.speed * deltaT);
+      if (this.dirChange) {
+        position.data[12] += movement.x;
+        position.data[13] += movement.y;
+        position.data[14] += movement.z;
+        //console.log("GroupNode: ", position.data[13]);
+        this.distanceCovered += movement.length;
+        if (this.distanceCovered >= this.distanceToGoal) {
+          this.dirChange = false;
+        }
+      } else {
+        position.data[12] -= movement.x;
+        position.data[13] -= movement.y;
+        position.data[14] -= movement.z;
+        this.distanceCovered -= movement.length;
+        if (this.distanceCovered <= 0) {
+          this.dirChange = true;
+        }
+      }
     }
   }
 }

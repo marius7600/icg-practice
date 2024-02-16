@@ -2,7 +2,7 @@ import "bootstrap";
 import "bootstrap/scss/bootstrap.scss";
 import MouseVisitor from "./mousevisitor";
 import AABoxNode from "./nodes/aabox-node";
-import { DriverNode, JumperNode, RotationNode, ScaleNode } from "./nodes/animation-nodes";
+import { DriverNode, DriverNodeMouse, JumperNode, RotationNode, ScaleNode } from "./nodes/animation-nodes";
 import CameraNode from "./nodes/camera-node";
 import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
@@ -29,6 +29,8 @@ let rasterizing: boolean = true;
 
 let phongProperties: PhongProperties;
 let light1: LightNode;
+let light2: LightNode;
+let light3: LightNode;
 
 let cameraNode: CameraNode;
 let rootNode: GroupNode;
@@ -201,9 +203,11 @@ window.addEventListener("load", () => {
   const groupNodeUnderRoot = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
   rootNode.add(groupNodeUnderRoot);
 
-  // add light node
+  // add light node 1
   light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 4, -2, 0));
-  groupNodeUnderRoot.add(light1);
+  //groupNodeUnderRoot.add(light1);
+
+
 
   ///////////// ===== ADD TASKBAR ===== /////////////
   const taskbarButtonDimension = new Vector(.7, .7, .3, 0);
@@ -262,6 +266,18 @@ window.addEventListener("load", () => {
   const ticTacToeRoot = new GroupNode(new Translation(new Vector(-1.3, -1.4, 0, 0)));
   ticTacToeRoot.add(createTicTacToe());
   rightWindowGroup.add(ticTacToeRoot);
+
+  // add light node 2
+  const groupNodeLight2 = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
+  light2 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, -5, 0, 1));
+  let lightSpehre = new SphereNode(new Vector(1, 1, 0, 1), new Vector(0, 0, 0, 1), 0.25);
+  groupNodeLight2.add(light2);
+  groupNodeLight2.add(lightSpehre);
+
+  const animateLight2 = new DriverNode(groupNodeLight2, new Vector(1, 0, 0, 0), 0.0005);
+  animateLight2.toggleActive();
+
+  taskbarGroup.add(groupNodeLight2);
 
   ///////////// ===== ADD LEFT WINDOW ===== /////////////
   // groupNode for the secound application window
@@ -416,6 +432,7 @@ window.addEventListener("load", () => {
     rasterSetupVisitor.objects,
     phongProperties
   );
+
   phongShader.load();
   textureShader.load();
   rasterVisitor.setupCamera(cameraNode);
@@ -454,7 +471,7 @@ window.addEventListener("load", () => {
       // console.log("animation loop ended");
       // console.log("animation loop ended");
       // console.log("animation loop ended");
-      animationNode.simulate(delta);
+      animateLight2.simulate(delta);
       window.requestAnimationFrame(animate);
     }
 
