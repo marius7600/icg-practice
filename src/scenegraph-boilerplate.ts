@@ -26,6 +26,7 @@ import JsonVisitor from "./jsonVisitor";
 import TextureTextBoxNode from "./nodes/texture-text-box-node";
 import Node from "./nodes/node";
 import MeshNode from "./nodes/mesh-node";
+import { Game } from "./game";
 
 let rasterizing: boolean = true;
 
@@ -35,8 +36,6 @@ let light2: LightNode;
 let light3: LightNode;
 
 let cameraNode: CameraNode;
-let rootNode: GroupNode;
-
 let rasterVisitor: RasterVisitor;
 let rayVisitor: RayVisitor;
 
@@ -58,10 +57,9 @@ export default interface PhongValues {
   shininess: number;
 }
 
-let selectedNode: Node;
-let object: MeshNode | null = null;
+let selectedNode: Node = null;
 
-let currentPlayer = true; // true = X, false = O
+
 
 window.addEventListener("load", () => {
   const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
@@ -71,6 +69,9 @@ window.addEventListener("load", () => {
   const ctx_raster = canvas_raster.getContext("webgl2");
 
   const rasterSetupVisitor = new RasterSetupVisitor(ctx_raster);
+
+  const mouseVisitor = new MouseVisitor();
+
 
   //!!!create scene graph!!!
   Scenegraph.createProjectGraph(canvas_raster.width, canvas_raster.height, rasterSetupVisitor);
@@ -110,18 +111,14 @@ window.addEventListener("load", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
 
-  // // Function to clear the game
-  // document.getElementById('clearGame')?.addEventListener('click', function () {
-  //   ticTacToeRoot.children = [];
-  //   const newTicTacToe = new GroupNode(new Translation(new Vector(-1.3, -1.4, 0, 0)));
-  //   newTicTacToe.add(createTicTacToe());
-  //   //Remove the old game and add a new one
-  //   rightWindowGroup.children.pop();
-  //   rightWindowGroup.add(newTicTacToe);
-  //   rasterSetupVisitor.setup(rootNode);
-  //   currentPlayer = true;
-  // });
+  // Function to clear the game
+  document.getElementById('clearGame')?.addEventListener('click', function () {
+    Game.clearGame();
+    rasterSetupVisitor.setup(Scenegraph.getGraph());
+  });
 
+  // FIXME: Implement Magnifying glass effect
+  //// ========== MAGNIYING GLASS ==========
   // canvas_raster.addEventListener("mousemove", function (info) {
   //   const rect = canvas_raster.getBoundingClientRect();
 
@@ -135,33 +132,43 @@ window.addEventListener("load", () => {
   //   ctx_raster.bindFramebuffer(ctx_raster.FRAMEBUFFER, null);
   // });
 
-  // canvas_ray.addEventListener("click", function (info) {
-  //   setupWindow(info,
-  //     ctx_raster,
-  //     window1minimizeSphere,
-  //     windowGroup1,
-  //     taskbarButtonGroup1,
-  //     window2MinimizeSphere,
-  //     windowGroup2,
-  //     taskbarButtonGroup2,
-  //     taskbarButton1,
-  //     taskbarButton2);
-  // });
+  canvas_ray.addEventListener("click", function (info) {
+    // setupWindow(info,
+    //   ctx_raster,
+    //   rightWindowMinimizeSphere,
+    //   rightWindowGroup,
+    //   taskbarButtonGroup1,
+    //   leftWindowMinimizeSphere,
+    //   leftWindowGroup,
+    //   taskbarButtonGroup2,
+    //   taskbarButton1,
+    //   taskbarButton2);
+    //Playing tik tak toe
+    selectedNode = mouseVisitor.getSelectedNode(Scenegraph.getGraph(), info.offsetX, info.offsetY, ctx_raster);
+    Game.CheckTikTakToeField(selectedNode, rasterSetupVisitor);
+    // CheckTikTakToeField(currentPlayer, selectedNode);
+  });
 
-  // // Add a click event listener to the canvas
-  // canvas_raster.addEventListener("click", function (info) {
-  //   // Get the x and y coordinates of the click
-  //   setupWindow(info,
-  //     ctx_raster,
-  //     window1minimizeSphere,
-  //     windowGroup1,
-  //     taskbarButtonGroup1,
-  //     window2MinimizeSphere,
-  //     windowGroup2,
-  //     taskbarButtonGroup2,
-  //     taskbarButton1,
-  //     taskbarButton2);
-  // });
+  // Add a click event listener to the canvas
+  canvas_raster.addEventListener("click", function (info) {
+    // Get the x and y coordinates of the click
+    // setupWindow(info,
+    //   ctx_raster,
+    //   rightWindowMinimizeSphere,
+    //   rightWindowGroup,
+    //   taskbarButtonGroup1,
+    //   leftWindowMinimizeSphere,
+    //   leftWindowGroup,
+    //   taskbarButtonGroup2,
+    //   taskbarButton1,
+    //   taskbarButton2,
+    // );
+    //Playing tik tak toe
+    selectedNode = mouseVisitor.getSelectedNode(Scenegraph.getGraph(), info.offsetX, info.offsetY, ctx_raster);
+    Game.CheckTikTakToeField(selectedNode, rasterSetupVisitor);
+  });
+
+
 
 
 
@@ -386,7 +393,7 @@ function setupWindow(info: MouseEvent,
   // Create a new mouse visitor
   const mouseVisitor = new MouseVisitor();
   // Use the mouse visitor to get the selected node
-  let selectedNode = mouseVisitor.getSelectedNode(rootNode, x, y, ctx_raster);
+  let selectedNode = mouseVisitor.getSelectedNode(Scenegraph.getGraph(), x, y, ctx_raster);
   // If a node was selected
   if (selectedNode != null) {
     // If the selected node is a sphere

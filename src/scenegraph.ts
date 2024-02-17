@@ -13,6 +13,7 @@ import { RasterSetupVisitor, RasterVisitor } from "./rasterzier/rastervisitor";
 import Visitor from "./visitor";
 import TextureTextBoxNode from "./nodes/texture-text-box-node";
 import MeshNode from "./nodes/mesh-node";
+import { Game } from "./game";
 
 export class Scenegraph {
 
@@ -20,6 +21,7 @@ export class Scenegraph {
     private static animationNodesList: AnimationNode[] = [];
     private static driver: DriverNode;
     private static camera: camera;
+    private static TicTacToe: Game = new Game();
 
     static getGraph() {
         if (!this.sceneGraph) {
@@ -180,7 +182,9 @@ export class Scenegraph {
 
         // Add ticTacToe to the right window
         const ticTacToeRoot = new GroupNode(new Translation(new Vector(-1.3, -1.4, 0, 0)));
-        ticTacToeRoot.add(createTicTacToe());
+        // ticTacToeRoot.add(createTicTacToe());
+        // rightWindowGroup.add(ticTacToeRoot);
+        ticTacToeRoot.add(this.TicTacToe.createTicTacToe());
         rightWindowGroup.add(ticTacToeRoot);
 
         ///////////// ===== ADD LEFT WINDOW ===== /////////////
