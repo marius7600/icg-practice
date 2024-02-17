@@ -63,4 +63,11 @@ export default class GroupNode extends Node {
   containsCamera(cameraNode: CameraNode) {
     return !!this.children.includes(cameraNode);
   }
+
+  toJSON() {
+    const json = super.toJSON();
+    json["childCodes"] = []
+    json["transform"] = { type: this.transform.constructor.name, transformation: this.transform }
+    return json
+  }
 }

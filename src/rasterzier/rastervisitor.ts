@@ -21,6 +21,8 @@ import RasterSphere from "./raster-sphere";
 import RasterTextureBox from "./raster-texture-box";
 import RasterTextTextureBox from "./raster-texture-box-text";
 import RasterVideoTextureBox from "./raster-texture-box-video";
+import AnimationNode from "../nodes/animation-nodes";
+import { Scenegraph } from "../scenegraph";
 
 interface Renderable {
   render(shader: Shader): void;
@@ -67,6 +69,7 @@ export class RasterVisitor implements Visitor {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     this.stack = [{ traverse: Matrix.identity(), inverse: Matrix.identity() }];
     this.lightNodes = [];
+    Scenegraph.setAnimationNodes([]);
 
     this.setupCamera(camera);
 
@@ -277,13 +280,17 @@ export class RasterVisitor implements Visitor {
 
     this.renderables.get(node)?.render(shader);
   }
+
+  visitAnimationNode(node: AnimationNode): void {
+    Scenegraph.setAnimationNode(node);
+  }
 }
 
 /**
  * Class representing a Visitor that sets up buffers
  * for use by the RasterVisitor
  * */
-export class RasterSetupVisitor {
+export class RasterSetupVisitor implements Visitor {
   /**
    * The created render objects
    */
@@ -397,6 +404,12 @@ export class RasterSetupVisitor {
   visitMeshNode(node: MeshNode) {
     this.objects.set(node, new RasterMeshObject(this.gl, node.vertices, node.normals, node.color));
   }
+
+  visitAnimationNode(node: AnimationNode): void {
+    //TODO-Animation
+    console.log("Method visitAnimationNode not implemented.");
+  }
+
 
 
   /**

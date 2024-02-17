@@ -9,11 +9,12 @@ import Vector from "./vector";
 export interface Transformation {
     getMatrix(): Matrix;
     getInverseMatrix(): Matrix;
+    toJSON(): any;
 }
 
-class MatrixTransformation implements Transformation {
-    matrix: Matrix;
-    inverse: Matrix;
+export class MatrixTransformation implements Transformation {
+    public matrix: Matrix;
+    public inverse: Matrix;
 
     constructor(matrix: Matrix, inverse: Matrix) {
         this.matrix = matrix;
@@ -31,6 +32,48 @@ class MatrixTransformation implements Transformation {
 
     getInverseMatrix(): Matrix {
         return this.inverse;
+    }
+
+    toJSON() {
+        let transform;
+        if (this instanceof Transform4x4) {
+            transform = {
+                type: "Transform4x4",
+                matrix: this.matrix.toJSON(),
+                inverse: this.inverse.toJSON()
+            }
+        } else if (this instanceof Translation) {
+            transform = {
+                type: "Translation",
+                matrix: this.matrix.toJSON(),
+                inverse: this.inverse.toJSON()
+            }
+        } else if (this instanceof EmptyTransformation) {
+            transform = {
+                type: "EmptyTransformation",
+                matrix: this.matrix.toJSON(),
+                inverse: this.inverse.toJSON()
+            }
+        } else if (this instanceof Rotation) {
+            transform = {
+                type: "Rotation",
+                matrix: this.matrix.toJSON(),
+                inverse: this.inverse.toJSON()
+            }
+        } else if (this instanceof RotateWithPosition) {
+            transform = {
+                type: "RotateWithPosition",
+                matrix: this.matrix.toJSON(),
+                inverse: this.inverse.toJSON()
+            }
+        } else if (this instanceof Scaling) {
+            transform = {
+                type: "Scaling",
+                matrix: this.matrix.toJSON(),
+                inverse: this.inverse.toJSON()
+            }
+        }
+        return transform;
     }
 }
 

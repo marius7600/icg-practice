@@ -1,13 +1,15 @@
 import Vector from '../vector';
+import Node from './node';
 import GroupNode from './group-node';
 import { Rotation } from '../transformation';
 import { Translation, Scaling } from '../transformation';
 import Matrix from '../matrix';
+import Visitor from '../visitor';
 
 /**
  * Class representing an Animation
  */
-export class AnimationNode {
+export default class AnimationNode extends Node {
   /**
    * Describes if the animation is running
    */
@@ -18,6 +20,7 @@ export class AnimationNode {
    * @param groupNode The GroupNode to attach to
    */
   constructor(public groupNode: GroupNode) {
+    super()
     this.active = false;
   }
 
@@ -28,7 +31,19 @@ export class AnimationNode {
     this.active = !this.active;
   }
 
+  accept(visitor: Visitor) {
+    visitor.visitAnimationNode(this);
+  }
+
   simulate(deltaT: number) {
+  }
+
+  toJSON(): any {
+    const json = super.toJSON()
+    json["active"] = this.active
+    json["childNodes"] = []
+    return json
+
   }
 
 }
@@ -73,6 +88,13 @@ export class RotationNode extends AnimationNode {
       this.groupNode.transform = rotation;
 
     }
+  }
+
+  toJSON(): any {
+    const json = super.toJSON();
+    json["angle"] = this.angle
+    json["axis"] = this.axis
+    return json
   }
 
 }
@@ -166,7 +188,16 @@ export class JumperNode extends AnimationNode {
       //   1));
     }
   }
+
+  toJSON(): any {
+    const json = super.toJSON();
+    json["translation"] = this.translation
+    json["number"] = this.number
+    return json
+  }
 }
+
+
 
 // /**
 //  * Class representing a Scaler Animation
@@ -383,6 +414,13 @@ export class ScaleNode extends AnimationNode {
     return startValue + (endValue - startValue) * progress;
     //return startValue + progress * (endValue - startValue);
   }
+
+  toJSON(): any {
+    const json = super.toJSON();
+    json["scale"] = this.scale
+    json["targetScale"] = this.targetScale
+    return json
+  }
 }
 
 
@@ -390,9 +428,10 @@ export class ScaleNode extends AnimationNode {
 
 export class DriverNodeMouse extends AnimationNode {
 
-  newTranslation: Translation;
-  constructor(groupNode: GroupNode) {
+  translation: Translation;
+  constructor(groupNode: GroupNode, translationVector: Vector) {
     super(groupNode);
+    this.translation = new Translation(translationVector);
   }
 
   // This function is used to simulate the movement of the groupnode
@@ -418,6 +457,11 @@ export class DriverNodeMouse extends AnimationNode {
         }
       });
     }
+  }
+  toJSON(): any {
+    const json = super.toJSON();
+    json["ranslation"] = this.translation
+    return json
   }
 }
 

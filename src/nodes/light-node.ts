@@ -20,4 +20,11 @@ export default class LightNode extends Node {
   accept(visitor: Visitor) {
     visitor.visitLightNode(this);
   }
+
+  toJSON(): any {
+    const json = super.toJSON();
+    json["color"] = this.color;
+    json["position"] = this.position;
+    return json;
+  }
 }

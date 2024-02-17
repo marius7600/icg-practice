@@ -21,6 +21,8 @@ import TextureBoxNode from "./nodes/texture-box-node";
 import textureVertexShader from "./shader/texture-vertex-perspective-shader.glsl";
 import textureFragmentShader from "./shader/texture-fragment-shader.glsl";
 import Matrix from "./matrix";
+import { Scenegraph } from "./scenegraph";
+import JsonVisitor from "./jsonVisitor";
 import TextureTextBoxNode from "./nodes/texture-text-box-node";
 import Node from "./nodes/node";
 import MeshNode from "./nodes/mesh-node";
@@ -48,6 +50,14 @@ let textureShader: Shader;
 let minMaxAnimation: ScaleNode;
 let boxBounce: JumperNode;
 
+
+export default interface PhongValues {
+  ambient: number;
+  diffuse: number;
+  specular: number;
+  shininess: number;
+}
+
 let selectedNode: Node;
 let object: MeshNode | null = null;
 
@@ -60,13 +70,11 @@ window.addEventListener("load", () => {
   const canvas_raster = document.getElementById("rasterizer") as HTMLCanvasElement;
   const ctx_raster = canvas_raster.getContext("webgl2");
 
-  const mouseVisitor = new MouseVisitor();
+  const rasterSetupVisitor = new RasterSetupVisitor(ctx_raster);
 
-  // Method for magnifying glass effect
+  //!!!create scene graph!!!
+  Scenegraph.createProjectGraph(canvas_raster.width, canvas_raster.height, rasterSetupVisitor);
 
-  // let magnifyingGroup = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
-  // let magnifyingObject = new TextureBoxNode("source-missing-texture.png", new Vector(0.5, 0.5, 0, 1), new Vector(1.5, 1.5, 0, 1), "brickwall-normal.png")
-  // magnifyingGroup.add(magnifyingObject);
 
   // Get a reference to the canvas and its context
   const canvas = document.getElementById('drawing') as HTMLCanvasElement;
@@ -102,17 +110,17 @@ window.addEventListener("load", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
 
-  // Function to clear the game
-  document.getElementById('clearGame')?.addEventListener('click', function () {
-    ticTacToeRoot.children = [];
-    const newTicTacToe = new GroupNode(new Translation(new Vector(-1.3, -1.4, 0, 0)));
-    newTicTacToe.add(createTicTacToe());
-    //Remove the old game and add a new one
-    rightWindowGroup.children.pop();
-    rightWindowGroup.add(newTicTacToe);
-    rasterSetupVisitor.setup(rootNode);
-    currentPlayer = true;
-  });
+  // // Function to clear the game
+  // document.getElementById('clearGame')?.addEventListener('click', function () {
+  //   ticTacToeRoot.children = [];
+  //   const newTicTacToe = new GroupNode(new Translation(new Vector(-1.3, -1.4, 0, 0)));
+  //   newTicTacToe.add(createTicTacToe());
+  //   //Remove the old game and add a new one
+  //   rightWindowGroup.children.pop();
+  //   rightWindowGroup.add(newTicTacToe);
+  //   rasterSetupVisitor.setup(rootNode);
+  //   currentPlayer = true;
+  // });
 
   // canvas_raster.addEventListener("mousemove", function (info) {
   //   const rect = canvas_raster.getBoundingClientRect();
@@ -127,42 +135,33 @@ window.addEventListener("load", () => {
   //   ctx_raster.bindFramebuffer(ctx_raster.FRAMEBUFFER, null);
   // });
 
-  canvas_ray.addEventListener("click", function (info) {
-    setupWindow(info,
-      ctx_raster,
-      rightWindowMinimizeSphere,
-      rightWindowGroup,
-      taskbarButtonGroup1,
-      leftWindowMinimizeSphere,
-      leftWindowGroup,
-      taskbarButtonGroup2,
-      taskbarButton1,
-      taskbarButton2);
-    //Playing tik tak toe
-    selectedNode = mouseVisitor.getSelectedNode(rootNode, info.offsetX, info.offsetY, ctx_raster);
-    CheckTikTakToeField(currentPlayer, selectedNode);
-    currentPlayer = !currentPlayer;
-  });
+  // canvas_ray.addEventListener("click", function (info) {
+  //   setupWindow(info,
+  //     ctx_raster,
+  //     window1minimizeSphere,
+  //     windowGroup1,
+  //     taskbarButtonGroup1,
+  //     window2MinimizeSphere,
+  //     windowGroup2,
+  //     taskbarButtonGroup2,
+  //     taskbarButton1,
+  //     taskbarButton2);
+  // });
 
-  // Add a click event listener to the canvas
-  canvas_raster.addEventListener("click", function (info) {
-    // Get the x and y coordinates of the click
-    setupWindow(info,
-      ctx_raster,
-      rightWindowMinimizeSphere,
-      rightWindowGroup,
-      taskbarButtonGroup1,
-      leftWindowMinimizeSphere,
-      leftWindowGroup,
-      taskbarButtonGroup2,
-      taskbarButton1,
-      taskbarButton2,
-    );
-    //Playing tik tak toe
-    selectedNode = mouseVisitor.getSelectedNode(rootNode, info.offsetX, info.offsetY, ctx_raster);
-    CheckTikTakToeField(currentPlayer, selectedNode);
-    currentPlayer = !currentPlayer;
-  });
+  // // Add a click event listener to the canvas
+  // canvas_raster.addEventListener("click", function (info) {
+  //   // Get the x and y coordinates of the click
+  //   setupWindow(info,
+  //     ctx_raster,
+  //     window1minimizeSphere,
+  //     windowGroup1,
+  //     taskbarButtonGroup1,
+  //     window2MinimizeSphere,
+  //     windowGroup2,
+  //     taskbarButtonGroup2,
+  //     taskbarButton1,
+  //     taskbarButton2);
+  // });
 
 
 
@@ -184,247 +183,18 @@ window.addEventListener("load", () => {
   // initialize the phong properties
   phongProperties = new PhongProperties();
 
-  /***************************************************************/
-  /*********************  START OF SCENEGRAPH *********************/
-  /***************************************************************/
-  rootNode = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
-  cameraNode = new CameraNode(
-    new Vector(0, 0, 0, 1), // eye
-    new Vector(0, 0, -1, 1), // center
-    new Vector(0, 1, 0, 0), // up
-    60, // fov
-    canvas_raster.width / canvas_raster.height, // aspect
-    0.1, // near
-    100
-  ); // far
-  rootNode.add(cameraNode);
-
-  // add group node
-  const groupNodeUnderRoot = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
-  rootNode.add(groupNodeUnderRoot);
-
-  // add light node 1
-  // light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 4, -2, 0));
-  // groupNodeUnderRoot.add(light1);
-
-  // add light node 2
-  const groupNodeLight2 = new GroupNode(new Translation(new Vector(-3, -1, -5, 0)));
-  light2 = new LightNode(new Vector(1, 0, 0, 1), new Vector(0, 0, 0, 1));
-  let lightSpehre = new SphereNode(new Vector(1, 0, 0, 1), new Vector(0, 0, 0, 1), 0.25);
-
-  groupNodeLight2.add(light2);
-  groupNodeLight2.add(lightSpehre);
 
 
+  // let myBox = new AABoxNode(new Vector(50, 0.8, 0.8, 1));
+  // sceneGraph.add(myBox);
 
-  const groupNodeLight3 = new GroupNode(new Translation(new Vector(0, -1, -3, 0)));
-  let aabox = new AABoxNode(new Vector(0.5, 0.5, 0.5, 1), new Vector(0, 0, 0, 1));
-  light3 = new LightNode(new Vector(0, 1, 0, 1), new Vector(0, -1.5, -3, 1));
-  groupNodeLight3.add(light3);
-  groupNodeLight3.add(aabox);
-
-  const animateLight2 = new DriverNode(groupNodeLight2, new Vector(4, 0, 0, 0), 0.0005);
-  animateLight2.toggleActive();
-
-  rootNode.add(groupNodeLight2);
-  rootNode.add(groupNodeLight3);
-
-
-
-  ///////////// ===== ADD TASKBAR ===== /////////////
-  const taskbarButtonDimension = new Vector(.7, .7, .3, 0);
-  const taskbarButtonColor = new Vector(0, 1, 0, 1);
-
-  // add Taskbar to SceneGraph
-  const taskbarGroup = new GroupNode(new Translation(new Vector(0, -3.3, -1, 0)));
-  groupNodeUnderRoot.add(taskbarGroup);
-
-  const taskBarBackground = new AABoxNode(new Vector(10, .2, .3, 0), new Vector(2, 2, 0, 1));
-  taskbarGroup.add(taskBarBackground)
-
-  //add Taskbar Button 1
-  const taskbarButtonGroup1 = new GroupNode(new Translation(new Vector(2, .45, 0, 0)));
-  const taskbarButton1 = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
-  taskbarButtonGroup1.add(taskbarButton1)
-  taskbarGroup.add(taskbarButtonGroup1)
-
-  // add Taskbar Buttons 2
-  const taskbarButtonGroup2 = new GroupNode(new Transform4x4(new Vector(-2, .45, 0, 0), new Rotation(new Vector(0, 1, 0, 0), Math.PI)));
-  const taskbarButton2 = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
-  taskbarButtonGroup2.add(taskbarButton2)
-  taskbarGroup.add(taskbarButtonGroup2)
-
-  ///////////// ===== WINDOW VARIABLES ===== /////////////
-  // variables for the windows
-  const windowDimension = new Vector(3, 3, 0, 1);
-  const windowBackgroundColor = new Vector(0.8, 0.8, 0.8, 1);
-
-  const windowMenuDimension = new Vector(3, 0.5, 0.01, 1);
-  const windowMenuBackgroundColor = new Vector(0, 0, 1, 1);
-
-  const minimizeSphereDimension = new Vector(1.3, 0, 0, 1);
-  const minimizeSphereRadius = 0.13;
-  const minimizeSphereColor = new Vector(0.9, 0.7, 0.3, 1);
-
-  ///////////// ===== ADD RIGHT WINDOW ===== /////////////
-  // groupNode for the first application window
-  const rightWindowGroup = new GroupNode(new Translation(new Vector(1.8, 0, -1, 0)));
-  groupNodeUnderRoot.add(rightWindowGroup);
-
-  // add background for rightWindowGroup
-  const rightWindowBackground = new AABoxNode(windowDimension, windowBackgroundColor);
-  rightWindowGroup.add(rightWindowBackground);
-
-  const rightWindowMenu = new GroupNode(new Translation(new Vector(0, 1.5, 0, 0)));
-  const rightWindowMenuBackground = new AABoxNode(windowMenuDimension, windowMenuBackgroundColor);
-  rightWindowMenu.add(rightWindowMenuBackground);
-
-  const rightWindowMinimizeSphere = new SphereNode(minimizeSphereColor, minimizeSphereDimension, minimizeSphereRadius);
-  rightWindowMenu.add(rightWindowMinimizeSphere);
-
-  rightWindowGroup.add(rightWindowMenu);
-
-  // Add ticTacToe to the right window
-  const ticTacToeRoot = new GroupNode(new Translation(new Vector(-1.3, -1.4, 0, 0)));
-  ticTacToeRoot.add(createTicTacToe());
-  rightWindowGroup.add(ticTacToeRoot);
-
-  ///////////// ===== ADD LEFT WINDOW ===== /////////////
-  // groupNode for the secound application window
-  const leftWindowGroup = new GroupNode(new Translation(new Vector(-1.8, 0, -1, 0)));
-  groupNodeUnderRoot.add(leftWindowGroup);
-
-  // add background for leftWindowGroup
-  const window2Background = new AABoxNode(windowDimension, windowBackgroundColor);
-  leftWindowGroup.add(window2Background);
-
-  // add menue bar for leftWindowGroup
-  const leftWindowMenu = new GroupNode(new Translation(new Vector(0, 1.5, 0, 0)));
-  leftWindowGroup.add(leftWindowMenu);
-
-  // Add menue bar on window 2 
-  const leftWindowMenuBackground = new AABoxNode(windowMenuDimension, windowMenuBackgroundColor);
-  leftWindowMenu.add(leftWindowMenuBackground);
-
-  // Add minimize sphere on window 2
-  const leftWindowMinimizeSphere = new SphereNode(minimizeSphereColor, minimizeSphereDimension, minimizeSphereRadius);
-  leftWindowMenu.add(leftWindowMinimizeSphere);
-
-  // Add Texture box to the left window
-  const textureBoxGroup = new GroupNode(new Translation(new Vector(-1.5, 1.2, 0, 0)));
-  leftWindowGroup.add(textureBoxGroup);
-  //const textureBox = new TextureBoxNode("source-missing-texture.png", new Vector(0.5, 0.5, 0.5, 1), new Vector(1, 1, 1, 1), "brickwall-normal.png");
-  const textureVideoBox = new TextureVideoBoxNode("assitoni.mp4", new Vector(0, 0, 0, 1), new Vector(3, 1.5, 0.1, 1));
-
-  const textureVideoBoxGroup = new GroupNode(new EmptyTransformation);
-  let rotation = rotateWithPosition(textureVideoBoxGroup, 180);
-  textureVideoBoxGroup.transform = rotation;
-
-  textureBoxGroup.add(textureVideoBoxGroup);
-  textureVideoBoxGroup.add(textureVideoBox);
-
-  const meshPosition = new GroupNode(new Transform4x4(new Vector(0.8, 0.8, 0, 0), new Rotation(new Vector(1, 0, 0, 0), -90)));
-  const meshScale = new GroupNode(new Scaling(new Vector(0.04, 0.04, 0.04, 1)));
-  meshPosition.add(meshScale);
-
-  (async () => {
-    try {
-      object = await loadOBJ();
-      console.log("Finished importing", object);
-      meshScale.add(object);
-      taskbarGroup.add(meshPosition);
-      object.accept(rasterSetupVisitor);
-    } catch (error) {
-      console.log(error);
-    }
-  })();
-  // const cube = new TextureBoxNode("source-missing-texture.png", new Vector(0, 0, 0, 1), new Vector(0.5, 0.5, 0.5, 1), "brickwall-normal.png");
-  // meshPosition.add(cube);
-  // leftWindowGroup.add(meshPosition);
-
-  //const object = await MeshNode.getNode("monkey.obj", new Vector(1, 0, 0, 0));
-  // let object = null;
-  // MeshNode.getNode("monkey.obj", new Vector(1, 0, 0, 0)).then(monkey => {
-  //   object = monkey;
-  // }).catch(error => {
-  //   // Handle any errors here
-  //   console.log(error);
-
-  // });
-  // meshPosition.add(object);
-  // leftWindowGroup.add(meshPosition);
-
-  //Add animation node
-  const animationNode = new RotationNode(meshPosition, new Vector(0, 1, 0, 0));
-  // const animationNode3 = new JumperNode(taskbarButtonGroup2, new Vector(0, 1, 0, 0));
-
-  // const animationNode4 = new DriverNode(gn1);
-  // const animationNode3 = new ScaleNode(taskbarButtonGroup2, new Vector(-1, -1, -1, 0));
-  animationNode.toggleActive();
-
-  /***************************************************************/
-  /*********************  END OF SCENE GRAPH *********************/
-  /***************************************************************/
-
-  async function loadOBJ() {
-    const object = await MeshNode.getNode("towelie.obj", new Vector(0, 0.2, 1, 0));
-    return object;
-  }
-
-  function createTicTacToe() {
-    // Scale the size of the cubes
-    const ticTacToeScaling = new GroupNode(new Scaling(new Vector(1.5, 1.5, 1.5, 1)));
-    //Add the cubes to the scaler
-    let idCounter = 0;
-    for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 3; j++) {
-        //Position of the cubes in the tic tac toe
-        const position = new GroupNode(new Translation(new Vector(i * 0.6, j * 0.6, 0, 1)));
-        let cube = new TextureTextBoxNode("", new Vector(0, 0, 0, 1), new Vector(0.5, 0.5, 0.1, 1), idCounter);
-        position.add(cube);
-        ticTacToeScaling.add(position);
-        idCounter++;
-      }
-    }
-    return ticTacToeScaling;
-  }
-
-  function CheckTikTakToeField(currentPlayer: boolean, selectedNode: Node) {
-    if (currentPlayer) {
-      if (selectedNode instanceof TextureTextBoxNode) {
-        if (selectedNode.texture == "X") {
-          selectedNode.texture = "O";
-          rasterSetupVisitor.setup(rootNode);
-        } else if (selectedNode.texture == "O") {
-          selectedNode.texture = "";
-          rasterSetupVisitor.setup(rootNode);
-        } else {
-          selectedNode.texture = "X";
-          rasterSetupVisitor.setup(rootNode);
-        }
-      }
-    } else {
-      if (selectedNode instanceof TextureTextBoxNode) {
-        if (selectedNode.texture == "O") {
-          selectedNode.texture = "X";
-          rasterSetupVisitor.setup(rootNode);
-        } else if (selectedNode.texture == "X") {
-          selectedNode.texture = "";
-          rasterSetupVisitor.setup(rootNode);
-        } else {
-          selectedNode.texture = "O";
-          rasterSetupVisitor.setup(rootNode);
-        }
-      }
-    }
-  }
 
   // setup for raytracing rendering
   rayVisitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
 
   // setup for raster rendering
-  const rasterSetupVisitor = new RasterSetupVisitor(ctx_raster);
-  rasterSetupVisitor.setup(rootNode);
+
+  rasterSetupVisitor.setup(Scenegraph.getGraph());
 
   phongShader = new Shader(ctx_raster, phongVertexShader, phongFragmentShader);
 
@@ -445,7 +215,7 @@ window.addEventListener("load", () => {
 
   phongShader.load();
   textureShader.load();
-  rasterVisitor.setupCamera(cameraNode);
+  rasterVisitor.setupCamera(Scenegraph.getCamera());
 
 
   lastTimestamp = performance.now();
@@ -471,17 +241,21 @@ window.addEventListener("load", () => {
       lastTimestamp = timestamp;
       if (rasterizing) {
         // rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
-        rasterVisitor.render(rootNode, cameraNode);
+        rasterVisitor.render(Scenegraph.getGraph(), Scenegraph.getCamera())
       } else {
         // rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
         // rayVisitor.render(sceneGraph, cameraNode, phongProperties);
-        rayVisitor.render(rootNode, phongProperties, 50000);
+        rayVisitor.render(Scenegraph.getGraph(), phongProperties, 50000);
       }
       //requestAnimationFrame(animate);
       // console.log("animation loop ended");
       // console.log("animation loop ended");
       // console.log("animation loop ended");
-      animateLight2.simulate(delta);
+
+      const animationNodeList = Scenegraph.getAnimationNodes();
+      for (let animationNode of animationNodeList) {
+        animationNode.simulate(delta);
+      }
       window.requestAnimationFrame(animate);
     }
 
@@ -518,6 +292,31 @@ window.addEventListener("load", () => {
       lastTimestamp = 0;
     }
   }
+
+  // dowload scene as JSON file
+  document.getElementById('downloadButton').addEventListener("click", () => {
+    new JsonVisitor().saveSceneGraph(Scenegraph.getGraph())
+  })
+
+  // upload scene from JSON file
+  let uploadButton = document.getElementById("uploadButton");
+  uploadButton.onclick = () => {
+    let fileSelector = document.createElement("input");
+    fileSelector.setAttribute("type", "file");
+    fileSelector.onchange = () => {
+      let files = fileSelector.files[0];
+      let reader = new FileReader();
+      reader.onload = (event) => {
+        Scenegraph.fromJSON(files, rasterVisitor)
+        console.log("JSON file uploaded");
+
+      };
+      reader.readAsText(files);
+    };
+    fileSelector.click();
+  };
+
+
 
 
 

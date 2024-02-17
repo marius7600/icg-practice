@@ -263,4 +263,14 @@ export default class Matrix {
       );
     }
   }
+
+  toJSON() {
+    let d: { [key: string]: any } = {}; // Add index signature to allow indexing with a string
+    for (let i = 0; i < this.data.length; i++) {
+      d[i.toString()] = this.data[i];
+    }
+    return {
+      data: d
+    };
+  }
 }

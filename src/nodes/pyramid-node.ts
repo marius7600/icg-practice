@@ -23,4 +23,12 @@ export default class PyramidNode extends Node {
   accept(visitor: Visitor) {
     visitor.visitPyramidNode(this);
   }
+
+  toJSON(): any {
+    const json = super.toJSON();
+    json["minPoint"] = this.minPoint;
+    json["maxPoint"] = this.maxPoint;
+    json["color"] = this.color;
+    return json;
+  }
 }
