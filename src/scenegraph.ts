@@ -37,6 +37,41 @@ export class Scenegraph {
 
 
     /**
+     * Retrieves a GroupNode with the specified name from the scene graph.
+     * 
+     * @param name - The name of the GroupNode to retrieve.
+     * @returns The GroupNode with the specified name, or null if not found.
+     */
+    static getGroupNode(name: string): GroupNode | null {
+        return this._getGroupNode(this.sceneGraph, name);
+    }
+
+    /**
+     * Retrieves a GroupNode with the specified name from the given Node and its descendants.
+     * 
+     * @param node - The root Node to search from.
+     * @param name - The name of the GroupNode to retrieve.
+     * @returns The GroupNode with the specified name, or null if not found.
+     */
+    static _getGroupNode(node: Node, name: string): GroupNode | null {
+        if (node.name === name && node instanceof GroupNode) {
+            return node;
+        }
+
+        if (node instanceof GroupNode || node instanceof WindowNode) {
+            for (let child of node.children) {
+                let result = this._getGroupNode(child, name);
+                if (result) {
+                    return result;
+                }
+            }
+        }
+
+        return null;
+    }
+
+
+    /**
      * Retrieves the WindowNode with the specified name from the scene graph.
      * 
      * @param name - The name of the WindowNode to retrieve.
@@ -181,6 +216,7 @@ export class Scenegraph {
 
         //add Taskbar Button on the Right
         const taskbarButtonGroupRight = new GroupNode(new Translation(new Vector(2, .45, 0, 0)));
+        taskbarButtonGroupRight.name = "taskbarButtonGroupRightWindow";
         const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
         taskbarButtonRight.name = "taskbarButtonRightWindow";
         taskbarButtonGroupRight.add(taskbarButtonRight)
@@ -188,6 +224,7 @@ export class Scenegraph {
 
         // add Taskbar Buttons on the Left
         const taskbarButtonGroupLeft = new GroupNode(new Transform4x4(new Vector(-2, .45, 0, 0), new Rotation(new Vector(0, 1, 0, 0), Math.PI)));
+        taskbarButtonGroupLeft.name = "taskbarButtonGroupLeftWindow";
         const taskbarButtonLeft = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
         taskbarButtonLeft.name = "taskbarButtonLeftWindow";
         taskbarButtonGroupLeft.add(taskbarButtonLeft)

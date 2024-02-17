@@ -134,16 +134,6 @@ window.addEventListener("load", () => {
   // });
 
   canvas_ray.addEventListener("click", function (info) {
-    // setupWindow(info,
-    //   ctx_raster,
-    //   rightWindowMinimizeSphere,
-    //   rightWindowGroup,
-    //   taskbarButtonGroup1,
-    //   leftWindowMinimizeSphere,
-    //   leftWindowGroup,
-    //   taskbarButtonGroup2,
-    //   taskbarButton1,
-    //   taskbarButton2);
     //Playing tik tak toe
     selectedNode = mouseVisitor.getSelectedNode(Scenegraph.getGraph(), info.offsetX, info.offsetY, ctx_raster);
     Game.CheckTikTakToeField(selectedNode, rasterSetupVisitor);
@@ -152,22 +142,11 @@ window.addEventListener("load", () => {
 
   // Add a click event listener to the canvas
   canvas_raster.addEventListener("click", function (info) {
-    // Get the x and y coordinates of the click
-    // setupWindow(info,
-    //   ctx_raster,
-    //   rightWindowMinimizeSphere,
-    //   rightWindowGroup,
-    //   taskbarButtonGroup1,
-    //   leftWindowMinimizeSphere,
-    //   leftWindowGroup,
-    //   taskbarButtonGroup2,
-    //   taskbarButton1,
-    //   taskbarButton2,
-    // );
     //Playing tik tak toe
     selectedNode = mouseVisitor.getSelectedNode(Scenegraph.getGraph(), info.offsetX, info.offsetY, ctx_raster);
     console.log("Object clicked: ", selectedNode);
     Game.CheckTikTakToeField(selectedNode, rasterSetupVisitor);
+    // Handle events when clicking on objects with the mouse
     handleMouseclickEvent(selectedNode);
   });
 
@@ -381,9 +360,15 @@ function handleMouseclickEvent(selectedNode: Node) {
 
   if (selectedNode.name.startsWith("taskbarButton")) {
     const windowName = selectedNode.name.slice(13);
-    console.log("WindowName: " + windowName);
     Scenegraph.getWindowNode(windowName).toggleMinMax();
+    const taskbarButtonGroup = Scenegraph.getGroupNode("taskbarButtonGroup" + windowName);
+    jumpAnimation(taskbarButtonGroup);
   }
+}
+
+function jumpAnimation(taskbarButtonGroup: GroupNode) {
+  boxBounce = new JumperNode(taskbarButtonGroup, new Vector(0, 1, 0, 0), taskbarButtonGroup.getTransformation().getMatrix());
+  boxBounce.toggleActive();
 }
 
 //FIXME: Implement the click events
@@ -444,10 +429,7 @@ function handleMouseclickEvent(selectedNode: Node) {
 //   }
 // }
 
-function jumpAnimation(taskbarButtonGroup1: GroupNode) {
-  boxBounce = new JumperNode(taskbarButtonGroup1, new Vector(0, 1, 0, 0), taskbarButtonGroup1.getTransformation().getMatrix());
-  boxBounce.toggleActive();
-}
+
 
 /* Toggle visability between the raytracer and rasterizer canvas */
 function toggleFigure() {
