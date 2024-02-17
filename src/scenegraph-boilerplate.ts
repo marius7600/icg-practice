@@ -7,7 +7,7 @@ import CameraNode from "./nodes/camera-node";
 import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
 import PyramidNode from "./nodes/pyramid-node";
-import SphereNode from "./nodes/shere-node";
+import SphereNode from "./nodes/sphere-node";
 import PhongProperties from "./phong-properties";
 import TextureVideoBoxNode from "./nodes/texture-video-box-node";
 import { RasterSetupVisitor, RasterVisitor } from "./rasterzier/rastervisitor";
@@ -27,6 +27,7 @@ import TextureTextBoxNode from "./nodes/texture-text-box-node";
 import Node from "./nodes/node";
 import MeshNode from "./nodes/mesh-node";
 import { Game } from "./game";
+import { WindowNode } from "./nodes/window-node";
 
 let rasterizing: boolean = true;
 
@@ -165,7 +166,9 @@ window.addEventListener("load", () => {
     // );
     //Playing tik tak toe
     selectedNode = mouseVisitor.getSelectedNode(Scenegraph.getGraph(), info.offsetX, info.offsetY, ctx_raster);
+    console.log("Object clicked: ", selectedNode);
     Game.CheckTikTakToeField(selectedNode, rasterSetupVisitor);
+    handleMouseclickEvent(selectedNode);
   });
 
 
@@ -367,103 +370,83 @@ window.addEventListener("load", () => {
   //     "click", () => cancelAnimationFrame(animationHandle));
 });
 
+function handleMouseclickEvent(selectedNode: Node) {
+  if (selectedNode == null || selectedNode.name == null) return;
 
-function rotateWithPosition(textureVideoBoxGroup: GroupNode, angle: number) {
-  const position = textureVideoBoxGroup.transform.getMatrix();
-  const inverse = textureVideoBoxGroup.transform.getInverseMatrix();
-  // let rotation = new Rotation(new Vector(1, 0, 0, 0), 9.25); //Weird rotation ich raffs garnicht????
-  let rotation = new Rotation(new Vector(1, 0, 0, 0), angle); //Weird rotation ich raffs garnicht????
-  rotation.matrix = position.mul(rotation.getMatrix());
-  rotation.inverse = rotation.getInverseMatrix().mul(inverse);
-  return rotation;
-}
+  // if the seleded node starts with "minimizeSphere" slice the name and minimize the window
+  if (selectedNode.name.startsWith("minimizeSphere")) {
+    const windowName = selectedNode.name.slice(14);
+    Scenegraph.getWindowNode(windowName).toggleMinMax();
+  }
 
-function setupWindow(info: MouseEvent,
-  ctx_raster: WebGL2RenderingContext,
-  rightWindowMinimizeSphere: SphereNode,
-  rightWindowGroup: GroupNode,
-  taskbarButtonGroup1: GroupNode,
-  leftWindowMinimizeSphere: SphereNode,
-  leftWindowGroup: GroupNode,
-  taskbarButtonGroup2: GroupNode,
-  taskbarButton1: AABoxNode,
-  taskbarButton2: AABoxNode) {
-  const x = info.offsetX;
-  const y = info.offsetY;
-  // Create a new mouse visitor
-  const mouseVisitor = new MouseVisitor();
-  // Use the mouse visitor to get the selected node
-  let selectedNode = mouseVisitor.getSelectedNode(Scenegraph.getGraph(), x, y, ctx_raster);
-  // If a node was selected
-  if (selectedNode != null) {
-    // If the selected node is a sphere
-    if (selectedNode instanceof SphereNode) {
-      // If x is smaller than half the canvas width, minimize rightWindowGroup, otherwise minimize leftWindowGroup
-      if (x > ctx_raster.canvas.width / 2) {
-        // Minimize window 1
-        minimize(rightWindowGroup);
-        // Jump the taskbar button
-        jumpAnimation(taskbarButtonGroup1);
-      } else {
-        // Minimize window 2
-        minimize(leftWindowGroup);
-        // Jump the taskbar button
-        jumpAnimation(taskbarButtonGroup2);
-      }
-    }
-    // If the selected node is an AA box
-    if (selectedNode instanceof AABoxNode) {
-      // Determine which taskbar button was clicked, depending on the color of the box
-      if (x > ctx_raster.canvas.width / 2) {
-        // If the window is minimized, maximize it
-        if (Math.floor(rightWindowGroup.getTransformation().getMatrix().data[0]) == 0) {
-          maximize(rightWindowGroup);
-        }
-
-        // If the window is maximized, minimize it
-        else {
-          minimize(rightWindowGroup);
-        }
-
-        // Jump the taskbar button
-        jumpAnimation(taskbarButtonGroup1);
-      } else {
-        // If the window is minimized, maximize it
-        if (Math.floor(leftWindowGroup.getTransformation().getMatrix().data[0]) == 0) {
-          maximize(leftWindowGroup);
-        }
-
-        // If the window is maximized, minimize it
-        else {
-          minimize(leftWindowGroup);
-        }
-        // Jump the taskbar button
-        jumpAnimation(taskbarButtonGroup2);
-      }
-    }
+  if (selectedNode.name.startsWith("taskbarButton")) {
+    const windowName = selectedNode.name.slice(13);
+    console.log("WindowName: " + windowName);
+    Scenegraph.getWindowNode(windowName).toggleMinMax();
   }
 }
+
+//FIXME: Implement the click events
+// function handleMouseclick(selectedNode: Node, ctx_raster: WebGL2RenderingContext, x: number, y: number) {
+//   // const x = info.offsetX;
+//   // const y = info.offsetY;
+//   // // Create a new mouse visitor
+//   // const mouseVisitor = new MouseVisitor();
+//   // // Use the mouse visitor to get the selected node
+//   // let selectedNode = mouseVisitor.getSelectedNode(Scenegraph.getGraph(), x, y, ctx_raster);
+//   // If a node was selected
+//   if (selectedNode != null) {
+//     // If the selected node is a sphere
+//     if (selectedNode instanceof SphereNode && selectedNode.name == "rightCloseButton") {
+//       // If x is smaller than half the canvas width, minimize rightWindowGroup, otherwise minimize leftWindowGroup
+//       if (x > ctx_raster.canvas.width / 2) {
+//         // Minimize window 1
+//         minimize(rightWindowGroup);
+//         // Jump the taskbar button
+//         jumpAnimation(taskbarButtonGroup1);
+//       } else {
+//         // Minimize window 2
+//         minimize(leftWindowGroup);
+//         // Jump the taskbar button
+//         jumpAnimation(taskbarButtonGroup2);
+//       }
+//     }
+//     // If the selected node is an AA box
+//     if (selectedNode instanceof AABoxNode) {
+//       // Determine which taskbar button was clicked, depending on the color of the box
+//       if (x > ctx_raster.canvas.width / 2) {
+//         // If the window is minimized, maximize it
+//         if (Math.floor(rightWindowGroup.getTransformation().getMatrix().data[0]) == 0) {
+//           maximize(rightWindowGroup);
+//         }
+
+//         // If the window is maximized, minimize it
+//         else {
+//           minimize(rightWindowGroup);
+//         }
+
+//         // Jump the taskbar button
+//         jumpAnimation(taskbarButtonGroup1);
+//       } else {
+//         // If the window is minimized, maximize it
+//         if (Math.floor(leftWindowGroup.getTransformation().getMatrix().data[0]) == 0) {
+//           maximize(leftWindowGroup);
+//         }
+
+//         // If the window is maximized, minimize it
+//         else {
+//           minimize(leftWindowGroup);
+//         }
+//         // Jump the taskbar button
+//         jumpAnimation(taskbarButtonGroup2);
+//       }
+//     }
+//   }
+// }
 
 function jumpAnimation(taskbarButtonGroup1: GroupNode) {
   boxBounce = new JumperNode(taskbarButtonGroup1, new Vector(0, 1, 0, 0), taskbarButtonGroup1.getTransformation().getMatrix());
   boxBounce.toggleActive();
-}
-
-function minimize(rightWindowGroup: GroupNode) {
-  const originalScale = new Vector(1, 1, 1, 1);
-  const scaleAmout = 0.001;
-  const targetScale = originalScale.mul(scaleAmout);
-  const duration = 5000; // in milliseconds
-
-  minMaxAnimation = new ScaleNode(rightWindowGroup, targetScale, duration);
-  minMaxAnimation.toggleActive();
-}
-
-function maximize(rightWindowGroup: GroupNode) {
-  const targetScale = new Vector(1.001, 1.001, 1.001, 1);
-  const duration = 2; // 2 Sekunden Dauer der Animation
-  minMaxAnimation = new ScaleNode(rightWindowGroup, targetScale, duration);
-  minMaxAnimation.toggleActive();
 }
 
 /* Toggle visability between the raytracer and rasterizer canvas */

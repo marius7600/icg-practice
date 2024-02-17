@@ -6,7 +6,7 @@ import LightNode from "../nodes/light-node";
 import MeshNode from "../nodes/mesh-node";
 import Node from "../nodes/node";
 import PyramidNode from "../nodes/pyramid-node";
-import SphereNode from "../nodes/shere-node";
+import SphereNode from "../nodes/sphere-node";
 import TextureBoxNode from "../nodes/texture-box-node";
 import TextureTextBoxNode from "../nodes/texture-text-box-node";
 import TextureVideoBoxNode from "../nodes/texture-video-box-node";
@@ -23,6 +23,7 @@ import RasterTextTextureBox from "./raster-texture-box-text";
 import RasterVideoTextureBox from "./raster-texture-box-video";
 import AnimationNode from "../nodes/animation-nodes";
 import { Scenegraph } from "../scenegraph";
+import { WindowNode } from "../nodes/window-node";
 
 interface Renderable {
   render(shader: Shader): void;

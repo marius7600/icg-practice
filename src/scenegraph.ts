@@ -3,7 +3,7 @@ import AnimationNode, { DriverNode, RotationNode } from "./nodes/animation-nodes
 import camera from "./nodes/camera-node";
 import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
-import SphereNode from "./nodes/shere-node";
+import SphereNode from "./nodes/sphere-node";
 import TextureVideoBoxNode from "./nodes/texture-video-box-node";
 import { EmptyTransformation, RotateWithPosition, Rotation, Scaling, Transform4x4, Translation } from "./transformation";
 import Vector from "./vector";
@@ -14,7 +14,12 @@ import Visitor from "./visitor";
 import TextureTextBoxNode from "./nodes/texture-text-box-node";
 import MeshNode from "./nodes/mesh-node";
 import { Game } from "./game";
+import { WindowNode } from "./nodes/window-node";
+import Node from "./nodes/node";
 
+/**
+ * Represents a scenegraph that holds the hierarchy of nodes in a 3D scene.
+ */
 export class Scenegraph {
 
     private static sceneGraph: GroupNode;
@@ -28,6 +33,42 @@ export class Scenegraph {
             alert("No Nodes in Scenegraph initialized! Please put Nodes in the scenegraph  first");
         }
         return this.sceneGraph;
+    }
+
+
+    /**
+     * Retrieves the WindowNode with the specified name from the scene graph.
+     * 
+     * @param name - The name of the WindowNode to retrieve.
+     * @returns The WindowNode with the specified name, or null if not found.
+     */
+    static getWindowNode(name: string): WindowNode | null {
+        return this._getWindowNode(this.sceneGraph, name);
+    }
+
+
+    /**
+     * Recursively searches for a WindowNode with the specified name in the scene graph.
+     * 
+     * @param node - The starting node for the search.
+     * @param name - The name of the WindowNode to find.
+     * @returns The found WindowNode, or null if not found.
+     */
+    static _getWindowNode(node: Node, name: string): WindowNode | null {
+        if (node.name === name && node instanceof WindowNode) {
+            return node;
+        }
+
+        if (node instanceof GroupNode || node instanceof WindowNode) {
+            for (let child of node.children) {
+                let result = this._getWindowNode(child, name);
+                if (result) {
+                    return result;
+                }
+            }
+        }
+
+        return null;
     }
 
     static setGraph(sceneGraph: GroupNode) {
@@ -83,7 +124,7 @@ export class Scenegraph {
             new Vector(0, 0, -1, 1), // center
             new Vector(0, 1, 0, 0), // up
             60, // fov
-            canvasWidth / canvasWidth, // aspect
+            canvasWidth / canvasHeight, // aspect
             0.1, // near
             100
         ); // far
@@ -138,47 +179,25 @@ export class Scenegraph {
         const taskBarBackground = new AABoxNode(new Vector(10, .2, .3, 0), new Vector(2, 2, 0, 1));
         taskbarGroup.add(taskBarBackground)
 
-        //add Taskbar Button 1
-        const taskbarButtonGroup1 = new GroupNode(new Translation(new Vector(2, .45, 0, 0)));
-        const taskbarButton1 = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
-        taskbarButtonGroup1.add(taskbarButton1)
-        taskbarGroup.add(taskbarButtonGroup1)
+        //add Taskbar Button on the Right
+        const taskbarButtonGroupRight = new GroupNode(new Translation(new Vector(2, .45, 0, 0)));
+        const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
+        taskbarButtonRight.name = "taskbarButtonRightWindow";
+        taskbarButtonGroupRight.add(taskbarButtonRight)
+        taskbarGroup.add(taskbarButtonGroupRight)
 
-        // add Taskbar Buttons 2
-        const taskbarButtonGroup2 = new GroupNode(new Transform4x4(new Vector(-2, .45, 0, 0), new Rotation(new Vector(0, 1, 0, 0), Math.PI)));
-        const taskbarButton2 = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
-        taskbarButtonGroup2.add(taskbarButton2)
-        taskbarGroup.add(taskbarButtonGroup2)
-
-        ///////////// ===== WINDOW VARIABLES ===== /////////////
-        // variables for the windows
-        const windowDimension = new Vector(3, 3, 0, 1);
-        const windowBackgroundColor = new Vector(0.8, 0.8, 0.8, 1);
-
-        const windowMenuDimension = new Vector(3, 0.5, 0.01, 1);
-        const windowMenuBackgroundColor = new Vector(0, 0, 1, 1);
-
-        const minimizeSphereDimension = new Vector(1.3, 0, 0, 1);
-        const minimizeSphereRadius = 0.13;
-        const minimizeSphereColor = new Vector(0.9, 0.7, 0.3, 1);
+        // add Taskbar Buttons on the Left
+        const taskbarButtonGroupLeft = new GroupNode(new Transform4x4(new Vector(-2, .45, 0, 0), new Rotation(new Vector(0, 1, 0, 0), Math.PI)));
+        const taskbarButtonLeft = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
+        taskbarButtonLeft.name = "taskbarButtonLeftWindow";
+        taskbarButtonGroupLeft.add(taskbarButtonLeft)
+        taskbarGroup.add(taskbarButtonGroupLeft)
 
         ///////////// ===== ADD RIGHT WINDOW ===== /////////////
-        // groupNode for the first application window
-        const rightWindowGroup = new GroupNode(new Translation(new Vector(1.8, 0, -1, 0)));
+
+        const rightWindowGroup = new WindowNode(new Translation(new Vector(1.8, 0, -1, 0)), "RightWindow");
         groupNodeUnderRoot.add(rightWindowGroup);
-
-        // add background for rightWindowGroup
-        const rightWindowBackground = new AABoxNode(windowDimension, windowBackgroundColor);
-        rightWindowGroup.add(rightWindowBackground);
-
-        const rightWindowMenu = new GroupNode(new Translation(new Vector(0, 1.5, 0, 0)));
-        const rightWindowMenuBackground = new AABoxNode(windowMenuDimension, windowMenuBackgroundColor);
-        rightWindowMenu.add(rightWindowMenuBackground);
-
-        const rightWindowMinimizeSphere = new SphereNode(minimizeSphereColor, minimizeSphereDimension, minimizeSphereRadius);
-        rightWindowMenu.add(rightWindowMinimizeSphere);
-
-        rightWindowGroup.add(rightWindowMenu);
+        // rightWindowGroup.add(rightWindowMenu);
 
         // Add ticTacToe to the right window
         const ticTacToeRoot = new GroupNode(new Translation(new Vector(-1.3, -1.4, 0, 0)));
@@ -189,24 +208,8 @@ export class Scenegraph {
 
         ///////////// ===== ADD LEFT WINDOW ===== /////////////
         // groupNode for the secound application window
-        const leftWindowGroup = new GroupNode(new Translation(new Vector(-1.8, 0, -1, 0)));
+        const leftWindowGroup = new WindowNode(new Translation(new Vector(-1.8, 0, -1, 0)), "LeftWindow");
         groupNodeUnderRoot.add(leftWindowGroup);
-
-        // add background for leftWindowGroup
-        const window2Background = new AABoxNode(windowDimension, windowBackgroundColor);
-        leftWindowGroup.add(window2Background);
-
-        // add menue bar for leftWindowGroup
-        const leftWindowMenu = new GroupNode(new Translation(new Vector(0, 1.5, 0, 0)));
-        leftWindowGroup.add(leftWindowMenu);
-
-        // Add menue bar on window 2 
-        const leftWindowMenuBackground = new AABoxNode(windowMenuDimension, windowMenuBackgroundColor);
-        leftWindowMenu.add(leftWindowMenuBackground);
-
-        // Add minimize sphere on window 2
-        const leftWindowMinimizeSphere = new SphereNode(minimizeSphereColor, minimizeSphereDimension, minimizeSphereRadius);
-        leftWindowMenu.add(leftWindowMinimizeSphere);
 
         // Add Texture box to the left window
         const textureBoxGroup = new GroupNode(new Translation(new Vector(-1.5, 1.2, 0, 0)));
@@ -217,6 +220,7 @@ export class Scenegraph {
         const textureVideoBoxGroup = new GroupNode(new EmptyTransformation);
         let rotation = rotateWithPosition(textureVideoBoxGroup, 180);
         textureVideoBoxGroup.transform = rotation;
+
 
         textureBoxGroup.add(textureVideoBoxGroup);
         textureVideoBoxGroup.add(textureVideoBox);
@@ -264,24 +268,6 @@ export class Scenegraph {
         /*********************  END OF SCENE GRAPH *********************/
         /***************************************************************/
     }
-}
-
-function createTicTacToe() {
-    // Scale the size of the cubes
-    const ticTacToeScaling = new GroupNode(new Scaling(new Vector(1.5, 1.5, 1.5, 1)));
-    //Add the cubes to the scaler
-    let idCounter = 0;
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            //Position of the cubes in the tic tac toe
-            const position = new GroupNode(new Translation(new Vector(i * 0.6, j * 0.6, 0, 1)));
-            let cube = new TextureTextBoxNode("", new Vector(0, 0, 0, 1), new Vector(0.5, 0.5, 0.1, 1), idCounter);
-            position.add(cube);
-            ticTacToeScaling.add(position);
-            idCounter++;
-        }
-    }
-    return ticTacToeScaling;
 }
 
 async function loadOBJ() {

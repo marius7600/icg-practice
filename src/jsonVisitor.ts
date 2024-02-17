@@ -3,7 +3,7 @@ import Visitor from "./visitor"; // Import the missing 'Visitor' class
 import GroupNode from "./nodes/group-node";
 import AABoxNode from "./nodes/aabox-node";
 import PyramidNode from "./nodes/pyramid-node";
-import SphereNode from "./nodes/shere-node";
+import SphereNode from "./nodes/sphere-node";
 import lightNode from "./nodes/light-node";
 import { Transformation } from "./transformation";
 import TextureBoxNode from "./nodes/texture-box-node";

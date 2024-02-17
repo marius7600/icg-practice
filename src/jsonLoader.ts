@@ -6,7 +6,7 @@ import Vector from "./vector";
 import Node from "./nodes/node";
 import LightNode from "./nodes/light-node";
 import PyramidNode from "./nodes/pyramid-node";
-import SphereNode from "./nodes/shere-node";
+import SphereNode from "./nodes/sphere-node";
 import TextureVideoBoxNode from "./nodes/texture-video-box-node";
 import TextureBoxNode from "./nodes/texture-box-node";
 import AABoxNode from "./nodes/aabox-node";

@@ -7,7 +7,7 @@ import LightNode from "./nodes/light-node";
 import MeshNode from "./nodes/mesh-node";
 import Node from "./nodes/node";
 import PyramidNode from "./nodes/pyramid-node";
-import SphereNode from "./nodes/shere-node";
+import SphereNode from "./nodes/sphere-node";
 import TextureBoxNode from "./nodes/texture-box-node";
 import TextureTextBoxNode from "./nodes/texture-text-box-node";
 import TextureVideoBoxNode from "./nodes/texture-video-box-node";
@@ -79,9 +79,9 @@ export default class MouseVisitor implements Visitor {
         this.nodes.push(node);
     }
     visitAABoxNode(node: AABoxNode): void {
-        // throw new Error('Method not implemented.');
-
+        // Get the transformation matrix for the current node
         let m = this.stack[this.stack.length - 1];
+        // Transform the min and max points of the node to world coordinates
         let min = m.mul(node.minPoint);
         let max = m.mul(node.maxPoint);
         // this.intersectables.push(new AABox(min, max, node.color));
@@ -145,7 +145,7 @@ export default class MouseVisitor implements Visitor {
     }
 
     visitAnimationNode(node: AnimationNode): void {
-        console.log("AnimationNode  in MouseVisitor");
+        //console.log("AnimationNode  in MouseVisitor");
     }
 
     /**
@@ -181,7 +181,7 @@ export default class MouseVisitor implements Visitor {
 
         let minIntersection = new Intersection(Infinity, null, null);
         let selectedNode: Node = null;
-        console.log(this.intersectables);
+        // console.log(this.intersectables);
 
         for (
             let i = 0;
@@ -195,7 +195,7 @@ export default class MouseVisitor implements Visitor {
                 continue;
             }
             if (this.intersection && this.intersection.closerThan(minIntersection)) {
-                console.log("New minIntersection found: " + this.intersection);
+                // console.log("New minIntersection found: " + this.intersection);
                 minIntersection = this.intersection;
                 selectedNode = this.nodes[i];
             }

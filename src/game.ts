@@ -84,26 +84,15 @@ export class Game {
      */
     static CheckTikTakToeField(selectedBox: Node, rasterSetupVisitor: RasterSetupVisitor) {
         if (this.currentPlayer) {
-            if (selectedBox instanceof TextureTextBoxNode) {
-                if (selectedBox.texture == "X") {
-                    selectedBox.texture = "O";
-                    rasterSetupVisitor.setup(Scenegraph.getGraph());
-                } else {
-                    selectedBox.texture = "X";
-                    rasterSetupVisitor.setup(Scenegraph.getGraph());
-                }
+            if (selectedBox instanceof TextureTextBoxNode && selectedBox.texture == "") {
+                selectedBox.texture = "O";
+                rasterSetupVisitor.setup(Scenegraph.getGraph());
                 this.currentPlayer = !this.currentPlayer;
             }
         } else {
-            if (selectedBox instanceof TextureTextBoxNode) {
-
-                if (selectedBox.texture == "O") {
-                    selectedBox.texture = "X";
-                    rasterSetupVisitor.setup(Scenegraph.getGraph());
-                } else {
-                    selectedBox.texture = "O";
-                    rasterSetupVisitor.setup(Scenegraph.getGraph());
-                }
+            if (selectedBox instanceof TextureTextBoxNode && selectedBox.texture == "") {
+                selectedBox.texture = "X";
+                rasterSetupVisitor.setup(Scenegraph.getGraph());
                 this.currentPlayer = !this.currentPlayer;
             }
         }
