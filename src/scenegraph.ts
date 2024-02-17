@@ -8,6 +8,9 @@ import TextureVideoBoxNode from "./nodes/texture-video-box-node";
 import { EmptyTransformation, RotateWithPosition, Rotation, Transform4x4, Translation } from "./transformation";
 import Vector from "./vector";
 import AABoxNode from "./nodes/aabox-node";
+import { JsonLoader } from "./jsonLoader";
+import { RasterVisitor } from "./rasterzier/rastervisitor";
+import Visitor from "./visitor";
 
 export class Scenegraph {
 
@@ -48,18 +51,19 @@ export class Scenegraph {
         new JsonVisitor().saveSceneGraph(this.sceneGraph)
     }
 
-    // static fromJSON(file: File) {
-    //     JsonLoader.JsonToScenegraph(file)
-    //         .then(loaded => {
-    //             Scenegraph.camera = loaded.camera
-    //             Scenegraph.setGraph(loaded.sg)
-    //             const animationNodes = new AnimationVisitor().visit(loaded.sg);
-    //             Scenegraph.setAnimationNodes(animationNodes)
-    //             Renderer.getInstance().update()
-    //         });
+    //TODO: Animation Visitor/ flexible for ray and raster
+    static fromJSON(file: File, visitor: RasterVisitor) {
+        JsonLoader.JsonToScenegraph(file)
+            .then(loaded => {
+                Scenegraph.camera = loaded.camera
+                console.log("setup new camera from json", Scenegraph.camera);
 
-
-    // }
+                Scenegraph.setGraph(loaded.sg)
+                //const animationNodes = new AnimationVisitor().visit(loaded.sg);
+                //Scenegraph.setAnimationNodes(animationNodes)
+                visitor.render(loaded.sg, loaded.camera)
+            });
+    }
 
     static async createProjectGraph(canvasWith: number, canvasHeight: number) {
         /***************************************************************/

@@ -244,17 +244,14 @@ window.addEventListener("load", () => {
     let fileSelector = document.createElement("input");
     fileSelector.setAttribute("type", "file");
     fileSelector.onchange = () => {
-      let file = fileSelector.files[0];
+      let files = fileSelector.files[0];
       let reader = new FileReader();
       reader.onload = (event) => {
-        let scene = JSON.parse(event.target.result as string);
-        console.log("Szene bei Upload", scene);
-        rootNode = scene.groupNode as GroupNode;
-        console.log("Upload root node : ", rootNode)
-        phongProperties = scene.phongValues;
-        console.log("Upload phong properties", phongProperties);
+        Scenegraph.fromJSON(files, rasterVisitor)
+        console.log("JSON file uploaded");
+
       };
-      reader.readAsText(file);
+      reader.readAsText(files);
     };
     fileSelector.click();
   };

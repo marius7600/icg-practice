@@ -13,8 +13,8 @@ export interface Transformation {
 }
 
 export class MatrixTransformation implements Transformation {
-    matrix: Matrix;
-    inverse: Matrix;
+    public matrix: Matrix;
+    public inverse: Matrix;
 
     constructor(matrix: Matrix, inverse: Matrix) {
         this.matrix = matrix;
@@ -36,27 +36,42 @@ export class MatrixTransformation implements Transformation {
 
     toJSON() {
         let transform;
-        if (this instanceof Translation) {
+        if (this instanceof Transform4x4) {
             transform = {
-                Translation: {
-                    matrix: this.matrix.toJSON(),
-                    inverse: this.inverse.toJSON(),
-                },
-            };
+                type: "Transform4x4",
+                matrix: this.matrix.toJSON(),
+                inverse: this.inverse.toJSON()
+            }
+        } else if (this instanceof Translation) {
+            transform = {
+                type: "Translation",
+                matrix: this.matrix.toJSON(),
+                inverse: this.inverse.toJSON()
+            }
+        } else if (this instanceof EmptyTransformation) {
+            transform = {
+                type: "EmptyTransformation",
+                matrix: this.matrix.toJSON(),
+                inverse: this.inverse.toJSON()
+            }
         } else if (this instanceof Rotation) {
             transform = {
-                Rotation: {
-                    matrix: this.matrix.toJSON(),
-                    inverse: this.inverse.toJSON(),
-                },
-            };
+                type: "Rotation",
+                matrix: this.matrix.toJSON(),
+                inverse: this.inverse.toJSON()
+            }
+        } else if (this instanceof RotateWithPosition) {
+            transform = {
+                type: "RotateWithPosition",
+                matrix: this.matrix.toJSON(),
+                inverse: this.inverse.toJSON()
+            }
         } else if (this instanceof Scaling) {
             transform = {
-                Scaling: {
-                    matrix: this.matrix.toJSON(),
-                    inverse: this.inverse.toJSON(),
-                },
-            };
+                type: "Scaling",
+                matrix: this.matrix.toJSON(),
+                inverse: this.inverse.toJSON()
+            }
         }
         return transform;
     }

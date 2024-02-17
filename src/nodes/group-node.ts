@@ -21,7 +21,6 @@ export default class GroupNode extends Node {
     super();
     // TODO
     this.children = [];
-    // this.transform = transform;
   }
 
   /**

@@ -265,14 +265,12 @@ export default class Matrix {
   }
 
   toJSON() {
-    let arr = [];
-    for (let row = 0; row < 4; row++) {
-      for (let col = 0; col < 4; col++) {
-        arr[col * 4 + row] = this.data[row * 4 + col];
-      }
+    let d: { [key: string]: any } = {}; // Add index signature to allow indexing with a string
+    for (let i = 0; i < this.data.length; i++) {
+      d[i.toString()] = this.data[i];
     }
     return {
-      "data": arr,
+      data: d
     };
   }
 }

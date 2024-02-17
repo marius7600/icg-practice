@@ -78,7 +78,7 @@ export default class JsonVisitor implements Visitor {
     }
 
     visitCameraNode(node: CameraNode): void {
-        this.visitLeafNode(node)
+        //this.visitLeafNode(node)
     }
 
     visitGroupNodeCamera(node: GroupNode): void {

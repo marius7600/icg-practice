@@ -33,13 +33,17 @@ export class JsonLoader {
     }
 
     private static loadCamera(cameraJson: any) {
-        const eye = this.parseVector(cameraJson._eye)
-        const center = this.parseVector(cameraJson._center)
-        const up = this.parseVector(cameraJson._up)
-        const fovy = cameraJson._fovy
-        const aspect = cameraJson._aspect
-        const near = cameraJson._near
-        const far = cameraJson._far
+        console.log("cameraJson", cameraJson);
+
+        const eye = this.parseVector(cameraJson.eye)
+        console.log("eye", eye);
+
+        const center = this.parseVector(cameraJson.center)
+        const up = this.parseVector(cameraJson.up)
+        const fovy = cameraJson.fovy
+        const aspect = cameraJson.aspect
+        const near = cameraJson.near
+        const far = cameraJson.far
         return new CameraNode(
             up,
             center,
@@ -52,8 +56,12 @@ export class JsonLoader {
     }
 
     private static getTransformation(transformJson: any): Transformation {
+        console.log("transformJSON", transformJson);
+        console.log("transformJSON.transformation.matrix", transformJson.transformation.matrix);
+        transformJson.transform as MatrixTransformation;
         const traverse = this.parseMatrix(transformJson.transformation.matrix)
         const inverse = this.parseMatrix(transformJson.transformation.inverse)
+        console.log("inverse", inverse);
         return new MatrixTransformation(traverse, inverse)
     }
 
@@ -70,6 +78,8 @@ export class JsonLoader {
     }
 
     private static parseVector(vectorJson: any): Vector {
+        console.log("vectorJson", vectorJson);
+
         const data = vectorJson.data as [number, number, number, number]
         return new Vector(...data)
     }
@@ -125,8 +135,10 @@ export class JsonLoader {
     }
 
     private static loadAABoxNode(node: any): AABoxNode {
-        const dimensions = this.parseVector(node.dimensions);
+        const minPoint = this.parseVector(node.minPoint);
+        const maxPoint = this.parseVector(node.maxPoint);
         const color = this.parseVector(node.color);
+        const dimensions = maxPoint.sub(minPoint)
         return new AABoxNode(dimensions, color)
 
     }
