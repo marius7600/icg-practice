@@ -204,8 +204,30 @@ window.addEventListener("load", () => {
   rootNode.add(groupNodeUnderRoot);
 
   // add light node 1
-  light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 4, -2, 0));
-  //groupNodeUnderRoot.add(light1);
+  // light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 4, -2, 0));
+  // groupNodeUnderRoot.add(light1);
+
+  // add light node 2
+  const groupNodeLight2 = new GroupNode(new Translation(new Vector(-3, -1, -5, 0)));
+  light2 = new LightNode(new Vector(1, 0, 0, 1), new Vector(0, 0, 0, 1));
+  let lightSpehre = new SphereNode(new Vector(1, 0, 0, 1), new Vector(0, 0, 0, 1), 0.25);
+
+  groupNodeLight2.add(light2);
+  groupNodeLight2.add(lightSpehre);
+
+
+
+  const groupNodeLight3 = new GroupNode(new Translation(new Vector(0, -1, -3, 0)));
+  let aabox = new AABoxNode(new Vector(0.5, 0.5, 0.5, 1), new Vector(0, 0, 0, 1));
+  light3 = new LightNode(new Vector(0, 1, 0, 1), new Vector(0, -1.5, -3, 1));
+  groupNodeLight3.add(light3);
+  groupNodeLight3.add(aabox);
+
+  const animateLight2 = new DriverNode(groupNodeLight2, new Vector(4, 0, 0, 0), 0.0005);
+  animateLight2.toggleActive();
+
+  rootNode.add(groupNodeLight2);
+  rootNode.add(groupNodeLight3);
 
 
 
@@ -266,18 +288,6 @@ window.addEventListener("load", () => {
   const ticTacToeRoot = new GroupNode(new Translation(new Vector(-1.3, -1.4, 0, 0)));
   ticTacToeRoot.add(createTicTacToe());
   rightWindowGroup.add(ticTacToeRoot);
-
-  // add light node 2
-  const groupNodeLight2 = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
-  light2 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, -5, 0, 1));
-  let lightSpehre = new SphereNode(new Vector(1, 1, 0, 1), new Vector(0, 0, 0, 1), 0.25);
-  groupNodeLight2.add(light2);
-  groupNodeLight2.add(lightSpehre);
-
-  const animateLight2 = new DriverNode(groupNodeLight2, new Vector(1, 0, 0, 0), 0.0005);
-  animateLight2.toggleActive();
-
-  taskbarGroup.add(groupNodeLight2);
 
   ///////////// ===== ADD LEFT WINDOW ===== /////////////
   // groupNode for the secound application window

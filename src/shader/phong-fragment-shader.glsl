@@ -59,7 +59,7 @@ void main(void) {
 
     // Apply the light color 
     vec3 lightColor = v_light_colors[i];
-    diffuse += lightColor * max(dot(N, lightDir), 0.0);
+    diffuse += lightColor * max(dot(N, lightDir), 0.0); //No light color in diffuse term
     //diffuse +=  max(dot(N, lightDir), 0.0);
     // vec3 r = normalize(v_normal * (2.0 * dot(v_normal, lightDir)) - lightDir);
     vec3 r = (2.0 * dot(N, lightDir) * N - lightDir);
