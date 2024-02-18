@@ -17,6 +17,8 @@ export class JsonLoader {
     private static json: any
 
 
+    // loading the JSON file and parse the Scenegraph 
+    // sceneGraphRootNode is the first object in the JSON file
     static async JsonToScenegraph(file: File): Promise<{ sg: GroupNode, camera: CameraNode }> {
         const text = await file.text();
         this.json = await JSON.parse(text)
@@ -32,6 +34,8 @@ export class JsonLoader {
 
     }
 
+    // loading the camera from JSON Object
+    // camerNode is second object in the JSON file
     private static loadCamera(cameraJson: any) {
         console.log("cameraJson", cameraJson);
 
@@ -55,6 +59,7 @@ export class JsonLoader {
         )
     }
 
+    // loading transformation from JSON Object
     private static getTransformation(transformJson: any): Transformation {
         console.log("transformJSON", transformJson);
         console.log("transformJSON.transformation.matrix", transformJson.transformation.matrix);
@@ -65,7 +70,7 @@ export class JsonLoader {
         return new MatrixTransformation(traverse, inverse)
     }
 
-
+    // parsing the matrix from JSON Object
     private static parseMatrix(matrixJson: any) {
         const d = matrixJson.data
         const data = [
@@ -77,6 +82,7 @@ export class JsonLoader {
         return new Matrix(data)
     }
 
+    // parsing the vector from JSON Object
     private static parseVector(vectorJson: any): Vector {
         console.log("vectorJson", vectorJson);
 
@@ -84,6 +90,14 @@ export class JsonLoader {
         return new Vector(...data)
     }
 
+    // loading the group node for animation from JSON Object
+    private static getGroupForAnimation(node: any) {
+        const childCode = node.childCodes[0];
+        const gnJson = this.json[childCode];
+        return this.loadGroupNode(gnJson);
+    }
+
+    // factory method to load the node with corresponding type from JSON Object
     private static nodeFactory(nodeJson: any): Node {
         const classname = nodeJson.classname
         switch (classname) {
@@ -119,6 +133,7 @@ export class JsonLoader {
         }
     }
 
+    // loading group node from JSON Object and its children
     private static loadGroupNode(node: any): GroupNode {
         const transformation = this.getTransformation(node.transform);
         const groupNode = new GroupNode(transformation);
@@ -134,6 +149,7 @@ export class JsonLoader {
 
     }
 
+    // loading AABoxNode from JSON Object
     private static loadAABoxNode(node: any): AABoxNode {
         const minPoint = this.parseVector(node.minPoint);
         const maxPoint = this.parseVector(node.maxPoint);
@@ -143,6 +159,7 @@ export class JsonLoader {
 
     }
 
+    // loading TextureBoxNode from JSON Object
     private static loadTextureBoxNode(node: any): TextureBoxNode {
         const { texture, minPoint, maxPoint, normal } = this.getTextureProbs(node)
         if (normal) {
@@ -153,6 +170,7 @@ export class JsonLoader {
 
 
 
+    // loading TextureVideoBoxNode from JSON Object
     private static loadVideoBoxNode(node: any): TextureVideoBoxNode {
         const { texture, minPoint, maxPoint, normal } = this.getTextureProbs(node);
         if (normal) {
@@ -161,6 +179,7 @@ export class JsonLoader {
         return new TextureVideoBoxNode(texture, minPoint, maxPoint)
     }
 
+    // loading SphereNode from JSON Object
     private static loadSphereNode(node: any): SphereNode {
         const color = this.parseVector(node.color)
         const center = this.parseVector(node.center)
@@ -168,18 +187,21 @@ export class JsonLoader {
         return new SphereNode(color, center, radius)
     }
 
+    // loading PyramidNode from JSON Object
     private static loadPyramidNode(node: any): PyramidNode {
         const maxPoint = this.parseVector(node.maxPoint).mul(2);
         const color = this.parseVector(node.color);
         return new PyramidNode(maxPoint, color)
     }
 
+    // loading LightNode from JSON Object
     private static loadLightNode(node: any): LightNode {
         const position = this.parseVector(node.position)
         const color = this.parseVector(node.color)
         return new LightNode(color, position);
     }
 
+    // loading RotationNode from JSON Object
     private static loadRotationNode(node: any): RotationNode {
         const groupNode = this.getGroupForAnimation(node);
         const axis = this.parseVector(node.axis);
@@ -188,6 +210,7 @@ export class JsonLoader {
         return rotationNode
     }
 
+    // loading JumperNode from JSON Object
     private static loadJumperNode(node: any): JumperNode {
         const groupNode = this.getGroupForAnimation(node);
         const translation = this.parseVector(node.translation);
@@ -197,6 +220,7 @@ export class JsonLoader {
         return jumper
     }
 
+    // loading DriverNode from JSON Object
     private static loadDriverNode(node: any): DriverNode {
         const groupNode = this.getGroupForAnimation(node);
         const translationVector = this.parseVector(node.translation)
@@ -204,6 +228,7 @@ export class JsonLoader {
         return driver
     }
 
+    // loading ScalerNode from JSON Object
     private static loadScalerNode(node: any): ScaleNode {
         const groupNode = this.getGroupForAnimation(node);
         const targetScale = this.parseVector(node.targetScale);
@@ -212,10 +237,7 @@ export class JsonLoader {
         return scaler
     }
 
-
-
-
-
+    // loading TextureProbs from JSON Object
     private static getTextureProbs(node: any) {
         const texture = <string>node.texture
         const minPoint = this.parseVector(node.minPoint)
@@ -226,11 +248,7 @@ export class JsonLoader {
         }
     }
 
-    private static getGroupForAnimation(node: any) {
-        const childCode = node.childCodes[0];
-        const gnJson = this.json[childCode];
-        return this.loadGroupNode(gnJson);
-    }
+
 
 
 

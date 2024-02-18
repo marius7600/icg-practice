@@ -1,5 +1,5 @@
 import JsonVisitor from "./jsonVisitor";
-import AnimationNode, { DriverNode, RotationNode } from "./nodes/animation-nodes";
+import AnimationNode, { DriverNode, DriverNodeMouse, RotationNode, ScalerNodeMouse } from "./nodes/animation-nodes";
 import camera from "./nodes/camera-node";
 import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
@@ -128,6 +128,38 @@ export class Scenegraph {
         return null;
     }
 
+    /**
+     * Get the groupNode over the camera node, so that the camera is the child 
+     * of the groupNode.
+     * @returns The groupNode over the camera node.
+     */
+    static getGroupNodeCamera(): GroupNode {
+        return this._getGroupNodeCamera(this.sceneGraph);
+    }
+
+    /**
+     * Recursively searches for the groupNode over the camera node in the scene graph.
+     * 
+     * @param node - The starting node for the search.
+     * @returns The found groupNode over the camera node.
+     */
+    static _getGroupNodeCamera(node: Node): GroupNode {
+        if (node instanceof GroupNode && node.containsCamera(this.camera)) {
+            return node;
+        }
+
+        if (node instanceof GroupNode || node instanceof WindowNode) {
+            for (let child of node.children) {
+                let result = this._getGroupNodeCamera(child);
+                if (result) {
+                    return result;
+                }
+            }
+        }
+
+        return null;
+    }
+
     static setGraph(sceneGraph: GroupNode) {
         this.sceneGraph = sceneGraph;
         return this;
@@ -185,7 +217,24 @@ export class Scenegraph {
             0.1, // near
             100
         ); // far
-        this.sceneGraph.add(this.camera);
+
+        const groupNodeCamera = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
+        groupNodeCamera.add(this.camera);
+        groupNodeCamera.name = "groupNodeCamera";
+        //const driverNodeMouse = new DriverNodeMouse(groupNodeCamera);
+
+
+        //driverNodeMouse.toggleActive();
+
+        //groupNodeCamera.add(driverNodeMouse);
+        // window root von assi toni: -1.8, 0, -1, 0
+        //Translate to assi toni new Vector(-1.777, 0.1, -3, 0)
+        const driveToMouse = new DriverNode(groupNodeCamera, new Vector(-1.777, 0.1, -3, 0), 0.002);
+        //driveToMouse.toggleActive();
+        groupNodeCamera.add(driveToMouse);
+        this.sceneGraph.add(groupNodeCamera);
+
+        //this.sceneGraph.add(this.camera);
 
         // add group node
         const groupNodeUnderRoot = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
@@ -211,19 +260,33 @@ export class Scenegraph {
         groupNodeLight3.add(light3);
         groupNodeLight3.add(lightSpehre);
 
+        const groupNodeLight4 = new GroupNode(new Translation(new Vector(2, -1, -5, 0)));
+        const light4 = new LightNode(new Vector(0, 0, 1, 1), new Vector(0, 0, 0, 1));
+
+        groupNodeLight4.add(light4);
+        groupNodeLight4.add(lightSpehre);
+
+
         const animateLight2 = new DriverNode(groupNodeLight2, new Vector(2, 0, 0, 0), 0.0005);
+        animateLight2.name = "animateLight2";
         animateLight2.toggleActive();
 
         const animateLight3 = new DriverNode(groupNodeLight3, new Vector(0, 2, 0, 0), 0.0005);
+        animateLight3.name = "animateLight3";
+        animateLight3.toggleActive();
+
+        const animateLight4 = new DriverNode(groupNodeLight4, new Vector(0, 0, 2, 0), 0.0005);
+        animateLight4.name = "animateLight4";
+        animateLight4.toggleActive();
+
         groupNodeLight2.add(animateLight2);
         groupNodeLight3.add(animateLight3);
-        animateLight3.toggleActive();
+        groupNodeLight4.add(animateLight4);
+
 
         this.sceneGraph.add(groupNodeLight2);
         this.sceneGraph.add(groupNodeLight3);
-
-
-
+        this.sceneGraph.add(groupNodeLight4);
 
         ///////////// ===== ADD TASKBAR ===== /////////////
         const taskbarButtonDimension = new Vector(.7, .7, .3, 0);

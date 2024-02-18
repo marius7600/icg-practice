@@ -13,8 +13,14 @@ export default abstract class Node {
   abstract accept(visitor: Visitor): void
 
   toJSON(): any {
+    if (this.name) {
+      return {
+        name: this.name,
+        classname: this.constructor.name,
+      }
+    }
     return {
-      classname: this.constructor.name
+      classname: this.constructor.name,
     }
   }
 }

@@ -7,18 +7,18 @@
     <title>ICG-Project</title>
     <script type="text/javascript" src="scenegraph.bundle.js"></script>
     <link rel="icon" type="image/png" href="hci-logo.png">
-    <!-- <style type="text/css">
+    <style type="text/css">
         html, body {
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background-color: #000000;
+            background-color: #1a1a1a;
+            color : white;
             width:  100%;
             height: 100%;
-        }
-        
+        } 
        
-    </style>     -->
+    </style>
 </head>
 
 <body>
@@ -32,12 +32,12 @@
         </div>
     </nav>
     <br>
-    <div class="container">
+    <div class="container" style="background-color: #1a1a1a;">
         <!-- Canvases Container -->
         <div style="display: flex; justify-content: flex-start; align-items: flex-start;">
             <!-- Raytracer Canvas -->
-            <figure id="raytracer_fig" style="display:none">
-                <canvas id="raytracer" class="figure-img mx-auto d-block rounded canvas" width="500" height="500"></canvas>
+            <figure id="raytracer_fig" style="display:none;">
+                <canvas id="raytracer" class="figure-img mx-auto d-block rounded canvas" width="500" height="500" style="background-color: white;"></canvas>
                 <figcaption class="figure-caption text-center">Raytracer</figcaption>
             </figure>
             <!-- Rasterizer Canvas -->
@@ -60,24 +60,20 @@
                  <button id="clearCanvas" style="margin-top:10px">Clear Canvas</button>
                 <!-- Button to clear the game -->
                 <button id="clearGame" style="margin-top:10px">Clear Game</button>
+                <!-- Button to import OBJ file -->
+                <button id="importOBJ" style="margin-top:10px">Import OBJ</button>
+                <!-- Button to download Scene as JSON -->
+                <button id="downloadButton" style="margin-top:10px">Download JSON</button>
+                <!-- Button to upload Scene as JSON -->
+                <button id="uploadButton" style="margin-top:10px">Upload JSON</button>
+
             </div>
     
                 
             
         </div>
         </div>
-        <!-- Download Button-->
-        <div class="download-button">
-            <div id="download-button">
-                <button class="button" id="downloadButton" style="background:green ;">Download</button>
-            </div>
-        </div>
-        <!-- Upload Button-->
-        <div class="upload-button">
-            <div id="upload-button">
-                <button class="button" id="uploadButton" style="background:green ;">Upload</button>
-            </div>
-        </div>
+        
         <!-- Slider Container -->
         <div class="options side-bar border">
             <h4 class="bold">Phong</h4>

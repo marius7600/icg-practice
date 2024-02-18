@@ -5,7 +5,7 @@ import { Transformation, Translation } from '../transformation';
 import Vector from '../vector';
 import AABoxNode from './aabox-node';
 import SphereNode from './sphere-node';
-import { ScaleNode } from './animation-nodes';
+import { DriverNode, DriverNodeMouse, ScaleNode } from './animation-nodes';
 
 // variables for the windows
 const windowDimension = new Vector(3, 3, 0, 1);
@@ -17,6 +17,9 @@ const windowMenuBackgroundColor = new Vector(0, 0, 1, 1);
 const minimizeSphereDimension = new Vector(1.3, 0, 0, 1);
 const minimizeSphereRadius = 0.13;
 const minimizeSphereColor = new Vector(0.9, 0.7, 0.3, 1);
+
+const maximizeSphereColor = new Vector(0, 0.7, 0.3, 1);
+const maximizeSphereDimension = new Vector(0.9, 0, 0, 1);
 
 let scaleNode: ScaleNode = new ScaleNode(this, new Vector(0, 0, 0, 0), 1);
 
@@ -41,6 +44,10 @@ export class WindowNode extends GroupNode {
         const windowMinimizeSphere = new SphereNode(minimizeSphereColor, minimizeSphereDimension, minimizeSphereRadius);
         windowMinimizeSphere.name = "minimizeSphere" + windowName;
         windowMenuRoot.add(windowMinimizeSphere);
+
+        const windowMaximizeSphere = new SphereNode(maximizeSphereColor, maximizeSphereDimension, minimizeSphereRadius);
+        windowMaximizeSphere.name = "maximizeSphere" + windowName;
+        windowMenuRoot.add(windowMaximizeSphere);
         this.add(windowMenuRoot);
     }
 
@@ -50,6 +57,22 @@ export class WindowNode extends GroupNode {
         } else {
             this.minimize();
         }
+    }
+
+    public fullScreen(cameraGroup: GroupNode, windowRootNode: GroupNode) {
+
+        // Offset for the camera position relative to the window root node
+        const offset = new Vector(0.02300000000000013, 0.1, -2, 0);
+
+        // Position of the current window root node in world space
+        const windowRootWorldPosition = windowRootNode.transform.getMatrix().mul(new Vector(0, 0, 0, 1));
+
+        // Calculate the desired camera position for the current window by adding the offset to the window root node's position
+        const desiredCameraPosition = windowRootWorldPosition.add(offset);
+
+        const animation = new DriverNode(cameraGroup, desiredCameraPosition, 0.002, false);
+        cameraGroup.add(animation);
+        animation.toggleActive();
     }
 
     /**
@@ -103,6 +126,8 @@ export class WindowNode extends GroupNode {
             this.state.minimized = false;
         }
     }
+
+
 
     accept(visitor: Visitor) {
         visitor.visitGroupNode(this);

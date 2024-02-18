@@ -27,6 +27,7 @@ export default class Ray {
     camera: CameraNode
   ): Ray {
     const origin = new Vector(0, 0, 0, 1);
+    // const origin = camera.transform
     // Calculate camera alpha
     const alpha = (camera.fovy * Math.PI) / 180;
 

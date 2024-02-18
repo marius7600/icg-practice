@@ -29,6 +29,7 @@ import MeshNode from "./nodes/mesh-node";
 import { Game } from "./game";
 import { WindowNode } from "./nodes/window-node";
 import AnimationNode from "./nodes/animation-nodes";
+import Ray from "./raytracer/ray";
 
 let rasterizing: boolean = true;
 
@@ -48,6 +49,9 @@ let textureShader: Shader;
 
 let myJumperNode: JumperNode = null;
 
+let canvas_raster: HTMLCanvasElement;
+let ctx_raster: WebGL2RenderingContext;
+
 
 export default interface PhongValues {
   ambient: number;
@@ -64,8 +68,8 @@ window.addEventListener("load", () => {
   const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
   const ctx_ray = canvas_ray.getContext("2d");
 
-  const canvas_raster = document.getElementById("rasterizer") as HTMLCanvasElement;
-  const ctx_raster = canvas_raster.getContext("webgl2");
+  canvas_raster = document.getElementById("rasterizer") as HTMLCanvasElement;
+  ctx_raster = canvas_raster.getContext("webgl2");
 
   const rasterSetupVisitor = new RasterSetupVisitor(ctx_raster);
 
@@ -145,13 +149,30 @@ window.addEventListener("load", () => {
     console.log("Object clicked: ", selectedNode);
     Game.CheckTikTakToeField(selectedNode, rasterSetupVisitor);
     // Handle events when clicking on objects with the mouse
-    handleMouseclickEvent(selectedNode);
+    handleMouseclickEvent(selectedNode, info.x, info.y);
   });
 
   // Event listeners for the slider changes
   window.addEventListener("input", function (event) {
     sliderChanged(event);
   });
+
+  /*
+  * Event listener for the keydown event to stop the animation
+  */
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "p") {
+      Scenegraph.getAllNodesOfType(AnimationNode).forEach((node) => {
+        if (node.name == null) return;
+        if (node.name.startsWith("animateLight")) {
+          node.toggleActive();
+        }
+      }
+      )
+    }
+
+  })
+
   /* Call figure toggle if key 2 is pressed */
   document.addEventListener("keydown", (event) => {
     if (event.key === "2") {
@@ -269,13 +290,17 @@ window.addEventListener("load", () => {
   };
 });
 
-function handleMouseclickEvent(selectedNode: Node) {
+function handleMouseclickEvent(selectedNode: Node, mouseX: number, mouseY: number) {
   if (selectedNode == null || selectedNode.name == null) return;
 
   // if the seleded node starts with "minimizeSphere" slice the name and minimize the window
   if (selectedNode.name.startsWith("minimizeSphere")) {
     const windowName = selectedNode.name.slice(14);
     Scenegraph.getWindowNode(windowName).toggleMinMax();
+  }
+  if (selectedNode.name.startsWith("maximizeSphere")) {
+    const windowName = selectedNode.name.slice(14);
+    Scenegraph.getWindowNode(windowName).fullScreen(Scenegraph.getGroupNodeCamera(), Scenegraph.getWindowNode(windowName));
   }
   // if the seleded node starts with "taskbarButton" slice the name, minimize the window and jump the taskbar button
   if (selectedNode.name.startsWith("taskbarButton")) {

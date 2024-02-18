@@ -408,14 +408,53 @@ export class ScaleNode extends AnimationNode {
 }
 
 
+/**
+ * Represents a ScalerNodeMouse class that extends AnimationNode.
+ * This class handles scaling of a group node based on keyboard input.
+ */
+export class ScalerNodeMouse extends AnimationNode {
+  private scaleChange: number;
 
+  /**
+   * Constructs a new instance of the ScalerNodeMouse class.
+   * @param groupNode The group node to be scaled.
+   */
+  constructor(groupNode: GroupNode) {
+    super(groupNode);
+    this.scaleChange = 0;
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === '+') {
+        this.scaleChange = 0.05;
+      } else if (event.key === '-') {
+        this.scaleChange = -0.05;
+      }
+    });
+  }
+
+  /**
+   * Simulates the scaling of the group node based on the scale change.
+   * @param deltaT The time difference between the current and previous frame.
+   */
+  simulate(deltaT: number): void {
+    if (this.active) {
+      const position = this.groupNode.transform.getMatrix();
+      position.data[0] += this.scaleChange;
+      position.data[5] += this.scaleChange;
+      position.data[10] += this.scaleChange;
+      this.scaleChange = 0; // Reset the scale change
+    }
+  }
+}
 
 export class DriverNodeMouse extends AnimationNode {
 
-  translation: Translation;
-  constructor(groupNode: GroupNode, translationVector: Vector) {
+  static translation: Translation;
+  constructor(groupNode: GroupNode) {
     super(groupNode);
-    this.translation = new Translation(translationVector);
+    // Create a copy of the transformation matrix
+    const originalMatrix = groupNode.getTransformation().getMatrix();
+    DriverNodeMouse.translation = new Translation(new Vector(originalMatrix.data[12], originalMatrix.data[13], originalMatrix.data[14], 1));
   }
 
   // This function is used to simulate the movement of the groupnode
@@ -438,16 +477,31 @@ export class DriverNodeMouse extends AnimationNode {
         } else if (event.key === 'd') {
           // move right
           position.data[12] += 0.0001;
+        } else if (event.key === 'r') {
+          // move forward
+          position.data[14] -= 0.0001;
+        } else if (event.key === 'f') {
+          // move backward
+          position.data[14] += 0.0001;
+        } else if (event.key === 'y') {
+          console.log(DriverNodeMouse.translation.getMatrix().print());
+
+          // reset position to the start postion of the group node (translation)
+          position.data[12] = DriverNodeMouse.translation.getMatrix().data[12];
+          position.data[13] = DriverNodeMouse.translation.getMatrix().data[13];
+          position.data[14] = DriverNodeMouse.translation.getMatrix().data[14];
+
         }
       });
     }
   }
   toJSON(): any {
     const json = super.toJSON();
-    json["ranslation"] = this.translation
+    json["ranslation"] = DriverNodeMouse.translation
     return json
   }
 }
+
 
 export class DriverNode extends AnimationNode {
   distanceToGoal: number;
@@ -455,12 +509,14 @@ export class DriverNode extends AnimationNode {
   direction: Vector;
   dirChange: boolean = true;
   distanceCovered: number = 0;
+  loop: boolean = true;
 
-  constructor(groupNode: GroupNode, direction: Vector, speed?: number) {
+  constructor(groupNode: GroupNode, direction: Vector, speed?: number, loop?: boolean) {
     super(groupNode);
     this.direction = direction;
     this.distanceToGoal = direction.length;
     this.speed = speed || 0.0001;
+    this.loop = loop;
   }
 
   simulate(deltaT: number) {
@@ -473,7 +529,12 @@ export class DriverNode extends AnimationNode {
         position.data[14] += movement.z;
         this.distanceCovered += movement.length;
         if (this.distanceCovered >= this.distanceToGoal) {
-          this.dirChange = false;
+          if (this.loop) {
+            this.dirChange = false;
+          } else {
+            this.active = false;
+          }
+          //this.dirChange = false;
         }
       } else {
         position.data[12] -= movement.x;
