@@ -28,13 +28,12 @@ import Node from "./nodes/node";
 import MeshNode from "./nodes/mesh-node";
 import { Game } from "./game";
 import { WindowNode } from "./nodes/window-node";
+import AnimationNode from "./nodes/animation-nodes";
 
 let rasterizing: boolean = true;
 
 let phongProperties: PhongProperties;
 let light1: LightNode;
-let light2: LightNode;
-let light3: LightNode;
 
 let cameraNode: CameraNode;
 let rasterVisitor: RasterVisitor;
@@ -47,8 +46,7 @@ let animationActivated: boolean = true;
 let phongShader: Shader;
 let textureShader: Shader;
 
-let minMaxAnimation: ScaleNode;
-let boxBounce: JumperNode;
+let myJumperNode: JumperNode = null;
 
 
 export default interface PhongValues {
@@ -150,10 +148,6 @@ window.addEventListener("load", () => {
     handleMouseclickEvent(selectedNode);
   });
 
-
-
-
-
   // Event listeners for the slider changes
   window.addEventListener("input", function (event) {
     sliderChanged(event);
@@ -167,16 +161,9 @@ window.addEventListener("load", () => {
   document.getElementById("animationToggle").addEventListener("click", () => {
     toggleAnimation();
   });
-  // startAnimation();
 
   // initialize the phong properties
   phongProperties = new PhongProperties();
-
-
-
-  // let myBox = new AABoxNode(new Vector(50, 0.8, 0.8, 1));
-  // sceneGraph.add(myBox);
-
 
   // setup for raytracing rendering
   rayVisitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
@@ -189,7 +176,6 @@ window.addEventListener("load", () => {
 
   textureShader = new Shader(
     ctx_raster,
-    //TODO add texture shader
     textureVertexShader,
     textureFragmentShader
   );
@@ -229,42 +215,19 @@ window.addEventListener("load", () => {
       delta = (timestamp - lastTimestamp);
       lastTimestamp = timestamp;
       if (rasterizing) {
-        // rasterVisitor.render(sceneGraph, cameraNode, lightPositions);
         rasterVisitor.render(Scenegraph.getGraph(), Scenegraph.getCamera())
       } else {
-        // rayVisitor.render(sceneGraph, cameraNode, lightPositions, phongProperties);
-        // rayVisitor.render(sceneGraph, cameraNode, phongProperties);
         rayVisitor.render(Scenegraph.getGraph(), phongProperties, 50000);
       }
-      //requestAnimationFrame(animate);
-      // console.log("animation loop ended");
-      // console.log("animation loop ended");
-      // console.log("animation loop ended");
 
-      const animationNodeList = Scenegraph.getAnimationNodes();
+
+      const animationNodeList = Scenegraph.getAllNodesOfType(AnimationNode);
       for (let animationNode of animationNodeList) {
         animationNode.simulate(delta);
       }
       window.requestAnimationFrame(animate);
     }
 
-    // Verlangsamen Sie die Animation, indem Sie den Wert für deltaT teilen
-    const animationSpeedFactor = 0.1; // Probieren Sie verschiedene Werte aus, bis die Animation das gewünschte Verhalten hat
-    const deltaT = animationSpeedFactor * delta; // Verwenden Sie Ihre ursprünglichen deltaT-Werte
-
-    // Jetzt führen Sie die Animation mit dem neuen deltaT aus
-    // minimizeAnimation.simulate(deltaT);
-
-    if (minMaxAnimation != null) {
-      // console.log("minimizeAnimation is not null");
-      minMaxAnimation.simulate(delta);
-    }
-    if (boxBounce != null) {
-      // console.log("minimizeAnimation is null");
-      boxBounce.simulate(delta);
-    }
-    //animationNode3.simulate(delta);
-    // minimizeAnimation.simulate(delta);
 
   }
 
@@ -304,49 +267,6 @@ window.addEventListener("load", () => {
     };
     fileSelector.click();
   };
-
-
-
-
-
-  // requestAnimationFrame(animate);
-
-  // let animationHandle: number;
-
-  // let lastTimestamp = 0;
-  // let animationTime = 0;
-  // let animationHasStarted = true;
-  // function animate(timestamp: number) {
-  //     let deltaT = timestamp - lastTimestamp;
-  //     if (animationHasStarted) {
-  //         deltaT = 0;
-  //         animationHasStarted = false;
-  //     }
-  //     animationTime += deltaT;
-  //     lastTimestamp = timestamp;
-  //     gnRotation.angle = animationTime / 2000;
-
-  //
-  //     // animationHandle = window.requestAnimationFrame(animate);
-  // }
-
-  // function startAnimation() {
-  //     if (animationHandle) {
-  //         window.cancelAnimationFrame(animationHandle);
-  //     }
-  //     animationHasStarted = true;
-  //     function animation(t: number) {
-  //         animate(t);
-  //         animationHandle = window.requestAnimationFrame(animation);
-  //     }
-  //     animationHandle = window.requestAnimationFrame(animation);
-  // }
-  // animate(0);
-
-  // document.getElementById("startAnimationBtn").addEventListener(
-  //     "click", startAnimation);
-  // document.getElementById("stopAnimationBtn").addEventListener(
-  //     "click", () => cancelAnimationFrame(animationHandle));
 });
 
 function handleMouseclickEvent(selectedNode: Node) {
@@ -357,77 +277,44 @@ function handleMouseclickEvent(selectedNode: Node) {
     const windowName = selectedNode.name.slice(14);
     Scenegraph.getWindowNode(windowName).toggleMinMax();
   }
-
+  // if the seleded node starts with "taskbarButton" slice the name, minimize the window and jump the taskbar button
   if (selectedNode.name.startsWith("taskbarButton")) {
     const windowName = selectedNode.name.slice(13);
     Scenegraph.getWindowNode(windowName).toggleMinMax();
+
     const taskbarButtonGroup = Scenegraph.getGroupNode("taskbarButtonGroup" + windowName);
-    jumpAnimation(taskbarButtonGroup);
+    const startingPosition = taskbarButtonGroup.getTransformation().getMatrix();
+
+    jumpAnimation(taskbarButtonGroup, startingPosition);
   }
 }
 
-function jumpAnimation(taskbarButtonGroup: GroupNode) {
-  boxBounce = new JumperNode(taskbarButtonGroup, new Vector(0, 1, 0, 0), taskbarButtonGroup.getTransformation().getMatrix());
-  boxBounce.toggleActive();
+/**
+ * Performs a jump animation on the taskbarButtonGroup.
+ * If a jumper node already exists, it updates the jumper node with the new taskbarButtonGroup and starting position.
+ * If a jumper node does not exist, it creates a new jumper node and adds it to the taskbarButtonGroup.
+ * @param taskbarButtonGroup - The group node to perform the jump animation on.
+ * @param startingPosition - The starting position of the jump animation.
+ */
+function jumpAnimation(taskbarButtonGroup: GroupNode, startingPosition: Matrix) {
+  if (myJumperNode == null) {
+    // Create a new jumper node and add it to the taskbarButtonGroup
+    myJumperNode = new JumperNode(taskbarButtonGroup, new Vector(0, 1, 0, 0), taskbarButtonGroup.getTransformation().getMatrix());
+    taskbarButtonGroup.add(myJumperNode);
+
+    // Start the jump animation
+    myJumperNode.toggleActive();
+  } else {
+    if (!myJumperNode.active) {
+      // update the jumper node with the new taskbarButtonGroup and starting position
+      myJumperNode.groupNode = taskbarButtonGroup;
+      myJumperNode.startingPos = startingPosition;
+
+      // Start the jump animation
+      myJumperNode.toggleActive();
+    }
+  }
 }
-
-//FIXME: Implement the click events
-// function handleMouseclick(selectedNode: Node, ctx_raster: WebGL2RenderingContext, x: number, y: number) {
-//   // const x = info.offsetX;
-//   // const y = info.offsetY;
-//   // // Create a new mouse visitor
-//   // const mouseVisitor = new MouseVisitor();
-//   // // Use the mouse visitor to get the selected node
-//   // let selectedNode = mouseVisitor.getSelectedNode(Scenegraph.getGraph(), x, y, ctx_raster);
-//   // If a node was selected
-//   if (selectedNode != null) {
-//     // If the selected node is a sphere
-//     if (selectedNode instanceof SphereNode && selectedNode.name == "rightCloseButton") {
-//       // If x is smaller than half the canvas width, minimize rightWindowGroup, otherwise minimize leftWindowGroup
-//       if (x > ctx_raster.canvas.width / 2) {
-//         // Minimize window 1
-//         minimize(rightWindowGroup);
-//         // Jump the taskbar button
-//         jumpAnimation(taskbarButtonGroup1);
-//       } else {
-//         // Minimize window 2
-//         minimize(leftWindowGroup);
-//         // Jump the taskbar button
-//         jumpAnimation(taskbarButtonGroup2);
-//       }
-//     }
-//     // If the selected node is an AA box
-//     if (selectedNode instanceof AABoxNode) {
-//       // Determine which taskbar button was clicked, depending on the color of the box
-//       if (x > ctx_raster.canvas.width / 2) {
-//         // If the window is minimized, maximize it
-//         if (Math.floor(rightWindowGroup.getTransformation().getMatrix().data[0]) == 0) {
-//           maximize(rightWindowGroup);
-//         }
-
-//         // If the window is maximized, minimize it
-//         else {
-//           minimize(rightWindowGroup);
-//         }
-
-//         // Jump the taskbar button
-//         jumpAnimation(taskbarButtonGroup1);
-//       } else {
-//         // If the window is minimized, maximize it
-//         if (Math.floor(leftWindowGroup.getTransformation().getMatrix().data[0]) == 0) {
-//           maximize(leftWindowGroup);
-//         }
-
-//         // If the window is maximized, minimize it
-//         else {
-//           minimize(leftWindowGroup);
-//         }
-//         // Jump the taskbar button
-//         jumpAnimation(taskbarButtonGroup2);
-//       }
-//     }
-//   }
-// }
 
 
 

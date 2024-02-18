@@ -9,9 +9,6 @@ import Node from "./nodes/node";
 export class Game {
     private static parent: GroupNode;
     private static currentPlayer = true; // true = X, false = O
-    // constructor() {
-    //     this.createTicTacToe();
-    // }
 
     /**
      * Creates a Tic Tac Toe game.
@@ -47,13 +44,6 @@ export class Game {
     static clearGame() {
         // clear children of the parent
         Game.parent.children = [];
-        // const newTicTacToe = new GroupNode(new Translation(new Vector(-1.3, -1.4, 0, 0)));
-        // newTicTacToe.add(this.createTicTacToe());
-        // //Remove the old game and add a new one
-        // rightWindowGroup.children.pop();
-        // rightWindowGroup.add(newTicTacToe);
-        // rasterSetupVisitor.setup(rootNode);
-
         // Scale the size of the cubes
         const ticTacToeScale = new GroupNode(new Scaling(new Vector(1.5, 1.5, 1.5, 1)));
         //Add the cubes to the scaler

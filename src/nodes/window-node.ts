@@ -18,6 +18,8 @@ const minimizeSphereDimension = new Vector(1.3, 0, 0, 1);
 const minimizeSphereRadius = 0.13;
 const minimizeSphereColor = new Vector(0.9, 0.7, 0.3, 1);
 
+let scaleNode: ScaleNode = new ScaleNode(this, new Vector(0, 0, 0, 0), 1);
+
 
 export class WindowNode extends GroupNode {
 
@@ -50,30 +52,62 @@ export class WindowNode extends GroupNode {
         }
     }
 
+    /**
+     * Updates the scale node of the window.
+     * If the scale node already exists in the children array, it is replaced with the new scale node.
+     * Otherwise, the new scale node is added to the children array.
+     */
+    private updateScaleNode(targetScale: Vector, duration: number, name?: string) {
+        scaleNode.groupNode = this;
+        scaleNode.targetScale = targetScale;
+        scaleNode.duration = duration;
+        scaleNode.elapsedTime = 0;
+        scaleNode.name = name;
+        const index = this.children.findIndex(child => child === scaleNode);
+        if (index !== -1) {
+            this.children[index] = scaleNode;
+        } else {
+            this.children.push(scaleNode);
+        }
+    }
+
+    /**
+     * Minimizes the window node if the scale node is not active.
+     * Only minimizes if the scale node is not active.
+     */
     private minimize() {
-        const originalScale = new Vector(1, 1, 1, 1);
-        const scaleAmout = 0.001;
-        const targetScale = originalScale.mul(scaleAmout);
-        const duration = 5000; // in milliseconds
-
-        let minMaxAnimation = new ScaleNode(this, targetScale, duration);
-        minMaxAnimation.toggleActive();
-        this.children.push(minMaxAnimation);
-        this.state.minimized = true;
+        // only minimize if the scale node is not active
+        if (!scaleNode.active) {
+            const originalScale = new Vector(1, 1, 1, 1);
+            const scaleAmout = 0.001;
+            const targetScale = originalScale.mul(scaleAmout);
+            const duration = 5000; // in milliseconds
+            scaleNode.toggleActive();
+            this.updateScaleNode(targetScale, duration, "minimize");
+            this.state.minimized = true;
+        }
     }
 
 
+    /**
+     * Maximizes the window node.
+     * Only maximizes if the scale node is not active.
+     */
     private maximize() {
-        const targetScale = new Vector(1.001, 1.001, 1.001, 1);
-        const duration = 2; // 2 Sekunden Dauer der Animation
-        let minMaxAnimation = new ScaleNode(this, targetScale, duration);
-        minMaxAnimation.toggleActive();
-        this.children.push(minMaxAnimation);
-        this.state.minimized = false;
+        // only maximize if the scale node is not active
+        if (!scaleNode.active) {
+            const targetScale = new Vector(1.001, 1.001, 1.001, 1);
+            const duration = 2; // 2 Sekunden Dauer der Animation
+            scaleNode.toggleActive();
+            this.updateScaleNode(targetScale, duration, "maximize");
+            this.state.minimized = false;
+        }
     }
+
     accept(visitor: Visitor) {
         visitor.visitGroupNode(this);
     }
+
     toJSON() {
         const json = super.toJSON();
         return json;

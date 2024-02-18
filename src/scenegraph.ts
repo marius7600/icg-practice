@@ -35,6 +35,28 @@ export class Scenegraph {
         return this.sceneGraph;
     }
 
+    // get all nodes of the given type
+    static getAllNodesOfType<T extends Node>(type: new (...args: any[]) => T): T[] {
+        return this._getAllNodesOfType(this.sceneGraph, type);
+    }
+
+    // get all nodes of the given type
+    static _getAllNodesOfType<T extends Node>(node: Node, type: new (...args: any[]) => T): T[] {
+        let nodes: T[] = [];
+
+        if (node instanceof type) {
+            nodes.push(node);
+        }
+
+        if (node instanceof GroupNode || node instanceof WindowNode) {
+            for (let child of node.children) {
+                nodes = nodes.concat(this._getAllNodesOfType(child, type));
+            }
+        }
+
+        return nodes;
+    }
+
 
     /**
      * Retrieves a GroupNode with the specified name from the scene graph.

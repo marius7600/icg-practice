@@ -4,6 +4,6 @@
   "javascript.format.enable": true,
   "typescript.format.enable": true,
   "[typescript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+    "editor.defaultFormatter": "ms-vsliveshare.vsliveshare"
   }
 }

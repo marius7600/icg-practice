@@ -126,6 +126,7 @@ export class JumperNode extends AnimationNode {
     super(groupNode);
     this.translation = translation;
     this.startingPos = startingPos;
+    // FIXME: This is blocking rerunning the animation
     this.number = 1;
   }
 
@@ -134,6 +135,7 @@ export class JumperNode extends AnimationNode {
    * @param deltaT The time difference, the animation is advanced by
    */
   simulate(deltaT: number) {
+    // console.log("JumperNode state: " + this.active);
     if (this.active) {
       //pause anmiation if key 'p' is pressed, continue on 'c'
       // window.addEventListener('keydown', (event) => {
@@ -144,15 +146,9 @@ export class JumperNode extends AnimationNode {
       //   }
       // });
 
-
-
+      // FIXME: This is is blocking rerunning the animation
       this.number += 0.007 * deltaT;
       // Get the starting position of the groupnode only at the start of the animation 
-
-
-
-      console.log(this.startingPos.print());
-
 
       const position = this.groupNode.transform.getMatrix();
 
@@ -164,7 +160,6 @@ export class JumperNode extends AnimationNode {
 
       trans.matrix = position.mul(trans.getMatrix());
       this.groupNode.transform = trans;
-      console.log(trans.matrix.print());
 
       // Stop the animation if the group node has reached its original position
       if (this.groupNode.transform.getMatrix().data[13] <= this.startingPos.data[13]) {
@@ -174,18 +169,8 @@ export class JumperNode extends AnimationNode {
           this.startingPos.data[13],
           this.startingPos.data[14],
           1));
+        this.number = 1;
       }
-
-
-
-
-
-
-      // this.groupNode.transform = new Translation(new Vector(
-      //   this.translation.x * Math.sin(this.number) / 3,
-      //   this.translation.y * Math.sin(this.number) / 3,
-      //   this.translation.z * Math.sin(this.number) / 3,
-      //   1));
     }
   }
 
@@ -307,6 +292,7 @@ export class ScaleNode extends AnimationNode {
     this.scale = new Vector(1, 1, 1, 1);
     this.targetScale = targetScale;
     this.duration = duration;
+    // FIXME: This is blocking rerunning the animation
     this.elapsedTime = 0;
   }
 
@@ -369,7 +355,6 @@ export class ScaleNode extends AnimationNode {
       // Check if the x value of the scale are equal to the target scale values
       if (this.targetScale.x < 1) {
         if (scaling.getMatrix().data[0] <= this.targetScale.x) {
-          console.log("finished");
           this.active = false;
           scaling.matrix.data[0] = this.targetScale.x;
           scaling.matrix.data[5] = this.targetScale.y;
@@ -380,7 +365,6 @@ export class ScaleNode extends AnimationNode {
       }
       else if (this.targetScale.x > 1) {
         if (scaling.getMatrix().data[0] >= this.targetScale.x) {
-          console.log("finished");
           this.active = false;
           scaling.matrix.data[0] = this.targetScale.x;
           scaling.matrix.data[5] = this.targetScale.y;
@@ -487,7 +471,6 @@ export class DriverNode extends AnimationNode {
         position.data[12] += movement.x;
         position.data[13] += movement.y;
         position.data[14] += movement.z;
-        //console.log("GroupNode: ", position.data[13]);
         this.distanceCovered += movement.length;
         if (this.distanceCovered >= this.distanceToGoal) {
           this.dirChange = false;
