@@ -17,8 +17,8 @@ export default class AABox {
    * together form the faces of the box
    */
   indices: Array<number>;
-  minPoint: Vector;
-  maxPoint: Vector;
+  // minPoint: Vector;
+  // maxPoint: Vector;
 
   /**
    * Creates an axis aligned box
@@ -26,7 +26,7 @@ export default class AABox {
    * @param maxPoint The maximum Point
    * @param color The colour of the cube
    */
-  constructor(minPoint: Vector, maxPoint: Vector, public color: Vector) {
+  constructor(public minPoint: Vector, public maxPoint: Vector, public color: Vector) {
     /*
       7----6
      /|   /|   2 = maxPoint

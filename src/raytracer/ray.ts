@@ -1,4 +1,5 @@
 import CameraNode from "../nodes/camera-node";
+import { Scenegraph } from "../scenegraph";
 import Vector from "../vector";
 
 /**
@@ -26,9 +27,22 @@ export default class Ray {
     canvasWidth: number,
     camera: CameraNode
   ): Ray {
+    // get camera origin
+    // console.log(Scenegraph.getToWorld(Scenegraph.getCamera()));
+    // const origin = Scenegraph.getToWorld(Scenegraph.getCamera()).mul(new Vector(0, 0, 0, 1));
+    // const origin = Scenegraph.getToWorld(Scenegraph.getCamera()).mul(new Vector(0, 0, 0, 1));
+    // console.log(origin);
+
+    // let cameraGroup = Scenegraph.getGroupNodeCamera();
+    // let cameraOrigin = Scenegraph.getToWorld(cameraGroup);
+
+    // cameraOrigin.print();
+
+    // let origin = new Vector(0, 0, 0, 1);
+    // let origin = cameraOrigin.transpose().mul(new Vector(0, 0, 0, 1));
+    // console.log(origin);
+
     const origin = new Vector(0, 0, 0, 1);
-    // const origin = camera.transform
-    // Calculate camera alpha
     const alpha = (camera.fovy * Math.PI) / 180;
 
     // Calculate the direction of the ray

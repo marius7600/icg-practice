@@ -23,7 +23,7 @@ export default class Pyramid {
      * @param maxPoint The maximum Point
      * @param color The colour of the pyramid
      */
-    constructor(minPoint: Vector, maxPoint: Vector, public color: Vector) {
+    constructor(public minPoint: Vector, public maxPoint: Vector, public color: Vector) {
 
         let topx = (minPoint.x) + (maxPoint.x - minPoint.x) / 2;
         let topz = (minPoint.z) + (maxPoint.z - minPoint.z) / 2;

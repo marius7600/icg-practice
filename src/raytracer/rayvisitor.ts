@@ -45,6 +45,7 @@ export default class RayVisitor implements Visitor {
   intersection: Intersection | null;
   intersectionColor: Vector;
   lightNodes: Array<LightNode> = [];
+  boundingBoxes: Array<AABox> = [];
 
   /**
    * Creates a new RayVisitor
@@ -70,6 +71,57 @@ export default class RayVisitor implements Visitor {
   }
 
   /**
+   * Calculates the bounding boxes for the objects collected by the ray visitor.
+   * @returns An array of AABox objects representing the bounding boxes.
+   */
+  calcualteBoundingBoxes(): AABox[] {
+    let boundingBoxes: AABox[] = [];
+    console.log(this.objects.length);
+    for (let shape of this.objects) {
+      let min = new Vector(Infinity, Infinity, Infinity, 1);
+      let max = new Vector(-Infinity, -Infinity, -Infinity, 1);
+      if (shape instanceof Sphere) {
+        let sphere = shape as Sphere;
+        let center = sphere.center;
+        let radius = sphere.radius;
+
+        min.x = Math.min(min.x, center.x - radius);
+        min.y = Math.min(min.y, center.y - radius);
+        min.z = Math.min(min.z, center.z - radius);
+
+        max.x = Math.max(max.x, center.x + radius);
+        max.y = Math.max(max.y, center.y + radius);
+        max.z = Math.max(max.z, center.z + radius);
+      }
+      else if (shape instanceof AABox) {
+        let aabox = shape as AABox;
+        min.x = Math.min(min.x, aabox.minPoint.x);
+        min.y = Math.min(min.y, aabox.minPoint.y);
+        min.z = Math.min(min.z, aabox.minPoint.z);
+
+        max.x = Math.max(max.x, aabox.maxPoint.x);
+        max.y = Math.max(max.y, aabox.maxPoint.y);
+        max.z = Math.max(max.z, aabox.maxPoint.z);
+      }
+      else if (shape instanceof Pyramid) {
+        let pyramid = shape as Pyramid;
+        min.x = Math.min(min.x, pyramid.minPoint.x);
+        min.y = Math.min(min.y, pyramid.minPoint.y);
+        min.z = Math.min(min.z, pyramid.minPoint.z);
+
+        max.x = Math.max(max.x, pyramid.maxPoint.x);
+        max.y = Math.max(max.y, pyramid.maxPoint.y);
+        max.z = Math.max(max.z, pyramid.maxPoint.z);
+      }
+      else {
+        console.log("Unknown shape node " + shape);
+      }
+      boundingBoxes.push(new AABox(min, max, null));
+    }
+    return boundingBoxes;
+  }
+
+  /**
    * Renders the Scenegraph
    * @param rootNode The root node of the Scenegraph
    * @param camera The camera used
@@ -88,6 +140,9 @@ export default class RayVisitor implements Visitor {
     //build list of render objects
     rootNode.accept(this); // this = Visit: GroupNode, Visit: CameraNode, Visit: SphereNode, Visit: AABoxNode, Visit: TextureBoxNode
 
+    // calculate bounding boxes
+    this.boundingBoxes = this.calcualteBoundingBoxes();
+
     // raytrace
     const width = this.imageData.width;
     const height = this.imageData.height;
@@ -102,13 +157,26 @@ export default class RayVisitor implements Visitor {
       let minIntersection = new Intersection(Infinity, null, null);
       let minObj = null; // minObj is the closest object to the camera
 
-      for (let shape of this.objects) {
-        //This.objects wird in der Visit Methode gefüllt (enhält sphere und aabox)
-        const intersection = shape.intersect(ray);
-        if (intersection && intersection.closerThan(minIntersection)) {
-          // if intersection != null
-          minIntersection = intersection;
-          minObj = shape;
+      // iterate over all objects and check for intersection with its bounding box
+      for (let j = 0; j < this.objects.length; j++) {
+        let box = this.boundingBoxes[j];
+        let shape = this.objects[j];
+
+        // check if ray intersects bounding box
+        if (box.intersect(ray)) {
+          // check if ray intersects shape
+          const intersection = shape.intersect(ray);
+          // const intersection = box.intersect(ray);
+
+          // check if intersection exists and if it's closer than the current closest intersection
+          if (intersection && intersection.closerThan(minIntersection)) {
+            minIntersection = intersection;
+            minObj = shape;
+            // minObj = box;
+          }
+        }
+        else {
+          continue;
         }
       }
 

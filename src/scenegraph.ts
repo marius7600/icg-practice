@@ -1,6 +1,5 @@
 import JsonVisitor from "./jsonVisitor";
 import AnimationNode, { DriverNode, DriverNodeMouse, RotationNode, ScalerNodeMouse } from "./nodes/animation-nodes";
-import camera from "./nodes/camera-node";
 import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
 import SphereNode from "./nodes/sphere-node";
@@ -16,6 +15,8 @@ import MeshNode from "./nodes/mesh-node";
 import { Game } from "./game";
 import { WindowNode } from "./nodes/window-node";
 import Node from "./nodes/node";
+import Matrix from "./matrix";
+import CameraNode from "./nodes/camera-node";
 
 /**
  * Represents a scenegraph that holds the hierarchy of nodes in a 3D scene.
@@ -25,7 +26,7 @@ export class Scenegraph {
     private static sceneGraph: GroupNode;
     private static animationNodesList: AnimationNode[] = [];
     private static driver: DriverNode;
-    private static camera: camera;
+    private static camera: CameraNode;
     private static TicTacToe: Game = new Game();
 
     static getGraph() {
@@ -33,6 +34,37 @@ export class Scenegraph {
             alert("No Nodes in Scenegraph initialized! Please put Nodes in the scenegraph  first");
         }
         return this.sceneGraph;
+    }
+
+    static getToWorld(node: Node): Matrix {
+        let myGraph = this.getGraph();
+        let worldMatrix = Matrix.identity();
+
+        // traverse the graph to find the node, if the node is a group node check the children
+        let found = this._getToWorld(myGraph, node, worldMatrix);
+
+        if (!found) {
+            throw new Error("Node not found in the scenegraph");
+        }
+
+        return found;
+    }
+
+    static _getToWorld(node: Node, searchNode: Node, worldMatrix: Matrix): Matrix {
+        if (node === searchNode) {
+            return worldMatrix;
+        }
+
+        if (node instanceof GroupNode || node instanceof WindowNode) {
+            for (let child of node.children) {
+                let result = this._getToWorld(child, searchNode, worldMatrix.mul(node.transform.getMatrix()));
+                if (result) {
+                    return result;
+                }
+            }
+        }
+
+        return null;
     }
 
     // get all nodes of the given type
@@ -208,7 +240,7 @@ export class Scenegraph {
         /*********************  START OF SCENEGRAPH *********************/
         /***************************************************************/
         this.sceneGraph = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
-        this.camera = new camera(
+        this.camera = new CameraNode(
             new Vector(0, 0, 0, 1), // eye
             new Vector(0, 0, -1, 1), // center
             new Vector(0, 1, 0, 0), // up
@@ -218,9 +250,10 @@ export class Scenegraph {
             100
         ); // far
 
-        const groupNodeCamera = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
+        const groupNodeCamera = new GroupNode(new Translation(new Vector(0, 0, 0, 1)));
         groupNodeCamera.add(this.camera);
         groupNodeCamera.name = "groupNodeCamera";
+        groupNodeCamera.add(this.camera);
         //const driverNodeMouse = new DriverNodeMouse(groupNodeCamera);
 
 
@@ -330,7 +363,8 @@ export class Scenegraph {
 
         ///////////// ===== ADD LEFT WINDOW ===== /////////////
         // groupNode for the secound application window
-        const leftWindowGroup = new WindowNode(new Translation(new Vector(-1.8, 0, -1, 0)), "LeftWindow");
+        const leftWindowGroup = new WindowNode(new Translation(new Vector(-1.8, 0, -5, 0)), "LeftWindow");
+        // const leftWindowGroup = new WindowNode(new Translation(new Vector(-1.8, 0, -1, 0)), "LeftWindow");
         groupNodeUnderRoot.add(leftWindowGroup);
 
         // Add Texture box to the left window
