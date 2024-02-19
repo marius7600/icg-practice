@@ -73,22 +73,71 @@ export default class AABox {
      * @return The intersection if there is one, null if there is none
      */
   intersect(ray: Ray): Intersection | null {
+    // This is the "slab" method of ray-box intersection.
+    let tmin = (this.minPoint.x - ray.origin.x) / ray.direction.x;
+    let tmax = (this.maxPoint.x - ray.origin.x) / ray.direction.x;
 
-    let closestIntersection: Intersection = null;
-    let shortestT = Number.MAX_VALUE
-    for (let i = 0; i < this.indices.length; i += 3) {
-      const point1 = this.vertices[this.indices[i]]
-      const point2 = this.vertices[this.indices[i + 1]]
-      const point3 = this.vertices[this.indices[i + 2]]
-      const intersection = Polygon.intersect2(ray, point1, point2, point3, shortestT);
-      if (intersection) {
-        if (!closestIntersection || intersection.closerThan(closestIntersection)) {
-          closestIntersection = intersection
-          shortestT = intersection.t
-        }
-      }
+    if (tmin > tmax) [tmin, tmax] = [tmax, tmin];
+
+    let tymin = (this.minPoint.y - ray.origin.y) / ray.direction.y;
+    let tymax = (this.maxPoint.y - ray.origin.y) / ray.direction.y;
+
+    if (tymin > tymax) [tymin, tymax] = [tymax, tymin];
+
+    if ((tmin > tymax) || (tymin > tmax)) return null;
+
+    if (tymin > tmin) tmin = tymin;
+    if (tymax < tmax) tmax = tymax;
+
+    let tzmin = (this.minPoint.z - ray.origin.z) / ray.direction.z;
+    let tzmax = (this.maxPoint.z - ray.origin.z) / ray.direction.z;
+
+    if (tzmin > tzmax) [tzmin, tzmax] = [tzmax, tzmin];
+
+    if ((tmin > tzmax) || (tzmin > tmax)) return null;
+
+    if (tzmin > tmin) tmin = tzmin;
+    if (tzmax < tmax) tmax = tzmax;
+
+    // If we've made it this far, the ray intersects the box. 
+    if (tmin < 0) {
+      tmin = tmax; // If tmin is negative, the ray origin is inside the box.
     }
-    return closestIntersection
+
+    // Calculate the intersection point.
+    let p = ray.origin.add(ray.direction.mul(tmin));
+
+    // TODO: Fix the normal calculation
+    // Determine which face of the box the ray hit.
+    let normal: Vector;
+    if (tmin == tmax) {
+      normal = new Vector(-Math.sign(ray.direction.x), 0, 0, 1);
+    } else if (tmin == tymin) {
+      normal = new Vector(0, -Math.sign(ray.direction.y), 0, 1);
+    } else {
+      normal = new Vector(0, 0, -Math.sign(ray.direction.z), 1);
+    }
+
+    // normal = new Vector(0, 0, 0, 1);
+
+    return new Intersection(tmin, p, normal.normalize());
+
+
+    // let closestIntersection: Intersection = null;
+    // let shortestT = Number.MAX_VALUE
+    // for (let i = 0; i < this.indices.length; i += 3) {
+    //   const point1 = this.vertices[this.indices[i]]
+    //   const point2 = this.vertices[this.indices[i + 1]]
+    //   const point3 = this.vertices[this.indices[i + 2]]
+    //   const intersection = Polygon.intersect2(ray, point1, point2, point3, shortestT);
+    //   if (intersection) {
+    //     if (!closestIntersection || intersection.closerThan(closestIntersection)) {
+    //       closestIntersection = intersection
+    //       shortestT = intersection.t
+    //     }
+    //   }
+    // }
+    // return closestIntersection
   }
 
   toString(): string {
