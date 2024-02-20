@@ -76,7 +76,7 @@ export default class RayVisitor implements Visitor {
    */
   calcualteBoundingBoxes(): AABox[] {
     let boundingBoxes: AABox[] = [];
-    console.log(this.objects.length);
+
     for (let shape of this.objects) {
       let min = new Vector(Infinity, Infinity, Infinity, 1);
       let max = new Vector(-Infinity, -Infinity, -Infinity, 1);
