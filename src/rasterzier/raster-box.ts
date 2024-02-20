@@ -50,7 +50,7 @@ export default class RasterBox {
     /**
      * The texture of the box
      */
-    colorTexture: WebGLTexture;
+    texture: WebGLTexture;
     /**
      * The buffer containing the box's texture
      */
@@ -69,123 +69,94 @@ export default class RasterBox {
      * @param gl The canvas' context
      * @param minPoint The minimal x,y,z of the box
      * @param maxPoint The maximal x,y,z of the box
+     * @param color The color of the box
+     * @param texture The texture of the box
      */
-    // The 3D models displayed in the application should be able to be provided with
-    // a color texture. Furthermore, at least one of the objects must be provided with a color
-    // texture.
     constructor(
         gl: WebGL2RenderingContext,
         minPoint: Vector,
         maxPoint: Vector,
         color?: Vector,
-        colorTexture?: string
+        texture?: string
     ) {
 
         // set the WebGL context
         this.gl = gl;
-        const glu = new GlUtils(gl);
+        const glUtil = new GlUtils(gl);
 
         // calculate the vertices and normals
         this.vertices = SharedProps.calcVertices(minPoint, maxPoint)
         this.elements = this.vertices.length / 3;
         this.normals = SharedProps.getNormals()
 
-        this.vertexBuffer = glu.createVertexBuffer(this.vertices)
-        this.normalBuffer = glu.createNormalBuffer(this.normals)
-        if (color && !colorTexture) {
+        this.vertexBuffer = glUtil.createVertexBuffer(this.vertices)
+        this.normalBuffer = glUtil.createNormalBuffer(this.normals)
+        if (color && !texture) {
             // get the colors
-            this.colors = glu.getColorsArray(color, this.elements)
+            this.colors = glUtil.getColorsArray(color, this.elements)
 
             // create the buffers
-            this.colorBuffer = glu.createColorBuffer(this.colors)
+            this.colorBuffer = glUtil.createColorBuffer(this.colors)
         } else {
-            if (colorTexture) {
+            if (texture) {
                 // create the texture
-                this.colorTexture = gl.createTexture();
-                this.gl.bindTexture(gl.TEXTURE_2D, this.colorTexture);
+                this.texture = gl.createTexture();
+                this.gl.bindTexture(gl.TEXTURE_2D, this.texture);
+
+                // // create the texture buffer
+                this.textureBuffer = glUtil.createTextureBuffer(SharedProps.getUVCords())
+
+                // create uv cords
+                const uvBuffer = glUtil.createArrayBuffer(SharedProps.getUVCords());
 
                 // create the image and load the colour texture
                 const image = new Image();
-                image.src = colorTexture;
+                image.src = texture;
                 image.onload = () => {
-                    this.gl.bindTexture(this.gl.TEXTURE_2D, this.colorTexture);
+                    this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
                     this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, gl.UNSIGNED_BYTE, image);
                     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
                     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
                     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
                     this.gl.bindTexture(this.gl.TEXTURE_2D, null);
                 };
-
-                // // create the texture buffer
-                this.textureBuffer = this.gl.createBuffer();
-                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.textureBuffer);
-                this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(SharedProps.getUVCords()), this.gl.STATIC_DRAW);
-
-                // create uv cords
-                const uv = SharedProps.getUVCords();
-                const uvBuffer = this.gl.createBuffer();
-                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, uvBuffer);
-                this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(uv), this.gl.STATIC_DRAW);
+            }
+            else {
+                throw new Error("No color or texture provided")
             }
         }
     }
+
 
     /**
      * Renders the box
      * @param shader The shader used to render
      */
     render(shader: Shader) {
-        // if the box has no texture render as usual
-        if (!this.colorTexture) {
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-            const positionLocation = shader.getAttributeLocation("a_position");
-            this.gl.enableVertexAttribArray(positionLocation);
-            this.gl.vertexAttribPointer(positionLocation, 3, this.gl.FLOAT, false, 0, 0);
+        const glUtil = new GlUtils(this.gl);
 
-            const vertexColorAttribute = shader.getAttributeLocation("a_color")
-            this.gl.enableVertexAttribArray(vertexColorAttribute);
+        const positionLocation = glUtil.bindAndPointToAttribute(this.vertexBuffer, "a_position", 3, this.gl.FLOAT, shader);
 
-
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.normalBuffer);
-            const normalLocation = shader.getAttributeLocation("a_normal");
-            this.gl.enableVertexAttribArray(normalLocation);
-            this.gl.vertexAttribPointer(normalLocation,
-                3, this.gl.FLOAT, false, 0, 0);
-
-
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer)
-            this.gl.vertexAttribPointer(vertexColorAttribute, 3, this.gl.FLOAT, false, 0, 0);
+        if (!this.texture) {
+            const colorLocation = glUtil.bindAndPointToAttribute(this.colorBuffer, "a_color", 3, this.gl.FLOAT, shader);
+            const normalLocation = glUtil.bindAndPointToAttribute(this.normalBuffer, "a_normal", 3, this.gl.FLOAT, shader);
 
             this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
             this.gl.drawArrays(this.gl.TRIANGLES, 0, this.elements);
 
-            this.gl.disableVertexAttribArray(positionLocation);
-            this.gl.disableVertexAttribArray(vertexColorAttribute);
-            this.gl.disableVertexAttribArray(normalLocation);
-        }
-        // if the box has a texture use render from raster-texture-box.ts
-        else {
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-            const positionLocation = shader.getAttributeLocation("a_position");
-            this.gl.enableVertexAttribArray(positionLocation);
-            this.gl.vertexAttribPointer(positionLocation, 3, this.gl.FLOAT, false, 0, 0);
-
-            // Bind the texture coordinates in this.texCoords
-            // to their attribute in the shader
-
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.textureBuffer);
-            const texCoordLocation = shader.getAttributeLocation("a_texCoord");
-            this.gl.enableVertexAttribArray(texCoordLocation);
-            this.gl.vertexAttribPointer(texCoordLocation, 2, this.gl.FLOAT, false, 0, 0);
+            glUtil.disableAttribute(colorLocation);
+            glUtil.disableAttribute(normalLocation);
+        } else {
+            const texCoordLocation = glUtil.bindAndPointToAttribute(this.textureBuffer, "a_texCoord", 2, this.gl.FLOAT, shader);
 
             this.gl.activeTexture(this.gl.TEXTURE0);
-            this.gl.bindTexture(this.gl.TEXTURE_2D, this.colorTexture);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
             shader.getUniformInt("sampler").set(0);
             this.gl.drawArrays(this.gl.TRIANGLES, 0, this.elements);
 
-            this.gl.disableVertexAttribArray(positionLocation);
-            this.gl.disableVertexAttribArray(texCoordLocation);
+            glUtil.disableAttribute(texCoordLocation);
         }
-    }
 
+        glUtil.disableAttribute(positionLocation);
+    }
 }
