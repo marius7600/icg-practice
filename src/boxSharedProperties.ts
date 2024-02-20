@@ -143,10 +143,10 @@ export default class BoxSharedProperties {
         const uvCords = this.getUVCords();
         const uvVecs: Vec2[] = []
         for (let i = 0; i < uvCords.length; i += 2) {
-           const x = uvCords[i]
-            const y = uvCords[i+1]
-            const vec2 = new Vec2(x,y);
-           uvVecs.push(vec2)
+            const x = uvCords[i]
+            const y = uvCords[i + 1]
+            const vec2 = new Vec2(x, y);
+            uvVecs.push(vec2)
 
         }
         return uvVecs
@@ -171,7 +171,7 @@ export default class BoxSharedProperties {
             const deltaUV1 = uv1.sub(uv0)
             const deltaUV2 = uv2.sub(uv0)
 
-            const r = 1.0/(deltaUV1.x* deltaUV2.y - deltaUV1.y * deltaUV2.x)
+            const r = 1.0 / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x)
 
             const tangent = (edge1.mul(deltaUV2.y).sub(edge2.mul(deltaUV1.y))).mul(r)
             const bitangent = (edge2.mul(deltaUV1.x).sub(edge1.mul(deltaUV2.x))).mul(r).mul(-1)
@@ -187,7 +187,7 @@ export default class BoxSharedProperties {
     }
 
     static vecsToNumbersArray(vec: Vector[]) {
-        const nrs: number [] = []
+        const nrs: number[] = []
         for (let vector of vec) {
             nrs.push(vector.x, vector.y, vector.z)
         }
@@ -196,11 +196,11 @@ export default class BoxSharedProperties {
 
     static numbersToVecsArray(nrs: number[]) {
         const vecs = []
-        for (let i = 0; i < nrs.length; i+=3) {
+        for (let i = 0; i < nrs.length; i += 3) {
             const x = nrs[i]
-            const y = nrs[i +1]
-            const z = nrs[i +2]
-            vecs.push(new Vector(x,y,z, 1))
+            const y = nrs[i + 1]
+            const z = nrs[i + 2]
+            vecs.push(new Vector(x, y, z, 1))
         }
         return vecs
     }

@@ -12,7 +12,8 @@ export default class SphereNode extends Node {
   constructor(
     public color: Vector,
     public center: Vector,
-    public radius: number
+    public radius: number,
+    public texture?: string
   ) {
     super();
   }

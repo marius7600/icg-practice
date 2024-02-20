@@ -131,7 +131,12 @@ export class RasterVisitor implements Visitor {
    * @param node The node to visit
    */
   visitSphereNode(node: SphereNode) {
-    this.visitNode(node, this.shader);
+    if (node.texture) {
+      this.visitNode(node, this.textureshader);
+    }
+    else {
+      this.visitNode(node, this.shader);
+    }
   }
 
   /**
@@ -347,7 +352,7 @@ export class RasterSetupVisitor implements Visitor {
   visitSphereNode(node: SphereNode) {
     this.objects.set(
       node,
-      new RasterSphere(this.gl, node.center, node.radius, node.color)
+      new RasterSphere(this.gl, node.center, node.radius, node.color, node.texture)
     );
   }
 
@@ -408,10 +413,17 @@ export class RasterSetupVisitor implements Visitor {
   }
 
   visitPyramidNode(node: PyramidNode) {
-    this.objects.set(
-      node,
-      new RasterPyramid(this.gl, node.minPoint, node.maxPoint, node.color)
-    );
+    if (node.texture) {
+      this.objects.set(
+        node,
+        new RasterPyramid(this.gl, node.minPoint, node.maxPoint, node.color, node.texture)
+      );
+    } else {
+      this.objects.set(
+        node,
+        new RasterPyramid(this.gl, node.minPoint, node.maxPoint, node.color)
+      );
+    }
   }
 
   visitMeshNode(node: MeshNode) {

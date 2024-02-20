@@ -81,38 +81,25 @@ export default class RasterBox {
         colorTexture?: string
     ) {
 
+        // set the WebGL context
+        this.gl = gl;
+        const glu = new GlUtils(gl);
+
+        // calculate the vertices and normals
+        this.vertices = SharedProps.calcVertices(minPoint, maxPoint)
+        this.elements = this.vertices.length / 3;
+        this.normals = SharedProps.getNormals()
+
+        this.vertexBuffer = glu.createVertexBuffer(this.vertices)
+        this.normalBuffer = glu.createNormalBuffer(this.normals)
         if (color && !colorTexture) {
-            // set the WebGL context
-            this.gl = gl;
-            const glu = new GlUtils(gl);
-
-            // calculate the vertices and normals
-            this.vertices = SharedProps.calcVertices(minPoint, maxPoint)
-            this.elements = this.vertices.length / 3;
-            this.normals = SharedProps.getNormals()
-
             // get the colors
             this.colors = glu.getColorsArray(color, this.elements)
 
             // create the buffers
-            this.vertexBuffer = glu.createVertexBuffer(this.vertices)
-            this.normalBuffer = glu.createNormalBuffer(this.normals)
             this.colorBuffer = glu.createColorBuffer(this.colors)
         } else {
             if (colorTexture) {
-                // set the WebGL context
-                this.gl = gl;
-                const glu = new GlUtils(gl);
-
-                // calculate the vertices and normals
-                this.vertices = SharedProps.calcVertices(minPoint, maxPoint)
-                this.normals = SharedProps.getNormals()
-                this.elements = this.vertices.length / 3;
-
-                // create the buffers
-                this.vertexBuffer = glu.createVertexBuffer(this.vertices)
-                this.normalBuffer = glu.createNormalBuffer(this.normals)
-
                 // create the texture
                 this.colorTexture = gl.createTexture();
                 this.gl.bindTexture(gl.TEXTURE_2D, this.colorTexture);
