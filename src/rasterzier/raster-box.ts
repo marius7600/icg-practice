@@ -115,24 +115,24 @@ export default class RasterBox {
 
                 // create the texture
                 this.colorTexture = gl.createTexture();
-                gl.bindTexture(gl.TEXTURE_2D, this.colorTexture);
+                this.gl.bindTexture(gl.TEXTURE_2D, this.colorTexture);
 
                 // create the image and load the colour texture
                 const image = new Image();
                 image.src = colorTexture;
                 image.onload = () => {
-                    gl.bindTexture(gl.TEXTURE_2D, this.colorTexture);
-                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-                    gl.bindTexture(gl.TEXTURE_2D, null);
+                    this.gl.bindTexture(this.gl.TEXTURE_2D, this.colorTexture);
+                    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, gl.UNSIGNED_BYTE, image);
+                    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+                    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+                    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+                    this.gl.bindTexture(this.gl.TEXTURE_2D, null);
                 };
 
                 // // create the texture buffer
-                this.textureBuffer = gl.createBuffer();
-                gl.bindBuffer(gl.ARRAY_BUFFER, this.textureBuffer);
-                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(SharedProps.getUVCords()), gl.STATIC_DRAW);
+                this.textureBuffer = this.gl.createBuffer();
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.textureBuffer);
+                this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(SharedProps.getUVCords()), this.gl.STATIC_DRAW);
 
                 // create uv cords
                 const uv = SharedProps.getUVCords();
