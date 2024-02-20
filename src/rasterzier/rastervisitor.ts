@@ -241,7 +241,12 @@ export class RasterVisitor implements Visitor {
   }
 
   visitPyramidNode(node: PyramidNode) {
-    this.visitNode(node, this.shader);
+    if (node.texture) {
+      this.visitNode(node, this.textureshader);
+    }
+    else {
+      this.visitNode(node, this.shader);
+    }
   }
 
   private visitNode(node: Node, shader: Shader) {

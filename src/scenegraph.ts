@@ -17,6 +17,7 @@ import { WindowNode } from "./nodes/window-node";
 import Node from "./nodes/node";
 import Matrix from "./matrix";
 import CameraNode from "./nodes/camera-node";
+import PyramidNode from "./nodes/pyramid-node";
 
 /**
  * Represents a scenegraph that holds the hierarchy of nodes in a 3D scene.
@@ -273,6 +274,11 @@ export class Scenegraph {
         const groupNodeUnderRoot = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
         this.sceneGraph.add(groupNodeUnderRoot);
 
+        // test pyramid node
+        // const pyramid = new PyramidNode(new Vector(1, 1, 1, 1), new Vector(1, 0, 0, 1));
+        const pyramid = new PyramidNode(new Vector(1, 1, 1, 1), null, "source-missing-texture.png");
+        groupNodeUnderRoot.add(pyramid);
+
         // add light node 1
         // light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 4, -2, 0));
         // groupNodeUnderRoot.add(light1);
@@ -280,7 +286,8 @@ export class Scenegraph {
         // add light node 2
         const groupNodeLight2 = new GroupNode(new Translation(new Vector(-2, -1, -5, 0)));
         const light2 = new LightNode(new Vector(1, 0, 0, 1), new Vector(0, 0, 0, 1));
-        let lightSpehre = new SphereNode(new Vector(1, 1, 0, 1), new Vector(0, 0, 0, 1), 0.25);
+        let lightSpehre = new SphereNode(new Vector(1, 1, 0, 1), new Vector(0, 0, 0, 1), 0.25, "source-missing-texture.png");
+        // let lightSpehre = new SphereNode(new Vector(1, 1, 0, 1), new Vector(0, 0, 0, 1), 0.25);
 
         groupNodeLight2.add(light2);
         groupNodeLight2.add(lightSpehre);

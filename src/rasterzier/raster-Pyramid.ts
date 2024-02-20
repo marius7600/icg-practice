@@ -14,12 +14,33 @@ export default class RasterPyramid {
      * The indices describing which vertices form a triangle
      */
     indexBuffer: WebGLBuffer;
-    private colorBuffer: WebGLBuffer;
-    private normalBuffer: WebGLBuffer;
+    /**
+     * The buffer containing the Pyramid's colors
+     */
+    colorBuffer: WebGLBuffer;
+    /**
+     * The buffer containing the Pyramid's normals
+     */
+    normalBuffer: WebGLBuffer;
     /**
      * The amount of indices
      */
     elements: number;
+    /**
+     * The WebGL context
+     */
+    gl: WebGL2RenderingContext;
+    /**
+     * The buffer containing the Pyramids texture
+     */
+    textureBuffer: WebGLBuffer;
+    /**
+     * The Texture of the Pyramid
+    */
+    texture: WebGLTexture;
+
+
+
 
 
     /**
@@ -39,50 +60,42 @@ export default class RasterPyramid {
      * @param maxPoint The maximal x,y,z of the box
      */
     constructor(
-        private gl: WebGL2RenderingContext,
+        gl: WebGL2RenderingContext,
         minPoint: Vector,
         maxPoint: Vector,
-        color: Vector
-        ) {
+        private color?: Vector,
+        texture?: string,
+    ) {
         this.gl = gl;
-        const glu = new GlUtils(gl);
+        const glUtil = new GlUtils(gl);
         const mi = minPoint;
         const ma = maxPoint;
 
-        let topx = (mi.x)+(ma.x-mi.x)/2;
-        let topz = mi.z + (ma.z-mi.z) / 2;
+        let topx = (mi.x) + (ma.x - mi.x) / 2;
+        let topz = mi.z + (ma.z - mi.z) / 2;
 
 
         let frontVec1 = new Vector(mi.x, mi.y, ma.z, 1);
-        let frontVec2 = new Vector(ma.x, mi.y, mi.z,1);
-        let frontVec3 = new Vector(topx, ma.y, topz,1);
+        let frontVec2 = new Vector(ma.x, mi.y, mi.z, 1);
+        let frontVec3 = new Vector(topx, ma.y, topz, 1);
 
-        let backVec1 = new Vector(mi.x, mi.y, mi.z,1);
-        let backVec2 = new Vector(ma.x, mi.y, ma.z,1);
-        let backVec3 = new Vector(topx, ma.y, topz,1);
+        let backVec1 = new Vector(mi.x, mi.y, mi.z, 1);
+        let backVec2 = new Vector(ma.x, mi.y, ma.z, 1);
+        let backVec3 = new Vector(topx, ma.y, topz, 1);
 
-        let rightVec1 = new Vector(ma.x, mi.y, mi.z,1);
-        let rightVec2 = new Vector(ma.x, mi.y, ma.z,1);
-        let rightVec3 = new Vector(topx, ma.y, topz,1);
+        let rightVec1 = new Vector(ma.x, mi.y, mi.z, 1);
+        let rightVec2 = new Vector(ma.x, mi.y, ma.z, 1);
+        let rightVec3 = new Vector(topx, ma.y, topz, 1);
 
-        let leftVec1 = new Vector(mi.x, mi.y, mi.z,1);
-        let leftVec2 = new Vector(mi.x, mi.y, ma.z,1);
-        let leftVec3 = new Vector(topx, ma.y, topz,1);
+        let leftVec1 = new Vector(mi.x, mi.y, mi.z, 1);
+        let leftVec2 = new Vector(mi.x, mi.y, ma.z, 1);
+        let leftVec3 = new Vector(topx, ma.y, topz, 1);
 
 
-        let normalFront = makecross(frontVec1, frontVec2, frontVec3);
-        let normalBack = makecross(backVec3,backVec2,backVec1);
-        let normalRight = makecross(rightVec1, rightVec2, rightVec3);
-        let normalLeft = makecross(leftVec1,leftVec2,leftVec3);
-
-        function makecross(vector1: Vector,vector2:Vector, vector3: Vector){
-
-            let sub1 = vector1.sub(vector3);
-            let sub2 = vector2.sub(vector3);
-
-            return sub1.cross(sub2).normalize();
-        }
-
+        let normalFront = this.makecross(frontVec1, frontVec2, frontVec3);
+        let normalBack = this.makecross(backVec3, backVec2, backVec1);
+        let normalRight = this.makecross(rightVec1, rightVec2, rightVec3);
+        let normalLeft = this.makecross(leftVec1, leftVec2, leftVec3);
 
         let vertices = [
             //Font
@@ -108,22 +121,20 @@ export default class RasterPyramid {
             mi.x, mi.y, ma.z, //0
             mi.x, mi.y, mi.z, //3
             ma.x, mi.y, mi.z, //1
-
         ];
-
         this.elements = vertices.length / 3;
+        this.vertexBuffer = glUtil.createVertexBuffer(vertices)
 
         const normals = [
-
             //Front
             normalFront.x, normalFront.y, normalFront.z,
             normalFront.x, normalFront.y, normalFront.z,
             normalFront.x, normalFront.y, normalFront.z,
 
             //Back
-            normalBack.x,normalBack.y,normalBack.z,
-            normalBack.x,normalBack.y,normalBack.z,
-            normalBack.x,normalBack.y,normalBack.z,
+            normalBack.x, normalBack.y, normalBack.z,
+            normalBack.x, normalBack.y, normalBack.z,
+            normalBack.x, normalBack.y, normalBack.z,
             //Right
             normalRight.x, normalRight.y, normalRight.z,
             normalRight.x, normalRight.y, normalRight.z,
@@ -140,45 +151,72 @@ export default class RasterPyramid {
             0.0, -1.0, 0.0,
             0.0, -1.0, 0.0
         ]
+        this.normalBuffer = glUtil.createNormalBuffer(normals)
 
-        const colors = [
-            color.x, color.y, color.z,
-            color.x, color.y, color.z,
-            color.x, color.y, color.z,
-            color.x, color.y, color.z,
-            color.x, color.y, color.z,
-            color.x, color.y, color.z,
-            color.x, color.y, color.z,
-            color.x, color.y, color.z,
-            color.x, color.y, color.z,
-            color.x, color.y, color.z,
-            color.x, color.y, color.z,
-            color.x, color.y, color.z,
-            color.x, color.y, color.z,
-            color.x, color.y, color.z,
-            color.x, color.y, color.z,
-            color.x, color.y, color.z,
-            color.x, color.y, color.z,
-            color.x, color.y, color.z
+        if (color && !texture) {
+            let colors: number[] = []
+            for (let i = 0; i < vertices.length; i++) {
+                colors.push(...[color.x, color.y, color.z])
+            }
+            this.colorBuffer = glUtil.createColorBuffer(colors);
 
-        ];
+        } else {
+            if (texture) {
+                const uvCoords = [
+                    //Coordinates for uv mapping of the pyramid
+                    //Front
+                    0.5, 0,
+                    1, 1,
+                    0, 1,
+                    //Back
+                    0.5, 0,
+                    1, 1,
+                    0, 1,
+                    //Right
+                    0.5, 0,
+                    1, 1,
+                    0, 1,
+                    //Left
+                    0.5, 0,
+                    1, 1,
+                    0, 1,
+                    //Bottom
+                    0.5, 0,
+                    1, 1,
+                    0, 1,
+                    0.5, 0,
+                    1, 1,
+                    0, 1
+                ];
 
+                // // create the texture buffer
+                this.textureBuffer = glUtil.createTextureBuffer(uvCoords)
 
-        this.vertexBuffer = glu.createVertexBuffer(vertices)
+                this.texture = gl.createTexture();
+                this.gl.bindTexture(gl.TEXTURE_2D, this.texture);
+                this.gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 255, 255]));
 
-        // const indexBuffer = gl.createBuffer();
-        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-        // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-        // this.indexBuffer = indexBuffer;
-        // this.elements = indices.length;
+                const image = new Image();
+                image.src = texture;
 
+                image.onload = () => {
+                    this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+                    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, gl.UNSIGNED_BYTE, image);
+                    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+                    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+                    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+                    this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+                };
+            }
+        }
+    }
 
-        this.normalBuffer = glu.createNormalBuffer(normals)
+    makecross(vector1: Vector, vector2: Vector, vector3: Vector) {
 
-        // Code from Jacob
+        let sub1 = vector1.sub(vector3);
+        let sub2 = vector2.sub(vector3);
 
-        this.colorBuffer = glu.createColorBuffer(colors)
-
+        return sub1.cross(sub2).normalize();
     }
 
     /**
@@ -186,32 +224,29 @@ export default class RasterPyramid {
      * @param shader The shader used to render
      */
     render(shader: Shader) {
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-        const positionLocation = shader.getAttributeLocation("a_position");
-        this.gl.enableVertexAttribArray(positionLocation);
-        this.gl.vertexAttribPointer(positionLocation,
-            3, this.gl.FLOAT, false, 0, 0);
+        const glUtil = new GlUtils(this.gl);
+        const positionLocation = glUtil.bindAndPointToAttribute(this.vertexBuffer, "a_position", 3, this.gl.FLOAT, shader);
 
-        const vertexColorAttribute = shader.getAttributeLocation("a_color")
-        this.gl.enableVertexAttribArray(vertexColorAttribute);
+        // if the pyramid has no texture render as usual
+        if (this.color && !this.texture) {
+            const colorLocation = glUtil.bindAndPointToAttribute(this.colorBuffer, "a_color", 3, this.gl.FLOAT, shader);
+            const normalLocation = glUtil.bindAndPointToAttribute(this.normalBuffer, "a_normal", 3, this.gl.FLOAT, shader);
 
+            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+            this.gl.drawArrays(this.gl.TRIANGLES, 0, this.elements);
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.normalBuffer);
-        const normalLocation = shader.getAttributeLocation("a_normal");
-        this.gl.enableVertexAttribArray(normalLocation);
-        this.gl.vertexAttribPointer(normalLocation,
-            3, this.gl.FLOAT, false, 0, 0);
+            glUtil.disableAttribute(colorLocation);
+            glUtil.disableAttribute(normalLocation);
+        } else {
+            const texCoordLocation = glUtil.bindAndPointToAttribute(this.textureBuffer, "a_texCoord", 2, this.gl.FLOAT, shader);
 
+            this.gl.activeTexture(this.gl.TEXTURE0);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+            shader.getUniformInt("sampler").set(0);
+            this.gl.drawArrays(this.gl.TRIANGLES, 0, this.elements);
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer)
-        this.gl.vertexAttribPointer(vertexColorAttribute, 3, this.gl.FLOAT, false, 0, 0);
-        // TODO bind colour buffer
-
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, this.elements);
-
-        this.gl.disableVertexAttribArray(positionLocation);
-        this.gl.disableVertexAttribArray(vertexColorAttribute);
-        this.gl.disableVertexAttribArray(normalLocation);
+            glUtil.disableAttribute(texCoordLocation);
+        }
+        glUtil.disableAttribute(positionLocation);
     }
 }

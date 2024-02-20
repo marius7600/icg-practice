@@ -12,7 +12,7 @@ export default class PyramidNode extends Node {
    * @param dimensions
    * @param color The colour of the Pyramid
    */
-  constructor(public dimensions: Vector, public color: Vector) {
+  constructor(public dimensions: Vector, public color: Vector, public texture?: string) {
     super();
     this.maxPoint = dimensions.div(2);
     this.maxPoint.w = 1;
