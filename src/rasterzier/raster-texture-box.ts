@@ -1,6 +1,6 @@
 import Vector from '../vector';
 import Shader from '../shader/shader';
-
+import SharedProps from '../boxSharedProperties';
 /**
  * A class creating buffers for a textured box to render it with WebGL
  */
@@ -45,26 +45,7 @@ export default class RasterTextureBox {
     ) {
         const mi = minPoint;
         const ma = maxPoint;
-        let vertices = [
-            // front
-            mi.x, mi.y, ma.z, ma.x, mi.y, ma.z, ma.x, ma.y, ma.z,
-            ma.x, ma.y, ma.z, mi.x, ma.y, ma.z, mi.x, mi.y, ma.z,
-            // back
-            ma.x, mi.y, mi.z, mi.x, mi.y, mi.z, mi.x, ma.y, mi.z,
-            mi.x, ma.y, mi.z, ma.x, ma.y, mi.z, ma.x, mi.y, mi.z,
-            // right
-            ma.x, mi.y, ma.z, ma.x, mi.y, mi.z, ma.x, ma.y, mi.z,
-            ma.x, ma.y, mi.z, ma.x, ma.y, ma.z, ma.x, mi.y, ma.z,
-            // top
-            mi.x, ma.y, ma.z, ma.x, ma.y, ma.z, ma.x, ma.y, mi.z,
-            ma.x, ma.y, mi.z, mi.x, ma.y, mi.z, mi.x, ma.y, ma.z,
-            // left
-            mi.x, mi.y, mi.z, mi.x, mi.y, ma.z, mi.x, ma.y, ma.z,
-            mi.x, ma.y, ma.z, mi.x, ma.y, mi.z, mi.x, mi.y, mi.z,
-            // bottom
-            mi.x, mi.y, mi.z, ma.x, mi.y, mi.z, ma.x, mi.y, ma.z,
-            ma.x, mi.y, ma.z, mi.x, mi.y, ma.z, mi.x, mi.y, mi.z
-        ];
+        let vertices = SharedProps.calcVertices(mi, ma);
 
         const vertexBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
@@ -85,26 +66,7 @@ export default class RasterTextureBox {
         cubeImage.src = texture;
         this.texBuffer = cubeTexture;
 
-        let uv = [
-            // front
-            0, 0, 1, 0, 1, 1,
-            1, 1, 0, 1, 0, 0,
-            // back
-            0, 0, 1, 0, 1, 1,
-            1, 1, 0, 1, 0, 0,
-            // right
-            0, 0, 1, 0, 1, 1,
-            1, 1, 0, 1, 0, 0,
-            // top
-            0, 0, 1, 0, 1, 1,
-            1, 1, 0, 1, 0, 0,
-            // left
-            0, 0, 1, 0, 1, 1,
-            1, 1, 0, 1, 0, 0,
-            // bottom
-            0, 0, 1, 0, 1, 1,
-            1, 1, 0, 1, 0, 0,
-        ];
+        let uv = SharedProps.getUVCords();
         let uvBuffer = this.gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
         gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(uv),

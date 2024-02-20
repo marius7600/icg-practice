@@ -139,7 +139,13 @@ export class RasterVisitor implements Visitor {
    * @param  {AABoxNode} node - The node to visit
    */
   visitAABoxNode(node: AABoxNode) {
-    this.visitNode(node, this.shader);
+    // this.visitNode(node, this.shader);
+    if (node.colourTexture) {
+      this.visitNode(node, this.textureshader);
+    }
+    else {
+      this.visitNode(node, this.shader);
+    }
   }
 
   /**
@@ -352,7 +358,13 @@ export class RasterSetupVisitor implements Visitor {
   visitAABoxNode(node: AABoxNode) {
     this.objects.set(
       node,
-      new RasterBox(this.gl, node.minPoint, node.maxPoint, node.color)
+      new RasterBox(
+        this.gl,
+        node.minPoint,
+        node.maxPoint,
+        node.color,
+        node.colourTexture
+      )
     );
   }
 

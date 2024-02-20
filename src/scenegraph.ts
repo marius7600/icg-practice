@@ -335,7 +335,8 @@ export class Scenegraph {
         //add Taskbar Button on the Right
         const taskbarButtonGroupRight = new GroupNode(new Translation(new Vector(2, .45, 0, 0)));
         taskbarButtonGroupRight.name = "taskbarButtonGroupRightWindow";
-        const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
+        const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, null, "source-missing-texture.png");
+        // const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
         taskbarButtonRight.name = "taskbarButtonRightWindow";
         taskbarButtonGroupRight.add(taskbarButtonRight)
         taskbarGroup.add(taskbarButtonGroupRight)
@@ -396,6 +397,7 @@ export class Scenegraph {
                 console.log(error);
             }
         })();
+
         // const cube = new TextureBoxNode("source-missing-texture.png", new Vector(0, 0, 0, 1), new Vector(0.5, 0.5, 0.5, 1), "brickwall-normal.png");
         // meshPosition.add(cube);
         // leftWindowGroup.add(meshPosition);
