@@ -21,7 +21,7 @@ export default class MeshNode extends Node {
         super();
     }
     static async getNode(objName: string, color: Vector) {
-        const obj = await OBJLoader.loadOBJ(objName)
+        const obj = await OBJLoader.loadOBJ(objName);
         return new MeshNode(obj.vertices, obj.normals, color, objName, obj.maxPoint, obj.minPoint)
     }
     accept(visitor: Visitor): void {

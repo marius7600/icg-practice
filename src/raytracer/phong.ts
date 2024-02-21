@@ -97,6 +97,7 @@ function specularLightning(
     const s = lightNode.position.sub(position);
 
     const r = normal.mul(2 * normal.dot(s)).sub(s);
+
     var I_s = lightNode.color
       .mul(kS)
       .mul(

@@ -61,10 +61,7 @@ export default class Pyramid {
             const point3 = this.vertices[this.indices[i + 2]]
 
             // create polygon
-            let myPolygon = new Polygon(point1, point2, point3);
-
-            // find intersection
-            const intersection = myPolygon.intersect(ray);
+            const intersection = Polygon.intersect2(ray, point1, point2, point3);
 
             // check if intersection exists and if it's closer than the current closest intersection
             if (intersection && intersection.closerThan(minIntersection)) {

@@ -25,22 +25,23 @@ export default class Sphere {
    */
   intersect(ray: Ray): Intersection | null {
     const x_0 = ray.origin.sub(this.center);
-    // const c = Math.pow(x_0.dot(normalizedRay), 2) - Math.pow(x_0.length, 2) + Math.pow(this.radius, 2);
-    // Tino
-    const normalizedRay = ray.direction.normalize();
-    const c = Math.pow(x_0.dot(normalizedRay), 2) - x_0.dot(x_0) + Math.pow(this.radius, 2);
-    let t;
-    const sqrtC = Math.sqrt(c);
+    const a = x_0.dot(ray.direction);
+    const c = a * a - x_0.dot(x_0) + this.radius * this.radius;
+
     if (c < 0) {
       return null;
-    } else if (c === 0) {
-      const t = - x_0.dot(normalizedRay);
     } else {
-      const t_1 = - x_0.dot(normalizedRay) + sqrtC;
-      const t_2 = - x_0.dot(normalizedRay) - sqrtC;
-      t = Math.min(t_1, t_2);
+      const sqrtC = Math.sqrt(c);
+      let t;
+      if (c === 0) {
+        t = -a;
+      } else {
+        const t_1 = -a + sqrtC;
+        const t_2 = -a - sqrtC;
+        t = Math.min(t_1, t_2);
+      }
+      const intersection_point = ray.origin.add(ray.direction.mul(t));
+      return new Intersection(t, intersection_point, intersection_point.sub(this.center).normalize());
     }
-    const intersection_point = ray.origin.add(normalizedRay.mul(t));
-    return new Intersection(t, intersection_point, intersection_point.sub(this.center).normalize());
   }
 }

@@ -120,25 +120,11 @@ window.addEventListener("load", () => {
     rasterSetupVisitor.setup(Scenegraph.getGraph());
   });
 
-  // FIXME: Implement Magnifying glass effect
-  //// ========== MAGNIYING GLASS ==========
-  // canvas_raster.addEventListener("mousemove", function (info) {
-  //   const rect = canvas_raster.getBoundingClientRect();
-
-  //   // Adjust the mouse coordinates to the center of the canvas
-  //   const x = (info.x - rect.left) / rect.width * 5 - 2.5;
-  //   const y = (info.y - rect.top) / rect.height * -5 + 2.5;
-
-  //   //Set the magnifyingGroup position to the mouse position
-  //   magnifyingGroup.transform = new Translation(new Vector(x, y, -4, 0));
-
-  //   ctx_raster.bindFramebuffer(ctx_raster.FRAMEBUFFER, null);
-  // });
-
+  // Add a click event listener to the canvas
   canvas_ray.addEventListener("click", function (info) {
     //Playing tik tak toe
     selectedNode = mouseVisitor.getSelectedNode(Scenegraph.getGraph(), info.offsetX, info.offsetY, ctx_raster);
-    Game.CheckTikTakToeField(selectedNode, rasterSetupVisitor);
+    handleMouseclickEvent(selectedNode, info.x, info.y);
     // CheckTikTakToeField(currentPlayer, selectedNode);
   });
 
@@ -238,7 +224,7 @@ window.addEventListener("load", () => {
       if (rasterizing) {
         rasterVisitor.render(Scenegraph.getGraph(), Scenegraph.getCamera())
       } else {
-        rayVisitor.render(Scenegraph.getGraph(), phongProperties, 50000);
+        rayVisitor.render(Scenegraph.getGraph(), phongProperties, 500000);
       }
 
 
@@ -289,6 +275,8 @@ window.addEventListener("load", () => {
     fileSelector.click();
   };
 });
+
+
 
 function handleMouseclickEvent(selectedNode: Node, mouseX: number, mouseY: number) {
   if (selectedNode == null || selectedNode.name == null) return;

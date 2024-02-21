@@ -358,15 +358,17 @@ export class Scenegraph {
         textureBoxGroup.add(textureVideoBoxGroup);
         textureVideoBoxGroup.add(textureVideoBox);
 
-        const meshPosition = new GroupNode(new Transform4x4(new Vector(0.8, 0.8, 0, 0), new Rotation(new Vector(1, 0, 0, 0), -90)));
-        const meshScale = new GroupNode(new Scaling(new Vector(0.04, 0.04, 0.04, 1)));
-        meshPosition.add(meshScale);
+        //const meshPosition = new GroupNode(new Transform4x4(new Vector(0.8, 0.8, 0, 0), new Rotation(new Vector(1, 0, 0, 0), -90)));
+        const meshPosition = new GroupNode(new Translation(new Vector(0, 0.5, -2, 0)));
+        //const meshScale = new GroupNode(new Scaling(new Vector(0.04, 0.04, 0.04, 1)));
+        //meshPosition.add(meshScale);
 
         (async () => {
             try {
                 const object = await loadOBJ();
                 console.log("Finished importing", object);
-                meshScale.add(object);
+                //meshScale.add(object);
+                meshPosition.add(object);
                 taskbarGroup.add(meshPosition);
                 object.accept(rasterSetupVisitor);
             } catch (error) {
@@ -408,9 +410,11 @@ export class Scenegraph {
  * Loads an OBJ file and returns a mesh object.
  * Asynchronously because it take some time to load the mesh.
  * @returns {Promise<MeshNode>} A promise that resolves to the loaded mesh object.
- */
+ */2
 async function loadOBJ() {
-    const object = await MeshNode.getNode("towelie.obj", new Vector(0, 0.2, 1, 0));
+    //const object = await MeshNode.getNode("towelie.obj", new Vector(0, 0.2, 1, 0));
+    const object = await MeshNode.getNode("cube.obj", new Vector(0, 0.2, 1, 0));
+    // const object = await MeshNode.getNode("monkey.obj", new Vector(0, 0.2, 1, 0));
     return object;
 }
 

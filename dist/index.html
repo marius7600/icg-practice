@@ -8,16 +8,36 @@
     <script type="text/javascript" src="scenegraph.bundle.js"></script>
     <link rel="icon" type="image/png" href="hci-logo.png">
     <style type="text/css">
-        html, body {
+        html,
+        body {
             margin: 0;
             padding: 0;
             overflow: hidden;
             background-color: #1a1a1a;
-            color : white;
-            width:  100%;
+            color: white;
+            width: 100%;
             height: 100%;
-        } 
-       
+        }
+
+        .img-magnifier-glass {
+            position: absolute;
+            border: 3px solid #000;
+            border-radius: 50%;
+            cursor: none;
+            /*Set the size of the magnifier glass:*/
+            width: 100px;
+            height: 100px;
+        }
+        #magnifier {
+            position: absolute;
+            border: 3px solid #000;
+            border-radius: 50%;
+            cursor: none;
+            pointer-events: none;
+            width: 200px;
+            height: 200px;
+            background-repeat: no-repeat;
+        }
     </style>
 </head>
 
@@ -26,9 +46,9 @@
         <div class="container">
             <a class="navbar-brand" href="/index.html">
                 <img src="hci-logo.png" width="30" height="30" class="d-inline-block align-top" alt="">
-                ICG-Project1
+                ICG-Project: 3D Desktop
             </a>
-            <div class="navbar-brand">ICG-Project2</div>
+            <div class="navbar-brand">By Julius Arzberger, Marius Röhm and Lorenz Bauer</div>
         </div>
     </nav>
     <br>
@@ -37,18 +57,21 @@
         <div style="display: flex; justify-content: flex-start; align-items: flex-start;">
             <!-- Raytracer Canvas -->
             <figure id="raytracer_fig" style="display:none;">
-                <canvas id="raytracer" class="figure-img mx-auto d-block rounded canvas" width="500" height="500" style="background-color: white;"></canvas>
+                <canvas id="raytracer" class="figure-img mx-auto d-block rounded canvas" width="500" height="500"
+                    style="background-color: white;"></canvas>
                 <figcaption class="figure-caption text-center">Raytracer</figcaption>
             </figure>
             <!-- Rasterizer Canvas -->
             <figure id="rasterizer_fig">
-                <canvas id="rasterizer" class="figure-img mx-auto d-block rounded canvas" width="500" height="500"></canvas>
+                <canvas id="rasterizer" class="figure-img mx-auto d-block rounded canvas" width="500"
+                    height="500"></canvas>
                 <figcaption class="figure-caption text-center">Rasterizer</figcaption>
             </figure>
             <!-- Drawing canvas with blue background -->
             <div style="display:flex; justify-content: center; align-items: center;">
                 <figure style="margin-top:150px">
-                    <canvas id="drawing" class="figure-img mx-auto d-block rounded" width="200" height="200" style="background-color: #0000ff;"></canvas> 
+                    <canvas id="drawing" class="figure-img mx-auto d-block rounded" width="200" height="200"
+                        style="background-color: #0000ff;"></canvas>
                 </figure>
             </div>
         </div>
@@ -56,8 +79,8 @@
         <div class="animation-toggle">
             <div id="animation-toggle">
                 <button class="button" id="animationToggle" style="background:green ;">Animation on/off</button>
-                 <!-- Button to clear the canvas -->
-                 <button id="clearCanvas" style="margin-top:10px">Clear Canvas</button>
+                <!-- Button to clear the canvas -->
+                <button id="clearCanvas" style="margin-top:10px">Clear Canvas</button>
                 <!-- Button to clear the game -->
                 <button id="clearGame" style="margin-top:10px">Clear Game</button>
                 <!-- Button to import OBJ file -->
@@ -68,62 +91,58 @@
                 <button id="uploadButton" style="margin-top:10px">Upload JSON</button>
 
             </div>
-    
-                
-            
+
+
+
         </div>
+    </div>
+
+    <!-- Slider Container -->
+    <div class="options side-bar border">
+        <h4 class="bold">Phong</h4>
+        <div class="slider phong_slider flex flex-ai-c flex-jc-sb" id="ambient_slider">
+            <label>Ambient: </label>
+            <input type="range" min="0.1" max="1" value="0.5" step="0.1" class="slider__element" id="ambient_value">
+            <span class="slider__label"></span>
         </div>
-        
-        <!-- Slider Container -->
-        <div class="options side-bar border">
-            <h4 class="bold">Phong</h4>
-            <div class="slider phong_slider flex flex-ai-c flex-jc-sb" id="ambient_slider">
-                <label>Ambient: </label>
-                <input type="range" min="0.1" max="1" value="0.5" step="0.1" class="slider__element"
-                       id="ambient_value">
-                <span class="slider__label"></span>
-            </div>
-            <div class="slider phong_slider flex flex-ai-c flex-jc-sb" id="diffuse_slider">
-                <label>Diffuse: </label>
-                <input type="range" min="0.1" max="1" value="0.5" step="0.1" class="slider__element"
-                       id="diffuse_value">
-                <span class="slider__label"></span>
-            </div>
-            <div class="slider phong_slider flex flex-ai-c flex-jc-sb" id="specular_slider">
-                <label>Specular: </label>
-                <input type="range" min="0.1" max="5" value="1" step="0.2" class="slider__element"
-                       id="specular_value">
-                <span class="slider__label"></span>
-            </div>
-            <div class="slider phong_slider flex flex-ai-c flex-jc-sb" id="shininess_slider">
-                <label>Shininess: </label>
-                <input type="range" min="50" max="200" value="50" step="10" class="slider__element"
-                       id="shininess_value">
-                <span class="slider__label"></span>
-            </div>
-            <h4 class="bold">FOV</h4>
-            <div class="slider flex flex-ai-c flex-jc-sb" id="fov_slider">
-                <label>Field of View: </label>
-                <input type="range" min="30" max="80" value="60" step="10" class="slider__element" id="fov_value">
-                <span class="slider__label"></span>
-            </div>
-            <h4 class="bold">Light</h4>
-            <div class="slider flex flex-ai-c flex-jc-sb" id="light1_x_slider">
-                <label>Light 1 X </label>
-                <input type="range" min="-5" max="5" value="0" step="1" class="slider__element" id="light1_x_value">
-                <span class="slider__label"></span>
-            </div>
-            <div class="slider flex flex-ai-c flex-jc-sb" id="light1_y_slider">
-                <label>Light 1 Y </label>
-                <input type="range" min="-5" max="5" value="0" step="1" class="slider__element" id="light1_y_value">
-                <span class="slider__label"></span>
-            </div>
-            <div class="slider flex flex-ai-c flex-jc-sb" id="light1_z_slider">
-                <label>Light 1 Z </label>
-                <input type="range" min="-5" max="5" value="0" step="1" class="slider__element" id="light1_z_value">
-                <span class="slider__label"></span>
-            </div>
+        <div class="slider phong_slider flex flex-ai-c flex-jc-sb" id="diffuse_slider">
+            <label>Diffuse: </label>
+            <input type="range" min="0.1" max="1" value="0.5" step="0.1" class="slider__element" id="diffuse_value">
+            <span class="slider__label"></span>
         </div>
+        <div class="slider phong_slider flex flex-ai-c flex-jc-sb" id="specular_slider">
+            <label>Specular: </label>
+            <input type="range" min="0.1" max="5" value="1" step="0.2" class="slider__element" id="specular_value">
+            <span class="slider__label"></span>
+        </div>
+        <div class="slider phong_slider flex flex-ai-c flex-jc-sb" id="shininess_slider">
+            <label>Shininess: </label>
+            <input type="range" min="50" max="200" value="50" step="10" class="slider__element" id="shininess_value">
+            <span class="slider__label"></span>
+        </div>
+        <h4 class="bold">FOV</h4>
+        <div class="slider flex flex-ai-c flex-jc-sb" id="fov_slider">
+            <label>Field of View: </label>
+            <input type="range" min="30" max="80" value="60" step="10" class="slider__element" id="fov_value">
+            <span class="slider__label"></span>
+        </div>
+        <h4 class="bold">Light</h4>
+        <div class="slider flex flex-ai-c flex-jc-sb" id="light1_x_slider">
+            <label>Light 1 X </label>
+            <input type="range" min="-5" max="5" value="0" step="1" class="slider__element" id="light1_x_value">
+            <span class="slider__label"></span>
+        </div>
+        <div class="slider flex flex-ai-c flex-jc-sb" id="light1_y_slider">
+            <label>Light 1 Y </label>
+            <input type="range" min="-5" max="5" value="0" step="1" class="slider__element" id="light1_y_value">
+            <span class="slider__label"></span>
+        </div>
+        <div class="slider flex flex-ai-c flex-jc-sb" id="light1_z_slider">
+            <label>Light 1 Z </label>
+            <input type="range" min="-5" max="5" value="0" step="1" class="slider__element" id="light1_z_value">
+            <span class="slider__label"></span>
+        </div>
+    </div>
     </div>
 </body>
 

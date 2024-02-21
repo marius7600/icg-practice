@@ -16,6 +16,7 @@ import Vector from "../vector";
 import Visitor from "../visitor";
 import AABox from "./aabox";
 import Intersection from "./intersection";
+import MeshObject from "./meshObject";
 import phong from "./phong";
 import Pyramid from "./pyramid";
 import Ray from "./ray";
@@ -46,6 +47,7 @@ export default class RayVisitor implements Visitor {
   intersectionColor: Vector;
   lightNodes: Array<LightNode> = [];
   boundingBoxes: Array<AABox> = [];
+  boundingSpheres: Array<Sphere> = [];
 
   /**
    * Creates a new RayVisitor
@@ -126,6 +128,16 @@ export default class RayVisitor implements Visitor {
         max.x = Math.max(max.x, pyramid.maxPoint.x);
         max.y = Math.max(max.y, pyramid.maxPoint.y);
         max.z = Math.max(max.z, pyramid.maxPoint.z);
+
+      } else if (shape instanceof MeshObject) {
+        min.x = Math.min(min.x, shape.minPoint.x);
+        min.y = Math.min(min.y, shape.minPoint.y);
+        min.z = Math.min(min.z, shape.minPoint.z);
+
+        max.x = Math.max(max.x, shape.maxPoint.x);
+        max.y = Math.max(max.y, shape.maxPoint.y);
+        max.z = Math.max(max.z, shape.maxPoint.z);
+        //console.log("Min: ", min, " Max: ", max);
       }
       else {
         console.log("Unknown shape node " + shape);
@@ -133,6 +145,38 @@ export default class RayVisitor implements Visitor {
       boundingBoxes.push(new AABox(min, max, null));
     }
     return boundingBoxes;
+  }
+
+  calculateBoundingSpheres(): Sphere[] {
+    let boundingSpheres: Sphere[] = [];
+
+    for (let shape of this.objects) {
+      let center: Vector;
+      let radius: number;
+
+      if (shape instanceof Sphere) {
+        let sphere = shape as Sphere;
+        center = sphere.center;
+        radius = sphere.radius;
+      } else if (shape instanceof AABox || shape instanceof Pyramid) {
+        let box = shape as AABox;
+        center = box.minPoint.add(box.maxPoint).mul(0.5);
+        radius = box.maxPoint.sub(center).length;
+      } else if (shape instanceof MeshObject) {
+        let mesh = shape as MeshObject;
+        let min = mesh.minPoint;
+        let max = mesh.maxPoint;
+        center = min.add(max).mul(0.5);
+        radius = max.sub(center).length;
+      } else {
+        console.log("Unknown shape node " + shape);
+        continue;
+      }
+
+      boundingSpheres.push(new Sphere(center, radius, null));
+    }
+
+    return boundingSpheres;
   }
 
   /**
@@ -158,7 +202,7 @@ export default class RayVisitor implements Visitor {
 
     // calculate bounding boxes
     this.boundingBoxes = this.calcualteBoundingBoxes();
-
+    //this.boundingSpheres = this.calculateBoundingSpheres();
     // raytrace
     const width = this.imageData.width;
     const height = this.imageData.height;
@@ -175,22 +219,36 @@ export default class RayVisitor implements Visitor {
         let minIntersection = new Intersection(Infinity, null, null);
         let minObj = null; // minObj is the closest object to the camera
 
+
+        // for (let j = 0; j < this.objects.length; j++) {
+        //   let shape = this.objects[j];
+
+        //   const intersection = shape.intersect(ray);
+
+        //   if (intersection && intersection.closerThan(minIntersection)) {
+        //     minIntersection = intersection;
+        //     minObj = shape;
+        //   }
+        // }
+
         // iterate over all objects and check for intersection with its bounding box
         for (let j = 0; j < this.objects.length; j++) {
           let box = this.boundingBoxes[j];
+          // let sphere = this.boundingSpheres[j];
           let shape = this.objects[j];
 
-          // check if ray intersects bounding box
+          // check if ray intersects bounding box/sphere
           if (box.intersect(ray)) {
+            // if (sphere.intersect(ray)) {
             // check if ray intersects shape
             const intersection = shape.intersect(ray);
-            // const intersection = box.intersect(ray);
+            //const intersection = box.intersect(ray);
 
             // check if intersection exists and if it's closer than the current closest intersection
             if (intersection && intersection.closerThan(minIntersection)) {
               minIntersection = intersection;
               minObj = shape;
-              // minObj = box;
+              //minObj = box;
             }
           }
           else {
@@ -240,10 +298,12 @@ export default class RayVisitor implements Visitor {
     this.context.putImageData(this.imageData, 0, 0); // put the image data to the context (canvas)
   }
 
+
+
   /**
- * Seachres for light nodes and sets them in the lights array
- * @parm {Node} The node to search for light nodes
- */
+  * Seachres for light nodes and sets them in the lights array
+  * @parm {Node} The node to search for light nodes
+  */
   getLightNodes(node: Node) {
     if (node instanceof LightNode) {
       //node.position = this.stack.at(this.stack.length - 1).traverse.mul(new Vector(0, 0, 0, 1));
@@ -314,7 +374,59 @@ export default class RayVisitor implements Visitor {
 
   visitTextureTextBoxNode(node: TextureTextBoxNode): void { }
 
-  visitMeshNode(node: MeshNode): void { }
+  visitMeshNode(node: MeshNode): void {
+    // let mat = this.stack[this.stack.length - 1];
+
+    // // Transform the vertices
+    // let transformedVertices = [];
+    // for (let i = 0; i < node.vertices.length; i += 3) {
+    //   let vertex = [node.vertices[i], node.vertices[i + 1], node.vertices[i + 2], 1];
+    //   let transformedVertex = [
+    //     mat.data[0] * vertex[0] + mat.data[4] * vertex[1] + mat.data[8] * vertex[2] + mat.data[12] * vertex[3],
+    //     mat.data[1] * vertex[0] + mat.data[5] * vertex[1] + mat.data[9] * vertex[2] + mat.data[13] * vertex[3],
+    //     mat.data[2] * vertex[0] + mat.data[6] * vertex[1] + mat.data[10] * vertex[2] + mat.data[14] * vertex[3]
+    //   ];
+    //   transformedVertices.push(...transformedVertex);
+    // }
+
+    // // Create a new MeshObject with the transformed vertices and add it to the objects array
+    // const mesh = new MeshObject(transformedVertices, node.normals, node.color, node.maxPoint, node.minPoint);
+    // this.objects.push(mesh);
+    let mat = this.stack[this.stack.length - 1];
+    let matData = mat.data; // Cache mat.data to avoid repeated property lookups
+
+    // Preallocate array size for efficiency
+    let transformedVertices = new Float32Array(node.vertices.length);
+
+    for (let i = 0; i < node.vertices.length; i += 3) {
+      let vertex = [node.vertices[i], node.vertices[i + 1], node.vertices[i + 2], 1];
+
+      // Cache repeated computations
+      let matDataTimesVertex0 = matData[0] * vertex[0];
+      let matDataTimesVertex1 = matData[4] * vertex[1];
+      let matDataTimesVertex2 = matData[8] * vertex[2];
+      let matDataTimesVertex3 = matData[12] * vertex[3];
+
+      transformedVertices[i] = matDataTimesVertex0 + matDataTimesVertex1 + matDataTimesVertex2 + matDataTimesVertex3;
+      transformedVertices[i + 1] = matData[1] * vertex[0] + matData[5] * vertex[1] + matData[9] * vertex[2] + matData[13] * vertex[3];
+      transformedVertices[i + 2] = matData[2] * vertex[0] + matData[6] * vertex[1] + matData[10] * vertex[2] + matData[14] * vertex[3];
+    }
+
+    // Create a new MeshObject with the transformed vertices and add it to the objects array
+    const mesh = new MeshObject(transformedVertices, node.normals, node.color, node.maxPoint, node.minPoint);
+    this.objects.push(mesh);
+    return;
+  }
+
+  //   visitBoxNode(node: BoxNode, object?: GeometryObject) {
+  //     const toWorld = this.getToWorld(Matrix.identity());
+  //     const fromWorld = this.getFromWorld(Matrix.identity());
+  //     if (!object) {
+  //         object = new AABox(node.minPoint, node.maxPoint, new Vector(.5, 0, 1, 1));
+  //     }
+  //     const bounding = BoundingSphere.fromMinMax(node.minPoint, node.maxPoint);
+  //     this.objects.push({node: object, toWorld, fromWorld, boundingSphere: bounding})
+  // }
 
   visitCameraNode(node: CameraNode) {
     // Frage an Marius: warum machen wir uns den ganzen aufwand, und verwenden nicht einfach node.eye, node.center, node.up?
@@ -352,7 +464,7 @@ export default class RayVisitor implements Visitor {
 
   visitAnimationNode(node: AnimationNode): void {
     //TODO-Animation
-    console.log("AnimationNode visited; not implemented yet");
+    //console.log("AnimationNode visited; not implemented yet");
 
   }
 }

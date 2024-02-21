@@ -43,6 +43,8 @@ export default class JsonVisitor implements Visitor {
 
     // visit leafNode and add it to the sceneGraph in serialScene
     private visitLeafNode(node: Node) {
+        console.log("Current Node in visitLeafNodes: ", node);
+
         const code = this.nextCode();
         const toJSON = (node).toJSON();
         this.serialScene[code] = toJSON
@@ -53,6 +55,7 @@ export default class JsonVisitor implements Visitor {
 
     // add child code to parent node to create SceneGraphStructure
     private addChildCodeToParentNode(code: string) {
+        console.log("Current Code in addChildCodeToParentNode: ", code);
 
         const parentCode = this.parentCodeStack[this.parentCodeStack.length - 1];
         const parentNode = this.serialScene[parentCode] as SerializeGroupNode;
