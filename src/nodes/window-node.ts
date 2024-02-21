@@ -27,6 +27,8 @@ let scaleNode: ScaleNode = new ScaleNode(this, new Vector(0, 0, 0, 0), 1);
 export class WindowNode extends GroupNode {
 
     private state: { minimized: boolean }
+    private fullscreen: boolean = false;
+    private fullscrenVector: Vector = new Vector(0, 0, 0, 1);
 
     constructor(public transform: Transformation, windowName: string) {
         super(transform);
@@ -60,17 +62,23 @@ export class WindowNode extends GroupNode {
     }
 
     public fullScreen(cameraGroup: GroupNode, windowRootNode: GroupNode) {
+        if (this.fullscreen) {
+            this.fullscreen = false;
+            this.fullscrenVector = this.fullscrenVector.mul(-1);
+        } else {
+            // Offset for the camera position relative to the window root node
+            const offset = new Vector(0.02300000000000013, 0.1, -2, 0);
 
-        // Offset for the camera position relative to the window root node
-        const offset = new Vector(0.02300000000000013, 0.1, -2, 0);
+            // Position of the current window root node in world space
+            const windowRootWorldPosition = windowRootNode.transform.getMatrix().mul(new Vector(0, 0, 0, 1));
 
-        // Position of the current window root node in world space
-        const windowRootWorldPosition = windowRootNode.transform.getMatrix().mul(new Vector(0, 0, 0, 1));
+            // Calculate the desired camera position for the current window by adding the offset to the window root node's position
+            const desiredCameraPosition = windowRootWorldPosition.add(offset);
 
-        // Calculate the desired camera position for the current window by adding the offset to the window root node's position
-        const desiredCameraPosition = windowRootWorldPosition.add(offset);
-
-        const animation = new DriverNode(cameraGroup, desiredCameraPosition, 0.002, false);
+            this.fullscrenVector = desiredCameraPosition;
+            this.fullscreen = true;
+        }
+        const animation = new DriverNode(cameraGroup, this.fullscrenVector, 0.002, false);
         cameraGroup.add(animation);
         animation.toggleActive();
     }

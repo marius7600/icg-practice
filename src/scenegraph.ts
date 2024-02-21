@@ -37,37 +37,6 @@ export class Scenegraph {
         return this.sceneGraph;
     }
 
-    static getToWorld(node: Node): Matrix {
-        let myGraph = this.getGraph();
-        let worldMatrix = Matrix.identity();
-
-        // traverse the graph to find the node, if the node is a group node check the children
-        let found = this._getToWorld(myGraph, node, worldMatrix);
-
-        if (!found) {
-            throw new Error("Node not found in the scenegraph");
-        }
-
-        return found;
-    }
-
-    static _getToWorld(node: Node, searchNode: Node, worldMatrix: Matrix): Matrix {
-        if (node === searchNode) {
-            return worldMatrix;
-        }
-
-        if (node instanceof GroupNode || node instanceof WindowNode) {
-            for (let child of node.children) {
-                let result = this._getToWorld(child, searchNode, worldMatrix.mul(node.transform.getMatrix()));
-                if (result) {
-                    return result;
-                }
-            }
-        }
-
-        return null;
-    }
-
     // get all nodes of the given type
     static getAllNodesOfType<T extends Node>(type: new (...args: any[]) => T): T[] {
         return this._getAllNodesOfType(this.sceneGraph, type);
@@ -286,8 +255,8 @@ export class Scenegraph {
         // add light node 2
         const groupNodeLight2 = new GroupNode(new Translation(new Vector(-2, -1, -5, 0)));
         const light2 = new LightNode(new Vector(1, 0, 0, 1), new Vector(0, 0, 0, 1));
-        let lightSpehre = new SphereNode(new Vector(1, 1, 0, 1), new Vector(0, 0, 0, 1), 0.25, "source-missing-texture.png");
-        // let lightSpehre = new SphereNode(new Vector(1, 1, 0, 1), new Vector(0, 0, 0, 1), 0.25);
+        //let lightSpehre = new SphereNode(new Vector(1, 1, 0, 1), new Vector(0, 0, 0, 1), 0.25, "source-missing-texture.png");
+        let lightSpehre = new SphereNode(new Vector(1, 1, 0, 1), new Vector(0, 0, 0, 1), 0.25);
 
         groupNodeLight2.add(light2);
         groupNodeLight2.add(lightSpehre);
@@ -307,15 +276,15 @@ export class Scenegraph {
         groupNodeLight4.add(lightSpehre);
 
 
-        const animateLight2 = new DriverNode(groupNodeLight2, new Vector(2, 0, 0, 0), 0.0005);
+        const animateLight2 = new DriverNode(groupNodeLight2, new Vector(2, 0, 0, 0), 0.0005, true);
         animateLight2.name = "animateLight2";
         animateLight2.toggleActive();
 
-        const animateLight3 = new DriverNode(groupNodeLight3, new Vector(0, 2, 0, 0), 0.0005);
+        const animateLight3 = new DriverNode(groupNodeLight3, new Vector(0, 2, 0, 0), 0.0005, true);
         animateLight3.name = "animateLight3";
         animateLight3.toggleActive();
 
-        const animateLight4 = new DriverNode(groupNodeLight4, new Vector(0, 0, 2, 0), 0.0005);
+        const animateLight4 = new DriverNode(groupNodeLight4, new Vector(0, 0, 2, 0), 0.0005, true);
         animateLight4.name = "animateLight4";
         animateLight4.toggleActive();
 
@@ -342,7 +311,7 @@ export class Scenegraph {
         //add Taskbar Button on the Right
         const taskbarButtonGroupRight = new GroupNode(new Translation(new Vector(2, .45, 0, 0)));
         taskbarButtonGroupRight.name = "taskbarButtonGroupRightWindow";
-        const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, null, "source-missing-texture.png");
+        const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, null, "pychoandi.png");
         // const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
         taskbarButtonRight.name = "taskbarButtonRightWindow";
         taskbarButtonGroupRight.add(taskbarButtonRight)
@@ -371,8 +340,8 @@ export class Scenegraph {
 
         ///////////// ===== ADD LEFT WINDOW ===== /////////////
         // groupNode for the secound application window
-        const leftWindowGroup = new WindowNode(new Translation(new Vector(-1.8, 0, -5, 0)), "LeftWindow");
-        // const leftWindowGroup = new WindowNode(new Translation(new Vector(-1.8, 0, -1, 0)), "LeftWindow");
+        //const leftWindowGroup = new WindowNode(new Translation(new Vector(-1.8, 0, -5, 0)), "LeftWindow");
+        const leftWindowGroup = new WindowNode(new Translation(new Vector(-1.8, 0, -1, 0)), "LeftWindow");
         groupNodeUnderRoot.add(leftWindowGroup);
 
         // Add Texture box to the left window
@@ -435,6 +404,11 @@ export class Scenegraph {
     }
 }
 
+/**
+ * Loads an OBJ file and returns a mesh object.
+ * Asynchronously because it take some time to load the mesh.
+ * @returns {Promise<MeshNode>} A promise that resolves to the loaded mesh object.
+ */
 async function loadOBJ() {
     const object = await MeshNode.getNode("towelie.obj", new Vector(0, 0.2, 1, 0));
     return object;
@@ -443,8 +417,7 @@ async function loadOBJ() {
 function rotateWithPosition(textureVideoBoxGroup: GroupNode, angle: number) {
     const position = textureVideoBoxGroup.transform.getMatrix();
     const inverse = textureVideoBoxGroup.transform.getInverseMatrix();
-    // let rotation = new Rotation(new Vector(1, 0, 0, 0), 9.25); //Weird rotation ich raffs garnicht????
-    let rotation = new Rotation(new Vector(1, 0, 0, 0), angle); //Weird rotation ich raffs garnicht????
+    let rotation = new Rotation(new Vector(1, 0, 0, 0), angle);
     rotation.matrix = position.mul(rotation.getMatrix());
     rotation.inverse = rotation.getInverseMatrix().mul(inverse);
     return rotation;

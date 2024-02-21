@@ -528,13 +528,13 @@ export class DriverNode extends AnimationNode {
         position.data[13] += movement.y;
         position.data[14] += movement.z;
         this.distanceCovered += movement.length;
+        // Check if the group node has reached the goal
         if (this.distanceCovered >= this.distanceToGoal) {
           if (this.loop) {
             this.dirChange = false;
           } else {
             this.active = false;
           }
-          //this.dirChange = false;
         }
       } else {
         position.data[12] -= movement.x;

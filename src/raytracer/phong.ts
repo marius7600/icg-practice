@@ -93,8 +93,9 @@ function specularLightning(
   shininess: number
 ) {
   for (const lightNode of lightNodes) {
-    const s = lightNode.position.sub(position).normalize();
-    // const s = lightPosition.position;
+    //const s = lightNode.position.sub(position).normalize();
+    const s = lightNode.position.sub(position);
+
     const r = normal.mul(2 * normal.dot(s)).sub(s);
     var I_s = lightNode.color
       .mul(kS)

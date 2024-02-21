@@ -64,10 +64,24 @@ export default class RayVisitor implements Visitor {
   }
 
   visitLightNode(node: LightNode): void {
-    // Get the transform of the current node
-    let myPosition = this.stack[this.stack.length - 1].mul(node.position);
-    // Add a light node to the list of light nodes
-    this.lightNodes.push(new LightNode(node.color, myPosition));
+    // // Get the transform of the current node
+    // let myPosition = this.stack[this.stack.length - 1].mul(node.position);
+    // // Add a light node to the list of light nodes
+    // this.lightNodes.push(new LightNode(node.color, myPosition));
+
+    // Get the current transformation matrix
+    let m = this.stack.at(this.stack.length - 1);
+
+
+    // Iterate over the lightNodes
+    for (let i = 0; i < this.lightNodes.length; i++) {
+      // Check if the current node is the same as the visited node
+      if (this.lightNodes[i] === node) {
+        // Update the position of the node
+        this.lightNodes[i].position = m.mul(new Vector(0, 0, 0, 1));
+      }
+
+    }
   }
 
   /**
@@ -137,6 +151,8 @@ export default class RayVisitor implements Visitor {
     this.objects = [];
     this.lightNodes = [];
 
+    this.getLightNodes(rootNode); // get all light nodes
+
     //build list of render objects
     rootNode.accept(this); // this = Visit: GroupNode, Visit: CameraNode, Visit: SphereNode, Visit: AABoxNode, Visit: TextureBoxNode
 
@@ -147,78 +163,96 @@ export default class RayVisitor implements Visitor {
     const width = this.imageData.width;
     const height = this.imageData.height;
 
-    //For schleife für alle Pixel
-    for (let i = 0; i < numSamples; i++) {
-      const x = Math.floor(Math.random() * width);
-      const y = Math.floor(Math.random() * height);
+    // //For schleife für alle Pixel
+    // for (let i = 0; i < numSamples; i++) {
+    //   const x = Math.floor(Math.random() * width);
+    //   const y = Math.floor(Math.random() * height);
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
 
-      const ray = Ray.makeRay(x, y, height, width, this.camera); // ray = new Ray(origin, direction)
+        const ray = Ray.makeRay(x, y, height, width, this.camera); // ray = new Ray(origin, direction)
 
-      let minIntersection = new Intersection(Infinity, null, null);
-      let minObj = null; // minObj is the closest object to the camera
+        let minIntersection = new Intersection(Infinity, null, null);
+        let minObj = null; // minObj is the closest object to the camera
 
-      // iterate over all objects and check for intersection with its bounding box
-      for (let j = 0; j < this.objects.length; j++) {
-        let box = this.boundingBoxes[j];
-        let shape = this.objects[j];
+        // iterate over all objects and check for intersection with its bounding box
+        for (let j = 0; j < this.objects.length; j++) {
+          let box = this.boundingBoxes[j];
+          let shape = this.objects[j];
 
-        // check if ray intersects bounding box
-        if (box.intersect(ray)) {
-          // check if ray intersects shape
-          const intersection = shape.intersect(ray);
-          // const intersection = box.intersect(ray);
+          // check if ray intersects bounding box
+          if (box.intersect(ray)) {
+            // check if ray intersects shape
+            const intersection = shape.intersect(ray);
+            // const intersection = box.intersect(ray);
 
-          // check if intersection exists and if it's closer than the current closest intersection
-          if (intersection && intersection.closerThan(minIntersection)) {
-            minIntersection = intersection;
-            minObj = shape;
-            // minObj = box;
+            // check if intersection exists and if it's closer than the current closest intersection
+            if (intersection && intersection.closerThan(minIntersection)) {
+              minIntersection = intersection;
+              minObj = shape;
+              // minObj = box;
+            }
+          }
+          else {
+            continue;
           }
         }
-        else {
-          continue;
-        }
-      }
 
-      if (minObj) {
-        if (!minObj.color) {
-          // if no color is given then set pixel to black , else calculate color with phong
-          data[4 * (width * y + x) + 0] = 0;
-          data[4 * (width * y + x) + 1] = 0;
-          data[4 * (width * y + x) + 2] = 0;
-          data[4 * (width * y + x) + 3] = 255;
-        } else {
-          let color = phong(
-            minObj.color,
-            minIntersection,
-            this.lightNodes,
-            this.camera.center,
-            phongProperties
-          );
+        if (minObj) {
+          if (!minObj.color) {
+            // if no color is given then set pixel to black , else calculate color with phong
+            data[4 * (width * y + x) + 0] = 0;
+            data[4 * (width * y + x) + 1] = 0;
+            data[4 * (width * y + x) + 2] = 0;
+            data[4 * (width * y + x) + 3] = 255;
+          } else {
+            let color = phong(
+              minObj.color,
+              minIntersection,
+              this.lightNodes,
+              this.camera.center,
+              phongProperties
+            );
 
-          data[4 * (width * y + x) + 0] += color.r * 255;
-          data[4 * (width * y + x) + 1] += color.g * 255;
-          data[4 * (width * y + x) + 2] += color.b * 255;
-          data[4 * (width * y + x) + 3] = 255;
+            data[4 * (width * y + x) + 0] += color.r * 255;
+            data[4 * (width * y + x) + 1] += color.g * 255;
+            data[4 * (width * y + x) + 2] += color.b * 255;
+            data[4 * (width * y + x) + 3] = 255;
+          }
         }
       }
     }
 
-    // Accumulate old to the new data
-    let myImageData = this.context.getImageData(0, 0, width, height);
-    for (let i = 0; i < myImageData.data.length; i += 4) {
-      if (myImageData.data[i] != 0 // For all old non-empty pixels 
-        && myImageData.data[i + 1] != 0
-        && myImageData.data[i + 2] != 0
-        && myImageData.data[i + 3] != 0
-      ) { // Uebernimm alle alten Pixel falls vorhanden
-        this.imageData.data[i] = myImageData.data[i];
-        this.imageData.data[i + 1] = myImageData.data[i + 1];
-        this.imageData.data[i + 2] = myImageData.data[i + 2];
-        this.imageData.data[i + 3] = myImageData.data[i + 3];
-      }
-    }
+    // // Accumulate old to the new data
+    // let myImageData = this.context.getImageData(0, 0, width, height);
+    // for (let i = 0; i < myImageData.data.length; i += 4) {
+    //   if (myImageData.data[i] != 0 // For all old non-empty pixels 
+    //     && myImageData.data[i + 1] != 0
+    //     && myImageData.data[i + 2] != 0
+    //     && myImageData.data[i + 3] != 0
+    //   ) { // Uebernimm alle alten Pixel falls vorhanden
+    //     this.imageData.data[i] = myImageData.data[i];
+    //     this.imageData.data[i + 1] = myImageData.data[i + 1];
+    //     this.imageData.data[i + 2] = myImageData.data[i + 2];
+    //     this.imageData.data[i + 3] = myImageData.data[i + 3];
+    //   }
+    // }
     this.context.putImageData(this.imageData, 0, 0); // put the image data to the context (canvas)
+  }
+
+  /**
+ * Seachres for light nodes and sets them in the lights array
+ * @parm {Node} The node to search for light nodes
+ */
+  getLightNodes(node: Node) {
+    if (node instanceof LightNode) {
+      //node.position = this.stack.at(this.stack.length - 1).traverse.mul(new Vector(0, 0, 0, 1));
+      this.lightNodes.push(node);
+    } else if (node instanceof GroupNode) {
+      for (let i = 0; i < node.children.length; i++) {
+        this.getLightNodes(node.children[i]);
+      }
+    }
   }
 
   /**
@@ -228,8 +262,6 @@ export default class RayVisitor implements Visitor {
   visitGroupNode(node: GroupNode) {
     // TODO traverse the graph and build the model matrix
     let toWorld = this.stack.at(this.stack.length - 1).mul(node.transform.getMatrix());
-
-
     this.stack.push(toWorld);
     for (let i = 0; i < node.children.length; i++) {
       node.children[i].accept(this); // Je nachdem welche Art von Node: Accept Methode aufrufen im visitor
