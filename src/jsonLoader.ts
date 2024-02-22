@@ -10,7 +10,8 @@ import SphereNode from "./nodes/sphere-node";
 import TextureVideoBoxNode from "./nodes/texture-video-box-node";
 import TextureBoxNode from "./nodes/texture-box-node";
 import AABoxNode from "./nodes/aabox-node";
-import { DriverNode, JumperNode, RotationNode, ScaleNode } from "./nodes/animation-nodes";
+import AnimationNode, { DriverNode, JumperNode, RotationNode, ScaleNode } from "./nodes/animation-nodes";
+import { Scenegraph } from "./scenegraph";
 
 
 export class JsonLoader {
@@ -23,41 +24,17 @@ export class JsonLoader {
         const text = await file.text();
         this.json = await JSON.parse(text)
 
-
-
         const rootElementCode = this.json.root.childCodes[0];
         const sg = this.loadGroupNode(this.json[rootElementCode])
         return {
             sg,
-            camera: this.loadCamera(this.json["camera"])
+            //camera: this.loadCamera(this.json["camera"])
+            camera: Scenegraph.getCamera()
         }
 
     }
 
-    // loading the camera from JSON Object
-    // camerNode is second object in the JSON file
-    private static loadCamera(cameraJson: any) {
-        console.log("cameraJson", cameraJson);
 
-        const eye = this.parseVector(cameraJson.eye)
-        console.log("eye", eye);
-
-        const center = this.parseVector(cameraJson.center)
-        const up = this.parseVector(cameraJson.up)
-        const fovy = cameraJson.fovy
-        const aspect = cameraJson.aspect
-        const near = cameraJson.near
-        const far = cameraJson.far
-        return new CameraNode(
-            up,
-            center,
-            eye,
-            fovy,
-            aspect,
-            near,
-            far,
-        )
-    }
 
     // loading transformation from JSON Object
     private static getTransformation(transformJson: any): Transformation {
@@ -92,9 +69,14 @@ export class JsonLoader {
 
     // loading the group node for animation from JSON Object
     private static getGroupForAnimation(node: any) {
-        const childCode = node.childCodes[0];
-        const gnJson = this.json[childCode];
-        return this.loadGroupNode(gnJson);
+        // Here we are getting our animation node (driver, jumper, rotation, scaler) 
+
+        // const gnJson = this.json[childCode];
+        // console.log("Animation: ", node);
+
+        // return this.loadGroupNode(node);
+        // // console.log("Animation: ", node);
+        return new GroupNode(new Translation(new Vector(0, 0, 0, 1)));
     }
 
     // factory method to load the node with corresponding type from JSON Object
@@ -103,6 +85,8 @@ export class JsonLoader {
         switch (classname) {
             case "GroupNode":
                 return this.loadGroupNode(nodeJson)
+            case "CameraNode":
+                return this.loadCamera(nodeJson)
             case "AABoxNode":
                 return this.loadAABoxNode(nodeJson)
             case "TextureBoxNode":
@@ -113,23 +97,25 @@ export class JsonLoader {
                 return this.loadLightNode(nodeJson)
             case "RotationNode":
                 return this.loadRotationNode(nodeJson)
-            case "Jumper":
+            case "JumperNode":
                 return this.loadJumperNode(nodeJson)
-            case "Driver":
+            case "DriverNode":
                 return this.loadDriverNode(nodeJson)
-            case "Scaler":
+            case "ScalerNode":
                 return this.loadScalerNode(nodeJson)
-            case "TextureBoxNode":
-                return this.loadTextureBoxNode(nodeJson)
             case "TextureVideoBoxNode":
                 return this.loadVideoBoxNode(nodeJson)
             case "PyramidNode":
                 return this.loadPyramidNode(nodeJson)
+            // case "MeshNode":
+            //     return this.loadMeshNode(nodeJson);
+            // case "WindowNode":
+            //     return this.loadWindowNode(nodeJson)
             default: {
-                console.error(`could not parse node: ${nodeJson}`)
+                //console.error(`could not parse node:${nodeJson}`)
+                console.error("could not parse: ", nodeJson.classname)
                 return null
             }
-
         }
     }
 
@@ -149,13 +135,43 @@ export class JsonLoader {
 
     }
 
+    // loading the camera from JSON Object
+    // camerNode is second object in the JSON file
+    private static loadCamera(cameraJson: any) {
+        console.log("cameraJson", cameraJson);
+
+        const eye = this.parseVector(cameraJson.eye)
+        console.log("eye", eye);
+
+        const center = this.parseVector(cameraJson.center)
+        const up = this.parseVector(cameraJson.up)
+        const fovy = cameraJson.fovy
+        const aspect = cameraJson.aspect
+        const near = cameraJson.near
+        const far = cameraJson.far
+        return new CameraNode(
+            up,
+            center,
+            eye,
+            fovy,
+            aspect,
+            near,
+            far,
+        )
+    }
+
     // loading AABoxNode from JSON Object
     private static loadAABoxNode(node: any): AABoxNode {
         const minPoint = this.parseVector(node.minPoint);
         const maxPoint = this.parseVector(node.maxPoint);
-        const color = this.parseVector(node.color);
         const dimensions = maxPoint.sub(minPoint)
-        return new AABoxNode(dimensions, color)
+        if (node.color) {
+            const color = this.parseVector(node.color)
+            return new AABoxNode(dimensions, color)
+        } else if (node.texture) {
+            const texture = <string>node.texture
+            return new AABoxNode(dimensions, null, texture)
+        }
 
     }
 
@@ -181,17 +197,28 @@ export class JsonLoader {
 
     // loading SphereNode from JSON Object
     private static loadSphereNode(node: any): SphereNode {
-        const color = this.parseVector(node.color)
         const center = this.parseVector(node.center)
         const radius = <number>node.radius
-        return new SphereNode(color, center, radius)
+        if (node.color) {
+            const color = this.parseVector(node.color)
+            return new SphereNode(color, center, radius)
+        } else if (node.texture) {
+            const texture = <string>node.texture
+            return new SphereNode(null, center, radius, texture)
+        }
     }
 
     // loading PyramidNode from JSON Object
     private static loadPyramidNode(node: any): PyramidNode {
         const maxPoint = this.parseVector(node.maxPoint).mul(2);
-        const color = this.parseVector(node.color);
-        return new PyramidNode(maxPoint, color)
+        const dimensions = maxPoint.sub(this.parseVector(node.minPoint));
+        if (node.color) {
+            const color = this.parseVector(node.color)
+            return new PyramidNode(dimensions, color)
+        } else if (node.texture) {
+            const texture = <string>node.texture
+            return new PyramidNode(dimensions, null, texture)
+        }
     }
 
     // loading LightNode from JSON Object
@@ -223,8 +250,8 @@ export class JsonLoader {
     // loading DriverNode from JSON Object
     private static loadDriverNode(node: any): DriverNode {
         const groupNode = this.getGroupForAnimation(node);
-        const translationVector = this.parseVector(node.translation)
-        const driver = new DriverNode(groupNode, translationVector)
+        const directionVector = this.parseVector(node.direction)
+        const driver = new DriverNode(groupNode, directionVector)
         return driver
     }
 
@@ -246,6 +273,35 @@ export class JsonLoader {
         return {
             texture, minPoint, maxPoint, normal
         }
+    }
+
+    private static loadMeshNode(node: any) {
+        // console.log("Mesh: ", node);
+        // const transformation = this.getTransformation(node.transform);
+        // const meshNode = new GroupNode(transformation);
+        // const children = node.childCodes as string[]
+
+        // for (let child of children) {
+        //     const childJSON = this.json[child]
+        //     const childNode = this.nodeFactory(childJSON)
+        //     meshNode.add(childNode)
+        // }
+        // return meshNode
+    }
+
+    private static loadWindowNode(node: any) {
+        // console.log("Window: ", node.transform);
+
+        // const transformation = this.getTransformation(node.transform);
+        // const meshNode = new GroupNode(transformation);
+        // const children = node.childCodes as string[]
+
+        // for (let child of children) {
+        //     const childJSON = this.json[child]
+        //     const childNode = this.nodeFactory(childJSON)
+        //     meshNode.add(childNode)
+        // }
+        // return meshNode
     }
 
 

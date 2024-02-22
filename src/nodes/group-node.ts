@@ -64,6 +64,14 @@ export default class GroupNode extends Node {
     return !!this.children.includes(cameraNode);
   }
 
+  getCamera() {
+    for (let i = 0; i < this.children.length; i++) {
+      if (this.children[i] instanceof CameraNode) {
+        return this.children[i] as CameraNode;
+      }
+    }
+  }
+
   toJSON() {
     const json = super.toJSON();
     json["childCodes"] = []

@@ -25,6 +25,12 @@ export default class AnimationVisitor implements Visitor {
         return this.animationNodes
     }
 
+
+    visitAnimationNode(node: AnimationNode) {
+        this.animationNodes.push(node)
+        node.groupNode.accept(this)
+    }
+
     visitAABoxNode(node: AABoxNode): void {
     }
 
@@ -32,12 +38,6 @@ export default class AnimationVisitor implements Visitor {
     }
 
     visitSphereNode(node: SphereNode): void {
-    }
-
-
-    visitAnimationNode(node: AnimationNode) {
-        this.animationNodes.push(node)
-        node.groupNode.accept(this)
     }
 
     visitTextureVideoBoxNode(node: TextureVideoBoxNode): void {

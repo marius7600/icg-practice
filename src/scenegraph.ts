@@ -197,11 +197,12 @@ export class Scenegraph {
             .then(loaded => {
                 Scenegraph.camera = loaded.camera
                 console.log("setup new camera from json", Scenegraph.camera);
+                console.log("Setup scenegraph:", loaded.sg);
 
                 Scenegraph.setGraph(loaded.sg)
                 //const animationNodes = new AnimationVisitor().visit(loaded.sg);
                 //Scenegraph.setAnimationNodes(animationNodes)
-                visitor.render(loaded.sg, loaded.camera)
+                visitor.render(Scenegraph.getGraph(), Scenegraph.getCamera());
             });
     }
 
@@ -210,6 +211,7 @@ export class Scenegraph {
         /*********************  START OF SCENEGRAPH *********************/
         /***************************************************************/
         this.sceneGraph = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
+        this.sceneGraph.name = "rootSceneGraph";
         this.camera = new CameraNode(
             new Vector(0, 0, 0, 1), // eye
             new Vector(0, 0, -1, 1), // center
@@ -221,189 +223,195 @@ export class Scenegraph {
         ); // far
 
         const groupNodeCamera = new GroupNode(new Translation(new Vector(0, 0, 0, 1)));
+        this.camera.name = "sceneCamera";
         groupNodeCamera.add(this.camera);
         groupNodeCamera.name = "groupNodeCamera";
         groupNodeCamera.add(this.camera);
         //const driverNodeMouse = new DriverNodeMouse(groupNodeCamera);
 
-
-        //driverNodeMouse.toggleActive();
-
-        //groupNodeCamera.add(driverNodeMouse);
-        // window root von assi toni: -1.8, 0, -1, 0
-        //Translate to assi toni new Vector(-1.777, 0.1, -3, 0)
-        const driveToMouse = new DriverNode(groupNodeCamera, new Vector(-1.777, 0.1, -3, 0), 0.002);
-        //driveToMouse.toggleActive();
-        groupNodeCamera.add(driveToMouse);
-        this.sceneGraph.add(groupNodeCamera);
-
-        //this.sceneGraph.add(this.camera);
-
-        // add group node
         const groupNodeUnderRoot = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
         this.sceneGraph.add(groupNodeUnderRoot);
 
-        // test pyramid node
-        // const pyramid = new PyramidNode(new Vector(1, 1, 1, 1), new Vector(1, 0, 0, 1));
-        const pyramid = new PyramidNode(new Vector(1, 1, 1, 1), null, "source-missing-texture.png");
-        groupNodeUnderRoot.add(pyramid);
+        const aabox = new AABoxNode(new Vector(1, 1, 1, 1), new Vector(1, 0, 0, 1));
+        groupNodeUnderRoot.add(aabox);
 
-        // add light node 1
-        // light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 4, -2, 0));
-        // groupNodeUnderRoot.add(light1);
+        // //driverNodeMouse.toggleActive();
 
-        // add light node 2
-        const groupNodeLight2 = new GroupNode(new Translation(new Vector(-2, -1, -5, 0)));
-        const light2 = new LightNode(new Vector(1, 0, 0, 1), new Vector(0, 0, 0, 1));
-        //let lightSpehre = new SphereNode(new Vector(1, 1, 0, 1), new Vector(0, 0, 0, 1), 0.25, "source-missing-texture.png");
-        let lightSpehre = new SphereNode(new Vector(1, 1, 0, 1), new Vector(0, 0, 0, 1), 0.25);
+        // //groupNodeCamera.add(driverNodeMouse);
+        // // window root von assi toni: -1.8, 0, -1, 0
+        // //Translate to assi toni new Vector(-1.777, 0.1, -3, 0)
+        // const driveToMouse = new DriverNode(groupNodeCamera, new Vector(-1.777, 0.1, -3, 0), 0.002);
+        // //driveToMouse.toggleActive();
+        // groupNodeCamera.add(driveToMouse);
+        // this.sceneGraph.add(groupNodeCamera);
 
-        groupNodeLight2.add(light2);
-        groupNodeLight2.add(lightSpehre);
+        // //this.sceneGraph.add(this.camera);
 
+        // // add group node
+        // const groupNodeUnderRoot = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
+        // this.sceneGraph.add(groupNodeUnderRoot);
 
+        // // test pyramid node
+        // // const pyramid = new PyramidNode(new Vector(1, 1, 1, 1), new Vector(1, 0, 0, 1));
+        // const pyramid = new PyramidNode(new Vector(1, 1, 1, 1), null, "source-missing-texture.png");
+        // groupNodeUnderRoot.add(pyramid);
 
-        const groupNodeLight3 = new GroupNode(new Translation(new Vector(0, -3, -3, 0)));
-        const light3 = new LightNode(new Vector(0, 1, 0, 1), new Vector(0, -1.5, -3, 1));
+        // // add light node 1
+        // // light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 4, -2, 0));
+        // // groupNodeUnderRoot.add(light1);
 
-        groupNodeLight3.add(light3);
-        groupNodeLight3.add(lightSpehre);
+        // // add light node 2
+        // const groupNodeLight2 = new GroupNode(new Translation(new Vector(-2, -1, -5, 0)));
+        // const light2 = new LightNode(new Vector(1, 0, 0, 1), new Vector(0, 0, 0, 1));
+        // //let lightSpehre = new SphereNode(new Vector(1, 1, 0, 1), new Vector(0, 0, 0, 1), 0.25, "source-missing-texture.png");
+        // let lightSpehre = new SphereNode(new Vector(1, 1, 0, 1), new Vector(0, 0, 0, 1), 0.25);
 
-        const groupNodeLight4 = new GroupNode(new Translation(new Vector(2, -1, -5, 0)));
-        const light4 = new LightNode(new Vector(0, 0, 1, 1), new Vector(0, 0, 0, 1));
-
-        groupNodeLight4.add(light4);
-        groupNodeLight4.add(lightSpehre);
-
-
-        const animateLight2 = new DriverNode(groupNodeLight2, new Vector(2, 0, 0, 0), 0.0005, true);
-        animateLight2.name = "animateLight2";
-        animateLight2.toggleActive();
-
-        const animateLight3 = new DriverNode(groupNodeLight3, new Vector(0, 3, 0, 0), 0.0005, true);
-        animateLight3.name = "animateLight3";
-        animateLight3.toggleActive();
-
-        const animateLight4 = new DriverNode(groupNodeLight4, new Vector(0, 0, 2, 0), 0.0005, true);
-        animateLight4.name = "animateLight4";
-        animateLight4.toggleActive();
-
-        groupNodeLight2.add(animateLight2);
-        groupNodeLight3.add(animateLight3);
-        groupNodeLight4.add(animateLight4);
+        // groupNodeLight2.add(light2);
+        // groupNodeLight2.add(lightSpehre);
 
 
-        this.sceneGraph.add(groupNodeLight2);
-        this.sceneGraph.add(groupNodeLight3);
-        this.sceneGraph.add(groupNodeLight4);
 
-        ///////////// ===== ADD TASKBAR ===== /////////////
-        const taskbarButtonDimension = new Vector(.7, .7, .3, 0);
-        const taskbarButtonColor = new Vector(0, 1, 0, 1);
+        // const groupNodeLight3 = new GroupNode(new Translation(new Vector(0, -3, -3, 0)));
+        // const light3 = new LightNode(new Vector(0, 1, 0, 1), new Vector(0, -1.5, -3, 1));
 
-        // add Taskbar to SceneGraph
-        const taskbarGroup = new GroupNode(new Translation(new Vector(0, -3.3, -1, 0)));
-        groupNodeUnderRoot.add(taskbarGroup);
+        // groupNodeLight3.add(light3);
+        // groupNodeLight3.add(lightSpehre);
 
-        const taskBarBackground = new AABoxNode(new Vector(10, .2, .3, 0), new Vector(2, 2, 0, 1));
-        taskbarGroup.add(taskBarBackground)
+        // const groupNodeLight4 = new GroupNode(new Translation(new Vector(2, -1, -5, 0)));
+        // const light4 = new LightNode(new Vector(0, 0, 1, 1), new Vector(0, 0, 0, 1));
 
-        //add Taskbar Button on the Right
-        const taskbarButtonGroupRight = new GroupNode(new Translation(new Vector(2, .45, 0, 0)));
-        taskbarButtonGroupRight.name = "taskbarButtonGroupRightWindow";
-        const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, null, "tictactoe.png");
-        // const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
-        taskbarButtonRight.name = "taskbarButtonRightWindow";
-        taskbarButtonGroupRight.add(taskbarButtonRight)
-        taskbarGroup.add(taskbarButtonGroupRight)
+        // groupNodeLight4.add(light4);
+        // groupNodeLight4.add(lightSpehre);
 
-        // add Taskbar Buttons on the Left
-        // const taskbarButtonGroupLeft = new GroupNode(new Transform4x4(new Vector(-2, .45, 0, 0), new Rotation(new Vector(0, 1, 0, 0), Math.PI)));
-        const taskbarButtonGroupLeft = new GroupNode(new Translation(new Vector(-2, .45, 0, 0)));
-        taskbarButtonGroupLeft.name = "taskbarButtonGroupLeftWindow";
-        const taskbarButtonLeft = new AABoxNode(taskbarButtonDimension, null, "psychoandreas.png");
-        taskbarButtonLeft.name = "taskbarButtonLeftWindow";
-        taskbarButtonGroupLeft.add(taskbarButtonLeft)
-        taskbarGroup.add(taskbarButtonGroupLeft)
 
-        ///////////// ===== ADD RIGHT WINDOW ===== /////////////
+        // const animateLight2 = new DriverNode(groupNodeLight2, new Vector(2, 0, 0, 0), 0.0005, true);
+        // //animateLight2.name = "animateLight2";
+        // animateLight2.toggleActive();
 
-        const rightWindowGroup = new WindowNode(new Translation(new Vector(1.8, 0, -1, 0)), "RightWindow");
-        groupNodeUnderRoot.add(rightWindowGroup);
-        // rightWindowGroup.add(rightWindowMenu);
+        // const animateLight3 = new DriverNode(groupNodeLight3, new Vector(0, 3, 0, 0), 0.0005, true);
+        // //animateLight3.name = "animateLight3";
+        // animateLight3.toggleActive();
 
-        // Add ticTacToe to the right window
-        const ticTacToeRoot = new GroupNode(new Translation(new Vector(-1.3, -1.4, 0, 0)));
-        // ticTacToeRoot.add(createTicTacToe());
+        // const animateLight4 = new DriverNode(groupNodeLight4, new Vector(0, 0, 2, 0), 0.0005, true);
+        // //animateLight4.name = "animateLight4";
+        // animateLight4.toggleActive();
+
+        // groupNodeLight2.add(animateLight2);
+        // groupNodeLight3.add(animateLight3);
+        // groupNodeLight4.add(animateLight4);
+
+
+        // this.sceneGraph.add(groupNodeLight2);
+        // this.sceneGraph.add(groupNodeLight3);
+        // this.sceneGraph.add(groupNodeLight4);
+
+        // ///////////// ===== ADD TASKBAR ===== /////////////
+        // const taskbarButtonDimension = new Vector(.7, .7, .3, 0);
+        // const taskbarButtonColor = new Vector(0, 1, 0, 1);
+
+        // // add Taskbar to SceneGraph
+        // const taskbarGroup = new GroupNode(new Translation(new Vector(0, -3.3, -1, 0)));
+        // groupNodeUnderRoot.add(taskbarGroup);
+
+        // const taskBarBackground = new AABoxNode(new Vector(10, .2, .3, 0), new Vector(2, 2, 0, 1));
+        // taskbarGroup.add(taskBarBackground)
+
+        // //add Taskbar Button on the Right
+        // const taskbarButtonGroupRight = new GroupNode(new Translation(new Vector(2, .45, 0, 0)));
+        // taskbarButtonGroupRight.name = "taskbarButtonGroupRightWindow";
+        // const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, null, "tictactoe.png");
+        // // const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
+        // taskbarButtonRight.name = "taskbarButtonRightWindow";
+        // taskbarButtonGroupRight.add(taskbarButtonRight)
+        // taskbarGroup.add(taskbarButtonGroupRight)
+
+        // // add Taskbar Buttons on the Left
+        // // const taskbarButtonGroupLeft = new GroupNode(new Transform4x4(new Vector(-2, .45, 0, 0), new Rotation(new Vector(0, 1, 0, 0), Math.PI)));
+        // const taskbarButtonGroupLeft = new GroupNode(new Translation(new Vector(-2, .45, 0, 0)));
+        // taskbarButtonGroupLeft.name = "taskbarButtonGroupLeftWindow";
+        // const taskbarButtonLeft = new AABoxNode(taskbarButtonDimension, null, "psychoandreas.png");
+        // taskbarButtonLeft.name = "taskbarButtonLeftWindow";
+        // taskbarButtonGroupLeft.add(taskbarButtonLeft)
+        // taskbarGroup.add(taskbarButtonGroupLeft)
+
+        // ///////////// ===== ADD RIGHT WINDOW ===== /////////////
+
+        // const rightWindowGroup = new WindowNode(new Translation(new Vector(1.8, 0, -1, 0)), "RightWindow");
+        // groupNodeUnderRoot.add(rightWindowGroup);
+        // // rightWindowGroup.add(rightWindowMenu);
+
+        // // Add ticTacToe to the right window
+        // const ticTacToeRoot = new GroupNode(new Translation(new Vector(-1.3, -1.4, 0, 0)));
+        // // ticTacToeRoot.add(createTicTacToe());
+        // // rightWindowGroup.add(ticTacToeRoot);
+        // ticTacToeRoot.add(this.TicTacToe.createTicTacToe());
         // rightWindowGroup.add(ticTacToeRoot);
-        ticTacToeRoot.add(this.TicTacToe.createTicTacToe());
-        rightWindowGroup.add(ticTacToeRoot);
 
-        ///////////// ===== ADD LEFT WINDOW ===== /////////////
-        // groupNode for the secound application window
-        //const leftWindowGroup = new WindowNode(new Translation(new Vector(-1.8, 0, -5, 0)), "LeftWindow");
-        const leftWindowGroup = new WindowNode(new Translation(new Vector(-1.8, 0, -1, 0)), "LeftWindow");
-        groupNodeUnderRoot.add(leftWindowGroup);
+        // ///////////// ===== ADD LEFT WINDOW ===== /////////////
+        // // groupNode for the secound application window
+        // //const leftWindowGroup = new WindowNode(new Translation(new Vector(-1.8, 0, -5, 0)), "LeftWindow");
+        // const leftWindowGroup = new WindowNode(new Translation(new Vector(-1.8, 0, -1, 0)), "LeftWindow");
+        // groupNodeUnderRoot.add(leftWindowGroup);
 
-        // Add Texture box to the left window
-        const textureBoxGroup = new GroupNode(new Translation(new Vector(-1.5, 1.2, 0, 0)));
-        leftWindowGroup.add(textureBoxGroup);
-        //const textureBox = new TextureBoxNode("source-missing-texture.png", new Vector(0.5, 0.5, 0.5, 1), new Vector(1, 1, 1, 1), "brickwall-normal.png");
-        const textureVideoBox = new TextureVideoBoxNode("assitoni.mp4", new Vector(0, 0, 0, 1), new Vector(3, 1.5, 0.1, 1));
+        // // Add Texture box to the left window
+        // const textureBoxGroup = new GroupNode(new Translation(new Vector(-1.5, 1.2, 0, 0)));
+        // leftWindowGroup.add(textureBoxGroup);
+        // //const textureBox = new TextureBoxNode("source-missing-texture.png", new Vector(0.5, 0.5, 0.5, 1), new Vector(1, 1, 1, 1), "brickwall-normal.png");
+        // const textureVideoBox = new TextureVideoBoxNode("assitoni.mp4", new Vector(0, 0, 0, 1), new Vector(3, 1.5, 0.1, 1));
 
-        const textureVideoBoxGroup = new GroupNode(new EmptyTransformation);
-        let rotation = rotateWithPosition(textureVideoBoxGroup, 180);
-        textureVideoBoxGroup.transform = rotation;
+        // const textureVideoBoxGroup = new GroupNode(new EmptyTransformation);
+        // let rotation = rotateWithPosition(textureVideoBoxGroup, 180);
+        // textureVideoBoxGroup.transform = rotation;
 
 
-        textureBoxGroup.add(textureVideoBoxGroup);
-        textureVideoBoxGroup.add(textureVideoBox);
+        // textureBoxGroup.add(textureVideoBoxGroup);
+        // textureVideoBoxGroup.add(textureVideoBox);
 
-        //const meshPosition = new GroupNode(new Transform4x4(new Vector(0.8, 0.8, 0, 0), new Rotation(new Vector(1, 0, 0, 0), -90)));
-        const meshPosition = new GroupNode(new Translation(new Vector(0, .2, -2, 0)));
-        const meshScale = new GroupNode(new Scaling(new Vector(0.8, 0.8, 0.8, 1)));
-        meshPosition.add(meshScale);
+        // //const meshPosition = new GroupNode(new Transform4x4(new Vector(0.8, 0.8, 0, 0), new Rotation(new Vector(1, 0, 0, 0), -90)));
+        // const meshPosition = new GroupNode(new Translation(new Vector(0, .2, -2, 0)));
+        // const meshScale = new GroupNode(new Scaling(new Vector(0.8, 0.8, 0.8, 1)));
+        // meshPosition.add(meshScale);
 
-        (async () => {
-            try {
-                const object = await loadOBJ();
-                console.log("Finished importing", object);
-                meshScale.add(object);
-                meshPosition.add(meshScale);
-                taskbarGroup.add(meshPosition);
-                object.accept(rasterSetupVisitor);
-            } catch (error) {
-                console.log(error);
-            }
-        })();
+        // (async () => {
+        //     try {
+        //         const object = await loadOBJ();
+        //         console.log("Finished importing", object);
+        //         meshScale.add(object);
+        //         meshPosition.add(meshScale);
+        //         taskbarGroup.add(meshPosition);
+        //         object.accept(rasterSetupVisitor);
+        //     } catch (error) {
+        //         console.log(error);
+        //     }
+        // })();
 
-        // const cube = new TextureBoxNode("source-missing-texture.png", new Vector(0, 0, 0, 1), new Vector(0.5, 0.5, 0.5, 1), "brickwall-normal.png");
-        // meshPosition.add(cube);
-        // leftWindowGroup.add(meshPosition);
+        // // const cube = new TextureBoxNode("source-missing-texture.png", new Vector(0, 0, 0, 1), new Vector(0.5, 0.5, 0.5, 1), "brickwall-normal.png");
+        // // meshPosition.add(cube);
+        // // leftWindowGroup.add(meshPosition);
 
-        //const object = await MeshNode.getNode("monkey.obj", new Vector(1, 0, 0, 0));
-        // let object = null;
-        // MeshNode.getNode("monkey.obj", new Vector(1, 0, 0, 0)).then(monkey => {
-        //   object = monkey;
-        // }).catch(error => {
-        //   // Handle any errors here
-        //   console.log(error);
+        // //const object = await MeshNode.getNode("monkey.obj", new Vector(1, 0, 0, 0));
+        // // let object = null;
+        // // MeshNode.getNode("monkey.obj", new Vector(1, 0, 0, 0)).then(monkey => {
+        // //   object = monkey;
+        // // }).catch(error => {
+        // //   // Handle any errors here
+        // //   console.log(error);
 
-        // });
-        // meshPosition.add(object);
-        // leftWindowGroup.add(meshPosition);
+        // // });
+        // // meshPosition.add(object);
+        // // leftWindowGroup.add(meshPosition);
 
-        //Add animation node
-        const animationNode = new RotationNode(meshPosition, new Vector(0, 1, 0, 0));
-        // const animationNode3 = new JumperNode(taskbarButtonGroup2, new Vector(0, 1, 0, 0));
+        // //Add animation node
+        // const animationNode = new RotationNode(meshPosition, new Vector(0, 1, 0, 0));
+        // // const animationNode3 = new JumperNode(taskbarButtonGroup2, new Vector(0, 1, 0, 0));
 
-        // const animationNode4 = new DriverNode(gn1);
-        // const animationNode3 = new ScaleNode(taskbarButtonGroup2, new Vector(-1, -1, -1, 0));
-        animationNode.toggleActive();
+        // // const animationNode4 = new DriverNode(gn1);
+        // // const animationNode3 = new ScaleNode(taskbarButtonGroup2, new Vector(-1, -1, -1, 0));
+        // animationNode.toggleActive();
 
-        /***************************************************************/
-        /*********************  END OF SCENE GRAPH *********************/
-        /***************************************************************/
+        // /***************************************************************/
+        // /*********************  END OF SCENE GRAPH *********************/
+        // /***************************************************************/
     }
 }
 

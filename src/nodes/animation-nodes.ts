@@ -41,7 +41,7 @@ export default class AnimationNode extends Node {
   toJSON(): any {
     const json = super.toJSON()
     json["active"] = this.active
-    json["childNodes"] = []
+    json["childCodes"] = []
     return json
 
   }
@@ -69,6 +69,7 @@ export class RotationNode extends AnimationNode {
    */
   constructor(groupNode: GroupNode, axis: Vector) {
     super(groupNode);
+    this.name = "RotationNode"
     this.angle = 0;
     this.axis = axis;
   }
@@ -124,6 +125,7 @@ export class JumperNode extends AnimationNode {
    */
   constructor(groupNode: GroupNode, translation: Vector, startingPos: Matrix) {
     super(groupNode);
+    this.name = "JumperNode"
     this.translation = translation;
     this.startingPos = startingPos;
     // FIXME: This is blocking rerunning the animation
@@ -289,6 +291,7 @@ export class ScaleNode extends AnimationNode {
    */
   constructor(groupNode: GroupNode, targetScale: Vector, duration: number) {
     super(groupNode);
+    this.name = "ScaleNode"
     this.scale = new Vector(1, 1, 1, 1);
     this.targetScale = targetScale;
     this.duration = duration;
@@ -421,6 +424,7 @@ export class ScalerNodeMouse extends AnimationNode {
    */
   constructor(groupNode: GroupNode) {
     super(groupNode);
+    this.name = "ScalerNodeMouse"
     this.scaleChange = 0;
 
     window.addEventListener('keydown', (event) => {
@@ -445,16 +449,24 @@ export class ScalerNodeMouse extends AnimationNode {
       this.scaleChange = 0; // Reset the scale change
     }
   }
+
+  toJSON() {
+    const json = super.toJSON();
+    json["scaleChange"] = this.scaleChange;
+    return json;
+
+  }
 }
 
 export class DriverNodeMouse extends AnimationNode {
 
-  static translation: Translation;
+  translation: Translation;
   constructor(groupNode: GroupNode) {
     super(groupNode);
+    this.name = "DriverNodeMouse"
     // Create a copy of the transformation matrix
     const originalMatrix = groupNode.getTransformation().getMatrix();
-    DriverNodeMouse.translation = new Translation(new Vector(originalMatrix.data[12], originalMatrix.data[13], originalMatrix.data[14], 1));
+    this.translation = new Translation(new Vector(originalMatrix.data[12], originalMatrix.data[13], originalMatrix.data[14], 1));
   }
 
   // This function is used to simulate the movement of the groupnode
@@ -484,12 +496,12 @@ export class DriverNodeMouse extends AnimationNode {
           // move backward
           position.data[14] += 0.0001;
         } else if (event.key === 'y') {
-          console.log(DriverNodeMouse.translation.getMatrix().print());
+          console.log(this.translation.getMatrix().print());
 
           // reset position to the start postion of the group node (translation)
-          position.data[12] = DriverNodeMouse.translation.getMatrix().data[12];
-          position.data[13] = DriverNodeMouse.translation.getMatrix().data[13];
-          position.data[14] = DriverNodeMouse.translation.getMatrix().data[14];
+          position.data[12] = this.translation.getMatrix().data[12];
+          position.data[13] = this.translation.getMatrix().data[13];
+          position.data[14] = this.translation.getMatrix().data[14];
 
         }
       });
@@ -497,7 +509,7 @@ export class DriverNodeMouse extends AnimationNode {
   }
   toJSON(): any {
     const json = super.toJSON();
-    json["ranslation"] = DriverNodeMouse.translation
+    json["translation"] = this.translation
     return json
   }
 }
@@ -513,6 +525,7 @@ export class DriverNode extends AnimationNode {
 
   constructor(groupNode: GroupNode, direction: Vector, speed?: number, loop?: boolean) {
     super(groupNode);
+    this.name = "DriverNode"
     this.direction = direction;
     this.distanceToGoal = direction.length;
     this.speed = speed || 0.0001;
@@ -547,44 +560,15 @@ export class DriverNode extends AnimationNode {
       }
     }
   }
-}
 
-/**
- * Class representing a Rotation Animation
- * @extends AnimationNode
- */
-export class SlerpNode extends AnimationNode {
-  /**
-   * The time
-   */
-  t: number;
-
-  // /**
-  //  * The rotations to interpolate between
-  //  */
-  // rotations: [Quaternion, Quaternion];
-
-  // /**
-  //  * Creates a new RotationNode
-  //  * @param groupNode The group node to attach to
-  //  * @param axis The axis to rotate around
-  //  */
-  // constructor(groupNode: GroupNode, rotation1: Quaternion, rotation2: Quaternion) {
-  //   super(groupNode);
-  //   this.rotations = [rotation1, rotation2];
-  //   this.t = 0;
-  // }
-
-  // /**
-  //  * Advances the animation by deltaT
-  //  * @param deltaT The time difference, the animation is advanced by
-  //  */
-  // simulate(deltaT: number) {
-  //   if (this.active) {
-  //     this.t += 0.001 * deltaT;
-  //     const rot = this.rotations[0].slerp(this.rotations[1], (Math.sin(this.t) + 1) / 2);
-  //     (this.groupNode.transform as SQT).rotation = rot;
-  //   }
-  // }
-
+  toJSON() {
+    const json = super.toJSON();
+    json["distanceToGoal"] = this.distanceToGoal;
+    json["speed"] = this.speed;
+    json["direction"] = this.direction;
+    json["dirChange"] = this.dirChange;
+    json["distanceCovered"] = this.distanceCovered;
+    json["loop"] = this.loop;
+    return json;
+  }
 }

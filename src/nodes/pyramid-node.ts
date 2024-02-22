@@ -29,6 +29,7 @@ export default class PyramidNode extends Node {
     json["minPoint"] = this.minPoint;
     json["maxPoint"] = this.maxPoint;
     json["color"] = this.color;
+    json["texture"] = this.texture;
     return json;
   }
 }

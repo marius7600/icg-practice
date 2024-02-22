@@ -30,11 +30,10 @@ export default class JsonVisitor implements Visitor {
     saveSceneGraph(sceneGraph: Scenegraph) {
         const root = Scenegraph.getGraph()
         this.animationsNodes = Scenegraph.getAnimationNodes()
-        this.lastCode = 0
-        const code = this.nextCode();
+        this.lastCode = 0 //How far inside the tree we are
+        const code = this.nextCode(); //Traverse one further 
         this.serialScene = {}
         this.serialScene["root"] = { childCodes: [] }
-        this.serialScene["camera"] = Scenegraph.getCamera()
         this.parentCodeStack = ["root"]
         root.accept(this)
         const serialScene = JSON.stringify(this.serialScene);
@@ -44,7 +43,6 @@ export default class JsonVisitor implements Visitor {
     // visit leafNode and add it to the sceneGraph in serialScene
     private visitLeafNode(node: Node) {
         console.log("Current Node in visitLeafNodes: ", node);
-
         const code = this.nextCode();
         const toJSON = (node).toJSON();
         this.serialScene[code] = toJSON
@@ -123,7 +121,7 @@ export default class JsonVisitor implements Visitor {
     // visiting CameraNode 
     // !!! CAMERA IS SAVED SEPARATELY IN THE saveSceneGraph method
     visitCameraNode(node: CameraNode): void {
-        //this.visitLeafNode(node)
+        this.visitLeafNode(node)
     }
 
     // visiting GroupNodeCamera
@@ -138,20 +136,21 @@ export default class JsonVisitor implements Visitor {
 
     // visiting AnimationNode
     visitAnimationNode(node: AnimationNode) {
-        const code = this.visitLeafNode(node);
-        this.parentCodeStack.push(code)
-        node.groupNode.accept(this)
-        this.parentCodeStack.pop()
+        // const code = this.visitLeafNode(node);
+        // this.parentCodeStack.push(code)
+        // node.groupNode.accept(this)
+        // this.parentCodeStack.pop()
+        this.visitLeafNode(node);
     }
 
     // TODO: visiting TextureTextBoxNode
     visitTextureTextBoxNode(node: TextureTextBoxNode): void {
-        throw new Error("Method not implemented.");
+        this.visitLeafNode(node)
     }
 
     // TODO: visiting MeshNode
     visitMeshNode(node: MeshNode): void {
-        throw new Error("Method not implemented.");
+        this.visitLeafNode(node)
     }
 
 

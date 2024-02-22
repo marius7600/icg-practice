@@ -145,7 +145,7 @@ export class RasterVisitor implements Visitor {
    */
   visitAABoxNode(node: AABoxNode) {
     // this.visitNode(node, this.shader);
-    if (node.colourTexture) {
+    if (node.colorTexture) {
       this.visitNode(node, this.textureshader);
     }
     else {
@@ -373,7 +373,7 @@ export class RasterSetupVisitor implements Visitor {
         node.minPoint,
         node.maxPoint,
         node.color,
-        node.colourTexture
+        node.colorTexture
       )
     );
   }

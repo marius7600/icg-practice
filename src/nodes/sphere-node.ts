@@ -32,6 +32,7 @@ export default class SphereNode extends Node {
     json["color"] = this.color;
     json["center"] = this.center;
     json["radius"] = this.radius;
+    json["texture"] = this.texture;
     return json;
   }
 }
