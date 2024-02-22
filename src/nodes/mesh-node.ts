@@ -27,4 +27,16 @@ export default class MeshNode extends Node {
     accept(visitor: Visitor): void {
         visitor.visitMeshNode(this);
     }
+
+    toJSON(): any {
+        const json = super.toJSON();
+        json["vertices"] = this.vertices;
+        json["normals"] = this.normals;
+        json["color"] = this.color.toJSON();
+        json["meshName"] = this.meshName;
+        json["maxPoint"] = this.maxPoint.toJSON();
+        json["minPoint"] = this.minPoint.toJSON();
+        json["name"] = this.name;
+        return json;
+    };
 }

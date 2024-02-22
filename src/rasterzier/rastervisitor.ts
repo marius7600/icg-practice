@@ -101,7 +101,6 @@ export class RasterVisitor implements Visitor {
    */
   setupCamera(camera: CameraNode) {
     this.lookat = Matrix.lookat(camera.eye, camera.center, camera.up);
-
     this.perspective = Matrix.perspective(
       camera.fovy,
       camera.aspect,
@@ -116,6 +115,9 @@ export class RasterVisitor implements Visitor {
    */
   visitGroupNode(node: GroupNode) {
     // TODO
+    // if (node.name === "groupNodeCamera") {
+    //   console.log("Node in visitGroupNode: ", node.getTransformation().getMatrix().print());
+    // }
     this.stack.push({
       traverse: node.transform.getMatrix(),
       inverse: node.transform.getInverseMatrix(),
@@ -145,7 +147,7 @@ export class RasterVisitor implements Visitor {
    */
   visitAABoxNode(node: AABoxNode) {
     // this.visitNode(node, this.shader);
-    if (node.colorTexture) {
+    if (node.texture) {
       this.visitNode(node, this.textureshader);
     }
     else {
@@ -345,6 +347,7 @@ export class RasterSetupVisitor implements Visitor {
    * @param node The node to visit
    */
   visitGroupNode(node: GroupNode) {
+
     for (let child of node.children) {
       child.accept(this);
     }
@@ -373,7 +376,7 @@ export class RasterSetupVisitor implements Visitor {
         node.minPoint,
         node.maxPoint,
         node.color,
-        node.colorTexture
+        node.texture
       )
     );
   }

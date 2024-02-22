@@ -83,7 +83,6 @@ window.addEventListener("load", () => {
   // Get a reference to the canvas and its context
   const canvas = document.getElementById('drawing') as HTMLCanvasElement;
   const ctx = canvas.getContext('2d');
-
   // Set the fill color to black
   ctx.fillStyle = 'white';
 
@@ -226,9 +225,8 @@ window.addEventListener("load", () => {
       } else {
         rayVisitor.render(Scenegraph.getGraph(), phongProperties, 500000);
       }
-
-
       const animationNodeList = Scenegraph.getAllNodesOfType(AnimationNode);
+
       for (let animationNode of animationNodeList) {
         animationNode.simulate(delta);
       }
@@ -266,8 +264,9 @@ window.addEventListener("load", () => {
       let files = fileSelector.files[0];
       let reader = new FileReader();
       reader.onload = (event) => {
-        Scenegraph.fromJSON(files, rasterVisitor)
+        Scenegraph.fromJSON(files, rasterVisitor, rasterSetupVisitor)
         console.log("JSON file uploaded");
+
 
       };
       reader.readAsText(files);

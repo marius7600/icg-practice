@@ -13,6 +13,7 @@ import TextureVideoBoxNode from "./nodes/texture-video-box-node";
 import { Scenegraph } from "./scenegraph";
 import MeshNode from "./nodes/mesh-node";
 import TextureTextBoxNode from "./nodes/texture-text-box-node";
+import { WindowNode } from "./nodes/window-node";
 
 
 export default class JsonVisitor implements Visitor {
@@ -56,7 +57,10 @@ export default class JsonVisitor implements Visitor {
         console.log("Current Code in addChildCodeToParentNode: ", code);
 
         const parentCode = this.parentCodeStack[this.parentCodeStack.length - 1];
+        console.log("Parent code: ", code);
         const parentNode = this.serialScene[parentCode] as SerializeGroupNode;
+        console.log("Current ParentNode in addChildCodeToParentNode: ", parentNode);
+
         parentNode.childCodes.push(code)
     }
 
@@ -153,6 +157,17 @@ export default class JsonVisitor implements Visitor {
         this.visitLeafNode(node)
     }
 
+    visitWindowNode(node: WindowNode): void {
+        const code = this.visitLeafNode(node);
+
+        this.parentCodeStack.push(code)
+        for (let child of node.children) {
+            child.accept(this)
+        }
+        this.parentCodeStack.pop()
+
+    }
+
 
     // create a download link for the JSON file
     private download(data: string, filename: string, type: string) {
@@ -195,7 +210,6 @@ class SerializeGroupNode extends SerializeNode {
         super(node);
         this.transformation = { type: node.transform.constructor.name, transformation: node.transform }
         this.childCodes = []
-
     }
 
 }

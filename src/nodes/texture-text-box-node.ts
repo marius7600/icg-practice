@@ -4,7 +4,7 @@ import Vector from "../math/vector";
 
 
 export default class TextureTextBoxNode extends Node {
-    constructor(public texture: string, public minPoint: Vector, public maxPoint: Vector, public id?: number, public normal?: string) {
+    constructor(public texture: string, public minPoint: Vector, public maxPoint: Vector, public normal?: string) {
         super();
     }
 
@@ -13,11 +13,11 @@ export default class TextureTextBoxNode extends Node {
     }
 
     toJSON() {
-        return {
-            TextureTextBoxNode: {
-                texture: this.texture,
-                normal: this.normal,
-            },
-        };
+        const json = super.toJSON();
+        json["texture"] = this.texture;
+        json["minPoint"] = this.minPoint;
+        json["maxPoint"] = this.maxPoint;
+        json["normal"] = this.normal;
+        return json
     }
 }

@@ -135,20 +135,15 @@ export class WindowNode extends GroupNode {
         }
     }
 
-
-
     accept(visitor: Visitor) {
         visitor.visitGroupNode(this);
     }
 
     toJSON() {
-        return {
-            transform: this.transform,
-            state: this.state,
-            fullscreen: this.fullscreen,
-            fullscrenVector: this.fullscrenVector,
-            children: this.children,
-            name: this.name
-        }
+        const json = super.toJSON();
+        json["state"] = this.state;
+        json["fullscreen"] = this.fullscreen;
+        json["fullscrenVector"] = this.fullscrenVector.toJSON();
+        return json
     }
 }

@@ -178,8 +178,8 @@ export class JumperNode extends AnimationNode {
 
   toJSON(): any {
     const json = super.toJSON();
-    json["translation"] = this.translation
-    json["number"] = this.number
+    json["startingPos"] = this.startingPos.toJSON()
+    json["translation"] = this.translation.toJSON()
     return json
   }
 }
@@ -406,6 +406,7 @@ export class ScaleNode extends AnimationNode {
     const json = super.toJSON();
     json["scale"] = this.scale
     json["targetScale"] = this.targetScale
+    json["duration"] = this.duration
     return json
   }
 }

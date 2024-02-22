@@ -16,7 +16,7 @@ export default class AABoxNode extends Node {
    * with all edges of length 1
    * @param color The colour of the cube
    */
-  constructor(public dimensions: Vector, public color: Vector, public colorTexture?: string) {
+  constructor(public dimensions: Vector, public color: Vector, public texture?: string) {
     super();
     this.maxPoint = dimensions.div(2);
     this.maxPoint.w = 1;
@@ -42,7 +42,7 @@ export default class AABoxNode extends Node {
     json["minPoint"] = this.minPoint;
     json["maxPoint"] = this.maxPoint;
     json["color"] = this.color;
-    json["colorTexture"] = this.colorTexture;
+    json["texture"] = this.texture;
     return json;
   };
 }

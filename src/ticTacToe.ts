@@ -22,15 +22,13 @@ export class TicTacToe {
         // Scale the size of the cubes
         const ticTacToeScale = new GroupNode(new Scaling(new Vector(1.5, 1.5, 1.5, 1)));
         //Add the cubes to the scaler
-        let idCounter = 0;
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
                 //Position of the cubes in the tic tac toe
                 const position = new GroupNode(new Translation(new Vector(i * 0.6, j * 0.6, 0, 1)));
-                let cube = new TextureTextBoxNode("", new Vector(0, 0, 0, 1), new Vector(0.5, 0.5, 0.1, 1), idCounter);
+                let cube = new TextureTextBoxNode("", new Vector(0, 0, 0, 1), new Vector(0.5, 0.5, 0.1, 1));
                 position.add(cube);
                 ticTacToeScale.add(position);
-                idCounter++;
             }
         }
         TicTacToe.parent.add(ticTacToeScale);
@@ -47,15 +45,13 @@ export class TicTacToe {
         // Scale the size of the cubes
         const ticTacToeScale = new GroupNode(new Scaling(new Vector(1.5, 1.5, 1.5, 1)));
         //Add the cubes to the scaler
-        let idCounter = 0;
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
                 //Position of the cubes in the tic tac toe
                 const position = new GroupNode(new Translation(new Vector(i * 0.6, j * 0.6, 0, 1)));
-                let cube = new TextureTextBoxNode("", new Vector(0, 0, 0, 1), new Vector(0.5, 0.5, 0.1, 1), idCounter);
+                let cube = new TextureTextBoxNode("", new Vector(0, 0, 0, 1), new Vector(0.5, 0.5, 0.1, 1));
                 position.add(cube);
                 ticTacToeScale.add(position);
-                idCounter++;
             }
         }
 
