@@ -1,8 +1,8 @@
 import Matrix from "./matrix";
-import AABoxNode from "./nodes/aabox-node";
-import GroupNode from "./nodes/group-node";
-import TextureBoxNode from "./nodes/texture-box-node";
-import TextureVideoBoxNode from "./nodes/texture-video-box-node";
+import AABoxNode from "../nodes/aabox-node";
+import GroupNode from "../nodes/group-node";
+import TextureBoxNode from "../nodes/texture-box-node";
+import TextureVideoBoxNode from "../nodes/texture-video-box-node";
 import Vector from "./vector";
 // import Quaternion from './quaternion';
 

@@ -1,5 +1,5 @@
 //source: https://webglfundamentals.org/webgl/lessons/webgl-load-obj.html
-import Vector from "./vector";
+import Vector from "./math/vector";
 
 export default class OBJLoader {
     static vertices: number[][]

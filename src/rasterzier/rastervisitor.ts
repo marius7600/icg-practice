@@ -1,4 +1,4 @@
-import Matrix from "../matrix";
+import Matrix from "../math/matrix";
 import AABoxNode from "../nodes/aabox-node";
 import CameraNode from "../nodes/camera-node";
 import GroupNode from "../nodes/group-node";
@@ -12,7 +12,7 @@ import TextureTextBoxNode from "../nodes/texture-text-box-node";
 import TextureVideoBoxNode from "../nodes/texture-video-box-node";
 import PhongProperties from "../phong-properties";
 import Shader from "../shader/shader";
-import Vector from "../vector";
+import Vector from "../math/vector";
 import Visitor from "../visitor";
 import RasterPyramid from "./raster-Pyramid";
 import RasterBox from "./raster-box";

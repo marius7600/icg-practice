@@ -15,18 +15,18 @@ import RayVisitor from "./raytracer/rayvisitor";
 import phongFragmentShader from "./shader/phong-fragment-shader.glsl";
 import phongVertexShader from "./shader/phong-vertex-perspective-shader.glsl";
 import Shader from "./shader/shader";
-import { EmptyTransformation, RotateWithPosition, Rotation, Scaling, Transform4x4, Translation } from "./transformation";
-import Vector from "./vector";
+import { EmptyTransformation, RotateWithPosition, Rotation, Scaling, Transform4x4, Translation } from "./math/transformation";
+import Vector from "./math/vector";
 import TextureBoxNode from "./nodes/texture-box-node";
 import textureVertexShader from "./shader/texture-vertex-perspective-shader.glsl";
 import textureFragmentShader from "./shader/texture-fragment-shader.glsl";
-import Matrix from "./matrix";
+import Matrix from "./math/matrix";
 import { Scenegraph } from "./scenegraph";
 import JsonVisitor from "./jsonVisitor";
 import TextureTextBoxNode from "./nodes/texture-text-box-node";
 import Node from "./nodes/node";
 import MeshNode from "./nodes/mesh-node";
-import { Game } from "./game";
+import { TicTacToe } from "./ticTacToe";
 import { WindowNode } from "./nodes/window-node";
 import AnimationNode from "./nodes/animation-nodes";
 import Ray from "./raytracer/ray";
@@ -116,7 +116,7 @@ window.addEventListener("load", () => {
 
   // Function to clear the game
   document.getElementById('clearGame')?.addEventListener('click', function () {
-    Game.clearGame();
+    TicTacToe.clearGame();
     rasterSetupVisitor.setup(Scenegraph.getGraph());
   });
 
@@ -133,7 +133,7 @@ window.addEventListener("load", () => {
     //Playing tik tak toe
     selectedNode = mouseVisitor.getSelectedNode(Scenegraph.getGraph(), info.offsetX, info.offsetY, ctx_raster);
     console.log("Object clicked: ", selectedNode);
-    Game.CheckTikTakToeField(selectedNode, rasterSetupVisitor);
+    TicTacToe.CheckTikTakToeField(selectedNode, rasterSetupVisitor);
     // Handle events when clicking on objects with the mouse
     handleMouseclickEvent(selectedNode, info.x, info.y);
   });

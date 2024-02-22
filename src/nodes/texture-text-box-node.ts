@@ -1,6 +1,6 @@
 import Node from "./node";
 import Visitor from "../visitor";
-import Vector from "../vector";
+import Vector from "../math/vector";
 
 
 export default class TextureTextBoxNode extends Node {

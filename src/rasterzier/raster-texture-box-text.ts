@@ -1,4 +1,4 @@
-import Vector from '../vector';
+import Vector from '../math/vector';
 import Shader from '../shader/shader';
 
 /**
@@ -129,7 +129,7 @@ export default class RasterTextTextureBox {
         ctx.scale(1, -1);
 
 
-        ctx.fillStyle = "#ffffff"; // This determines the text colour, it can take a hex value or rgba value (e.g. rgba(255,0,0,0.5))
+        ctx.fillStyle = "white"; // This determines the text colour, it can take a hex value or rgba value (e.g. rgba(255,0,0,0.5))
         ctx.textAlign = "center"; // This determines the alignment of text, e.g. left, center, right
         ctx.textBaseline = "middle"; // This determines the baseline of the text, e.g. top, middle, bottom
         ctx.font = "220px monospace"; // This determines the size of the text and the font family used

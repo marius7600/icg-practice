@@ -2,11 +2,11 @@ import GroupNode from "./nodes/group-node";
 import TextureTextBoxNode from "./nodes/texture-text-box-node";
 import { RasterSetupVisitor } from "./rasterzier/rastervisitor";
 import { Scenegraph } from "./scenegraph";
-import { EmptyTransformation, Scaling, Translation } from "./transformation";
-import Vector from "./vector";
+import { EmptyTransformation, Scaling, Translation } from "./math/transformation";
+import Vector from "./math/vector";
 import Node from "./nodes/node";
 
-export class Game {
+export class TicTacToe {
     private static parent: GroupNode;
     private static currentPlayer = true; // true = X, false = O
 
@@ -17,8 +17,8 @@ export class Game {
     createTicTacToe() {
         console.log("Creating tic tac toe");
         // create root for the tic tac toe
-        Game.parent = new GroupNode(new EmptyTransformation());
-        console.log(Game.parent);
+        TicTacToe.parent = new GroupNode(new EmptyTransformation());
+        console.log(TicTacToe.parent);
         // Scale the size of the cubes
         const ticTacToeScale = new GroupNode(new Scaling(new Vector(1.5, 1.5, 1.5, 1)));
         //Add the cubes to the scaler
@@ -33,8 +33,8 @@ export class Game {
                 idCounter++;
             }
         }
-        Game.parent.add(ticTacToeScale);
-        return Game.parent;
+        TicTacToe.parent.add(ticTacToeScale);
+        return TicTacToe.parent;
     }
 
     /**
@@ -43,7 +43,7 @@ export class Game {
      */
     static clearGame() {
         // clear children of the parent
-        Game.parent.children = [];
+        TicTacToe.parent.children = [];
         // Scale the size of the cubes
         const ticTacToeScale = new GroupNode(new Scaling(new Vector(1.5, 1.5, 1.5, 1)));
         //Add the cubes to the scaler
@@ -60,7 +60,7 @@ export class Game {
         }
 
         // Add the new game to the parent
-        Game.parent.add(ticTacToeScale);
+        TicTacToe.parent.add(ticTacToeScale);
         // Reset the current player
         this.currentPlayer = true;
     }

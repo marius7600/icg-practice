@@ -1,4 +1,4 @@
-import Vector from "./vector";
+import Vector from "./math/vector";
 
 export default class BoxSharedProperties {
     static calcVertices(mi: Vector, ma: Vector) {

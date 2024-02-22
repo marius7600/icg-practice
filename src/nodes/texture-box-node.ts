@@ -1,6 +1,6 @@
 import Node from "./node";
 import Visitor from "../visitor";
-import Vector from "../vector";
+import Vector from "../math/vector";
 
 /**
  * Class representing a Textured Axis Aligned Box in the Scenegraph

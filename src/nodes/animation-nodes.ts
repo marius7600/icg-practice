@@ -1,9 +1,9 @@
-import Vector from '../vector';
+import Vector from '../math/vector';
 import Node from './node';
 import GroupNode from './group-node';
-import { Rotation } from '../transformation';
-import { Translation, Scaling } from '../transformation';
-import Matrix from '../matrix';
+import { Rotation } from '../math/transformation';
+import { Translation, Scaling } from '../math/transformation';
+import Matrix from '../math/matrix';
 import Visitor from '../visitor';
 
 /**

@@ -1,5 +1,5 @@
 import Node from "./node";
-import { Transformation } from "../transformation";
+import { Transformation } from "../math/transformation";
 import Visitor from "../visitor";
 import CameraNode from "./camera-node";
 

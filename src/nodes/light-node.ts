@@ -1,5 +1,5 @@
 import Node from "./node";
-import Vector from "../vector";
+import Vector from "../math/vector";
 import Visitor from "../visitor";
 
 /**

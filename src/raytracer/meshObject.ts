@@ -1,9 +1,9 @@
-import Vector from '../vector';
+import Vector from '../math/vector';
 import Ray from './ray';
 import Intersection from './intersection';
 import { Polygon } from './polygon';
 import BoxSharedProperties from '../boxSharedProperties';
-import Matrix from '../matrix';
+import Matrix from '../math/matrix';
 
 export default class MeshObject {
     // color: Vector;

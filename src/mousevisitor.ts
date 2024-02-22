@@ -1,4 +1,4 @@
-import Matrix from "./matrix";
+import Matrix from "./math/matrix";
 import AABoxNode from "./nodes/aabox-node";
 import AnimationNode from "./nodes/animation-nodes";
 import CameraNode from "./nodes/camera-node";
@@ -17,7 +17,7 @@ import Intersection from "./raytracer/intersection";
 import Pyramid from "./raytracer/pyramid";
 import Ray from "./raytracer/ray";
 import Sphere from "./raytracer/ray-sphere";
-import Vector from "./vector";
+import Vector from "./math/vector";
 import Visitor from "./visitor";
 
 interface Intersectable {

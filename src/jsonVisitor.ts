@@ -5,7 +5,7 @@ import AABoxNode from "./nodes/aabox-node";
 import PyramidNode from "./nodes/pyramid-node";
 import SphereNode from "./nodes/sphere-node";
 import lightNode from "./nodes/light-node";
-import { Transformation } from "./transformation";
+import { Transformation } from "./math/transformation";
 import TextureBoxNode from "./nodes/texture-box-node";
 import Node from "./nodes/node";
 import CameraNode from "./nodes/camera-node";

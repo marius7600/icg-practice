@@ -1,4 +1,4 @@
-import Vector from '../vector';
+import Vector from '../math/vector';
 import Shader from '../shader/shader';
 import SharedProps from '../boxSharedProperties';
 import GlUtils from "../glUtils";

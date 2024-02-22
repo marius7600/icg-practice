@@ -1,8 +1,8 @@
-import Matrix from "./matrix";
+import Matrix from "./math/matrix";
 import CameraNode from "./nodes/camera-node";
 import GroupNode from "./nodes/group-node";
-import { MatrixTransformation, Transformation, Translation } from "./transformation";
-import Vector from "./vector";
+import { MatrixTransformation, Transformation, Translation } from "./math/transformation";
+import Vector from "./math/vector";
 import Node from "./nodes/node";
 import LightNode from "./nodes/light-node";
 import PyramidNode from "./nodes/pyramid-node";

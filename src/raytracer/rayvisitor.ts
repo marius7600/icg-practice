@@ -1,4 +1,4 @@
-import Matrix from "../matrix";
+import Matrix from "../math/matrix";
 import AABoxNode from "../nodes/aabox-node";
 import AnimationNode from "../nodes/animation-nodes";
 import CameraNode from "../nodes/camera-node";
@@ -12,7 +12,7 @@ import TextureBoxNode from "../nodes/texture-box-node";
 import TextureTextBoxNode from "../nodes/texture-text-box-node";
 import TextureVideoBoxNode from "../nodes/texture-video-box-node";
 import PhongProperties from "../phong-properties";
-import Vector from "../vector";
+import Vector from "../math/vector";
 import Visitor from "../visitor";
 import AABox from "./aabox";
 import Intersection from "./intersection";

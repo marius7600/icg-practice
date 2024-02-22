@@ -1,8 +1,8 @@
 import Node from './node';
 import Visitor from '../visitor';
 import GroupNode from './group-node';
-import { Transformation, Translation } from '../transformation';
-import Vector from '../vector';
+import { Transformation, Translation } from '../math/transformation';
+import Vector from '../math/vector';
 import AABoxNode from './aabox-node';
 import SphereNode from './sphere-node';
 import { DriverNode, DriverNodeMouse, ScaleNode } from './animation-nodes';

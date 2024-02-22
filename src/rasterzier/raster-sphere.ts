@@ -1,6 +1,6 @@
-import Vector from '../vector';
+import Vector from '../math/vector';
 import Shader from '../shader/shader';
-import Matrix from '../matrix';
+import Matrix from '../math/matrix';
 import GlUtils from "../glUtils";
 
 /**

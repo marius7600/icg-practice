@@ -4,18 +4,18 @@ import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
 import SphereNode from "./nodes/sphere-node";
 import TextureVideoBoxNode from "./nodes/texture-video-box-node";
-import { EmptyTransformation, RotateWithPosition, Rotation, Scaling, Transform4x4, Translation } from "./transformation";
-import Vector from "./vector";
+import { EmptyTransformation, RotateWithPosition, Rotation, Scaling, Transform4x4, Translation } from "./math/transformation";
+import Vector from "./math/vector";
 import AABoxNode from "./nodes/aabox-node";
 import { JsonLoader } from "./jsonLoader";
 import { RasterSetupVisitor, RasterVisitor } from "./rasterzier/rastervisitor";
 import Visitor from "./visitor";
 import TextureTextBoxNode from "./nodes/texture-text-box-node";
 import MeshNode from "./nodes/mesh-node";
-import { Game } from "./game";
+import { TicTacToe } from "./ticTacToe";
 import { WindowNode } from "./nodes/window-node";
 import Node from "./nodes/node";
-import Matrix from "./matrix";
+import Matrix from "./math/matrix";
 import CameraNode from "./nodes/camera-node";
 import PyramidNode from "./nodes/pyramid-node";
 
@@ -28,7 +28,7 @@ export class Scenegraph {
     private static animationNodesList: AnimationNode[] = [];
     private static driver: DriverNode;
     private static camera: CameraNode;
-    private static TicTacToe: Game = new Game();
+    private static TicTacToe: TicTacToe = new TicTacToe();
 
     static getGraph() {
         if (!this.sceneGraph) {
@@ -263,7 +263,7 @@ export class Scenegraph {
 
 
 
-        const groupNodeLight3 = new GroupNode(new Translation(new Vector(0, -1, -3, 0)));
+        const groupNodeLight3 = new GroupNode(new Translation(new Vector(0, -3, -3, 0)));
         const light3 = new LightNode(new Vector(0, 1, 0, 1), new Vector(0, -1.5, -3, 1));
 
         groupNodeLight3.add(light3);
@@ -280,7 +280,7 @@ export class Scenegraph {
         animateLight2.name = "animateLight2";
         animateLight2.toggleActive();
 
-        const animateLight3 = new DriverNode(groupNodeLight3, new Vector(0, 2, 0, 0), 0.0005, true);
+        const animateLight3 = new DriverNode(groupNodeLight3, new Vector(0, 3, 0, 0), 0.0005, true);
         animateLight3.name = "animateLight3";
         animateLight3.toggleActive();
 
@@ -311,16 +311,17 @@ export class Scenegraph {
         //add Taskbar Button on the Right
         const taskbarButtonGroupRight = new GroupNode(new Translation(new Vector(2, .45, 0, 0)));
         taskbarButtonGroupRight.name = "taskbarButtonGroupRightWindow";
-        const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, null, "pychoandi.png");
+        const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, null, "tictactoe.png");
         // const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
         taskbarButtonRight.name = "taskbarButtonRightWindow";
         taskbarButtonGroupRight.add(taskbarButtonRight)
         taskbarGroup.add(taskbarButtonGroupRight)
 
         // add Taskbar Buttons on the Left
-        const taskbarButtonGroupLeft = new GroupNode(new Transform4x4(new Vector(-2, .45, 0, 0), new Rotation(new Vector(0, 1, 0, 0), Math.PI)));
+        // const taskbarButtonGroupLeft = new GroupNode(new Transform4x4(new Vector(-2, .45, 0, 0), new Rotation(new Vector(0, 1, 0, 0), Math.PI)));
+        const taskbarButtonGroupLeft = new GroupNode(new Translation(new Vector(-2, .45, 0, 0)));
         taskbarButtonGroupLeft.name = "taskbarButtonGroupLeftWindow";
-        const taskbarButtonLeft = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
+        const taskbarButtonLeft = new AABoxNode(taskbarButtonDimension, null, "psychoandreas.png");
         taskbarButtonLeft.name = "taskbarButtonLeftWindow";
         taskbarButtonGroupLeft.add(taskbarButtonLeft)
         taskbarGroup.add(taskbarButtonGroupLeft)
@@ -359,16 +360,16 @@ export class Scenegraph {
         textureVideoBoxGroup.add(textureVideoBox);
 
         //const meshPosition = new GroupNode(new Transform4x4(new Vector(0.8, 0.8, 0, 0), new Rotation(new Vector(1, 0, 0, 0), -90)));
-        const meshPosition = new GroupNode(new Translation(new Vector(0, 0.5, -2, 0)));
-        //const meshScale = new GroupNode(new Scaling(new Vector(0.04, 0.04, 0.04, 1)));
-        //meshPosition.add(meshScale);
+        const meshPosition = new GroupNode(new Translation(new Vector(0, .2, -2, 0)));
+        const meshScale = new GroupNode(new Scaling(new Vector(0.8, 0.8, 0.8, 1)));
+        meshPosition.add(meshScale);
 
         (async () => {
             try {
                 const object = await loadOBJ();
                 console.log("Finished importing", object);
-                //meshScale.add(object);
-                meshPosition.add(object);
+                meshScale.add(object);
+                meshPosition.add(meshScale);
                 taskbarGroup.add(meshPosition);
                 object.accept(rasterSetupVisitor);
             } catch (error) {

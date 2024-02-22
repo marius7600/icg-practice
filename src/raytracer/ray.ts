@@ -1,6 +1,6 @@
 import CameraNode from "../nodes/camera-node";
 import { Scenegraph } from "../scenegraph";
-import Vector from "../vector";
+import Vector from "../math/vector";
 
 /**
  * Class representing a ray

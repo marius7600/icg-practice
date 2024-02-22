@@ -1,4 +1,4 @@
-import Vector from "../vector";
+import Vector from "../math/vector";
 import Intersection from "./intersection";
 import PhongProperties from "../phong-properties";
 import LightNode from "../nodes/light-node";

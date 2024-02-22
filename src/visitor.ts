@@ -9,7 +9,6 @@ import TextureBoxNode from "./nodes/texture-box-node";
 import TextureTextBoxNode from "./nodes/texture-text-box-node";
 import TextureVideoBoxNode from "./nodes/texture-video-box-node";
 import AnimationNode from "./nodes/animation-nodes";
-// import TaskbarNode from "./nodes/taskbar-node";
 
 export default interface Visitor {
   visitLightNode(node: LightNode): void;
@@ -24,5 +23,4 @@ export default interface Visitor {
   visitAnimationNode(node: AnimationNode): void;
   visitTextureTextBoxNode(node: TextureTextBoxNode): void;
   visitMeshNode(node: MeshNode): void;
-  // visitTaskbarNode(node: TaskbarNode): void;
 }
