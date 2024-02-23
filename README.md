@@ -191,7 +191,7 @@ The right window displays a tic-tac-toe game. The user can click on the boxes to
 | M8     | 2      | Zwei Anwendungsfenster                                            | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm, Lorenz Bauer |
 | M9     | 4      | Taskleiste mit Icons                                              | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm, Lorenz Bauer |
 | M10    | 5      | Auswahl & Manipulation per Maus                                   | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm               |
-| O1     | 7      | Materials for phong shading                                       | <ul><li>- [] </li></ul>  |                                             |
+| O1     | 7      | Materials for phong shading                                       | <ul><li>- [ ] </li></ul>  |                                             |
 | O2     | 3      | Videos and Text as texture                                        | <ul><li>- [X] </li></ul> | Julius Arzberger                            |
 | O3     | 8      | OBJ Loader                                                        | <ul><li>- [X] </li></ul> | Julius Arzberger                            |
 | O4     | 4      | Multiple moving light sources                                     | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm               |
@@ -201,8 +201,8 @@ The right window displays a tic-tac-toe game. The user can click on the boxes to
 | O8     | 5      | Bounding Volumes                                                  | <ul><li>- [X] </li></ul> | Marius Röhm, Julius Arzberger               |
 | O9     | 8      | JSON Loader                                                       | <ul><li>- [X] </li></ul> | Lorenz Bauer                                |
 | 10     | 7      | Ractracing of all Objects from triangles                          | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm               |
-| 11     | 10     | Shadow mapping in WebGL                                           | <ul><li>- [] </li></ul>  |                                             |
-| 12     | 10     | Second, interactive scene as display content of the drawing area. | <ul><li>- [] </li></ul>  |                                             |
+| 11     | 10     | Shadow mapping in WebGL                                           | <ul><li>- [ ] </li></ul>  |                                             |
+| 12     | 10     | Second, interactive scene as display content of the drawing area. | <ul><li>- [ ] </li></ul>  |                                             |
 | 13     | 5      | Simple application in the drawing area                            | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm               |
 | 14     | 5      | Own suggestion for an extension of the application                | <ul><li>- [ ] </li></ul> |                                             |
 | 15     | 5      | Exceptional implementation of requirements                        | <ul><li>- [ ] </li></ul> |                                             |
