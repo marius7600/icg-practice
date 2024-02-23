@@ -236,6 +236,7 @@ export class JsonLoader {
         const rotationNode = new RotationNode(groupNode, axis);
         rotationNode.angle = node.angle
         rotationNode.active = node.active
+        rotationNode.name = node.name
         return rotationNode
     }
 
@@ -244,6 +245,7 @@ export class JsonLoader {
         const translation = this.parseVector(node.translation);
         const startingPos = this.parseMatrix(node.startingPos);
         const jumper = new JumperNode(groupNode, translation, startingPos);
+        jumper.name = node.name
         jumper.active = node.active
         return jumper
     }
@@ -255,6 +257,7 @@ export class JsonLoader {
         driver.loop = node.loop
         driver.speed = node.speed
         driver.active = node.active
+        driver.name = node.name
         return driver
     }
 
@@ -272,6 +275,7 @@ export class JsonLoader {
         const duration = node.duration
         const scaler = new ScaleNode(groupNode, targetScale, duration)
         scaler.active = node.active
+        scaler.name = node.name
         return scaler
     }
 
@@ -308,7 +312,8 @@ export class JsonLoader {
         const transformation = this.getTransformation(node.transform);
         const windowNode = new WindowNode(transformation, node.name);
         const children = node.childCodes as string[]
-
+        windowNode.fullscreen = node.fullscreen
+        windowNode.fullscrenVector = this.parseVector(node.fullscrenVector)
         for (let child of children) {
             const childJSON = this.json[child]
             const childNode = this.nodeFactory(childJSON, node)

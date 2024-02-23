@@ -27,8 +27,8 @@ let scaleNode: ScaleNode = new ScaleNode(this, new Vector(0, 0, 0, 0), 1);
 export class WindowNode extends GroupNode {
 
     private state: { minimized: boolean }
-    private fullscreen: boolean = false;
-    private fullscrenVector: Vector = new Vector(0, 0, 0, 1);
+    public fullscreen: boolean = false;
+    public fullscrenVector: Vector = new Vector(0, 0, 0, 1);
 
     constructor(public transform: Transformation, windowName: string) {
         super(transform);
