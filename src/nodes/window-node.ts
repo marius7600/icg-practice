@@ -5,7 +5,7 @@ import { Transformation, Translation } from '../math/transformation';
 import Vector from '../math/vector';
 import AABoxNode from './aabox-node';
 import SphereNode from './sphere-node';
-import { DriverNode, DriverNodeMouse, ScaleNode } from './animation-nodes';
+import { DriverNode, InputDriverNode, ScaleNode } from './animation-nodes';
 
 // variables for the windows
 const windowDimension = new Vector(3, 3, 0, 1);
@@ -23,13 +23,33 @@ const maximizeSphereDimension = new Vector(0.9, 0, 0, 1);
 
 let scaleNode: ScaleNode = new ScaleNode(this, new Vector(0, 0, 0, 0), 1);
 
-
+/**
+ * Represents a window node in the application. 
+ * The window node contains the window background, the window menu and the minimize and maximize spheres.
+ * @extends GroupNode
+ */
 export class WindowNode extends GroupNode {
 
+    /**
+     * State representing if the window is minimized or not.
+     */
     private state: { minimized: boolean }
+
+    /**
+     * Represents if the window is in fullscreen mode or not.
+     */
     public fullscreen: boolean = false;
+
+    /**
+     * Represents the position of the camera in fullscreen mode.
+     */
     public fullscrenVector: Vector = new Vector(0, 0, 0, 1);
 
+    /**
+     * Represents a window node in the application.
+     * @param transform The transformation of the window node.
+     * @param windowName The name of the window.
+     */
     constructor(public transform: Transformation, windowName: string) {
         super(transform);
         this.state = { minimized: false };
@@ -53,6 +73,9 @@ export class WindowNode extends GroupNode {
         this.add(windowMenuRoot);
     }
 
+    /**
+     * Toggles the window between minimized and maximized state.
+     */
     public toggleMinMax() {
         if (this.state.minimized) {
             this.maximize();
@@ -61,6 +84,13 @@ export class WindowNode extends GroupNode {
         }
     }
 
+    /**
+     * Toggles the fullscreen mode of the window.
+     * If the window is currently in fullscreen mode, it will exit fullscreen mode.
+     * If the window is not in fullscreen mode, it will enter fullscreen mode.
+     * @param cameraGroup - The camera group node.
+     * @param windowRootNode - The window root node.
+     */
     public fullScreen(cameraGroup: GroupNode, windowRootNode: GroupNode) {
         if (this.fullscreen) {
             this.fullscreen = false;
@@ -84,9 +114,10 @@ export class WindowNode extends GroupNode {
     }
 
     /**
-     * Updates the scale node of the window.
-     * If the scale node already exists in the children array, it is replaced with the new scale node.
-     * Otherwise, the new scale node is added to the children array.
+     * Updates the scale node with the specified target scale, duration, and optional name.
+     * @param targetScale - The target scale vector.
+     * @param duration - The duration of the scaling animation.
+     * @param name - Optional name for the scale node.
      */
     private updateScaleNode(targetScale: Vector, duration: number, name?: string) {
         scaleNode.groupNode = this;
@@ -135,10 +166,18 @@ export class WindowNode extends GroupNode {
         }
     }
 
+    /**
+     * Accepts a visitor and calls the appropriate visit method.
+     * @param visitor The visitor to accept.
+     */
     accept(visitor: Visitor) {
         visitor.visitGroupNode(this);
     }
 
+    /**
+     * Converts the WindowNode object to a JSON representation.
+     * @returns The JSON representation of the WindowNode object.
+     */
     toJSON() {
         const json = super.toJSON();
         json["state"] = this.state;

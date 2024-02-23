@@ -4,7 +4,8 @@ import SharedProps from '../boxSharedProperties';
 import GlUtils from "../glUtils";
 
 /**
- * A class creating buffers for an axis aligned box to render it with WebGL
+ * A class representing an axis-aligned box to render it with WebGL.
+ * The box can be textured or coloured.
  */
 export default class RasterBox {
     /**

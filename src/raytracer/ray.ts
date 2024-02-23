@@ -13,12 +13,15 @@ export default class Ray {
    */
   constructor(public origin: Vector, public direction: Vector) { }
 
+
   /**
-   * Creates a ray from the camera through the image plane.
-   * @param x The pixel's x-position in the canvas
-   * @param y The pixel's y-position in the canvas
-   * @param camera The Camera
-   * @return The resulting Ray
+   * Creates a ray from the given coordinates on the canvas.
+   * @param x - The x-coordinate on the canvas.
+   * @param y - The y-coordinate on the canvas.
+   * @param canvasHeight - The height of the canvas.
+   * @param canvasWidth - The width of the canvas.
+   * @param camera - The camera node.
+   * @returns A Ray object representing the ray from the camera to the specified coordinates.
    */
   static makeRay(
     x: number,
@@ -27,10 +30,11 @@ export default class Ray {
     canvasWidth: number,
     camera: CameraNode
   ): Ray {
-    //get camera position 
+    // Get camera position matrix
     const cameraPos = Scenegraph.getGroupNodeCamera().getTransformation().getMatrix();
 
-    const origin = cameraPos.mul(new Vector(0, 0, 0, 1)); // Convert matrix to vector 
+    // Convert matrix to vector to get the camera position (origin of the ray)
+    const origin = cameraPos.mul(new Vector(0, 0, 0, 1));
     const alpha = (camera.fovy * Math.PI) / 180;
 
     // Calculate the direction of the ray

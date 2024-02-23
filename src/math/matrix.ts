@@ -64,7 +64,6 @@ export default class Matrix {
    * @return The resulting rotation matrix
    */
   static rotation(axis: Vector, angle: number): Matrix {
-    // TODO
     if (axis.x == 1) {
       return new Matrix([
         1, 0, 0, 0,
@@ -134,14 +133,17 @@ export default class Matrix {
   }
 
   /**
-   * Constructs a new matrix that represents a projection normalisation transformation
-   * @param left Camera-space left value of lower near point
-   * @param right Camera-space right value of upper right far point
-   * @param bottom Camera-space bottom value of lower lower near point
-   * @param top Camera-space top value of upper right far point
-   * @param near Camera-space near value of lower lower near point
-   * @param far Camera-space far value of upper right far point
-   * @return The rotation matrix
+   * Creates a perspective frustum matrix.
+   * Frustum refers to a solid shape that looks like a pyramid with the top cut off parallel to the base.
+   * This is the shape of the region that can be seen and rendered by a perspective camera.
+   * The output is either drawn to the screen or captured as a texture.
+   * @param left - The left clipping plane coordinate.
+   * @param right - The right clipping plane coordinate.
+   * @param bottom - The bottom clipping plane coordinate.
+   * @param top - The top clipping plane coordinate.
+   * @param near - The distance to the near clipping plane.
+   * @param far - The distance to the far clipping plane.
+   * @returns The perspective frustum matrix.
    */
   static frustum(left: number, right: number, bottom: number, top: number, near: number, far: number): Matrix {
     return new Matrix([
@@ -153,12 +155,12 @@ export default class Matrix {
   }
 
   /**
-   * Constructs a new matrix that represents a projection normalisation transformation.
-   * @param fovy Field of view in y-direction
-   * @param aspect Aspect ratio between width and height
-   * @param near Camera-space distance to near plane
-   * @param far Camera-space distance to far plane
-   * @return The resulting matrix
+   * Creates a perspective projection matrix.
+   * @param fovy - The vertical field of view in degrees.
+   * @param aspect - The aspect ratio of the viewport.
+   * @param near - The distance to the near clipping plane.
+   * @param far - The distance to the far clipping plane.
+   * @returns The perspective projection matrix.
    */
   static perspective(fovy: number, aspect: number, near: number, far: number): Matrix {
     let top = near * Math.tan((Math.PI / 180) * (fovy / 2));
@@ -182,10 +184,11 @@ export default class Matrix {
   }
 
   /**
-   * Matrix multiplication
-   * @param other The matrix or vector to multiply with
-   * @return The result of the multiplication this*other
-   */
+   * Multiplies this matrix with another matrix or vector.
+   * @param other The matrix or vector to multiply with.
+   * @returns The result of the multiplication.
+   * @throws Error if the argument is invalid.
+  */
   mul(other: Vector): Vector;
   mul(other: Matrix): Matrix;
   mul(other: Vector | Matrix): Vector | Matrix {
@@ -221,24 +224,12 @@ export default class Matrix {
   }
 
   /**
-   * Matrix-vector multiplication
-   * @param other The vector to multiply with
-   * @return The result of the multiplication this*other
-   */
-  // mulVec(other: Vector): Vector {
-  //   let result = new Vector(0, 0, 0, 0);
-  //   for (let row = 0; row < 4; row++) {
-  //     let sum = 0;
-  //     for (let col = 0; col < 4; col++) {
-  //       sum += this.getVal(row, col) * other.data[col];
-  //     }
-  //     result.data[row] = sum;
-  //   }
-  //   return result;
-  // }
-
-  /**
    * Returns the transpose of this matrix
+   * [0,1,2,3]      [0,4,8,12]
+   * [4,5,6,7]      [1,5,9,13]
+   * [8,9,10,11]    [2,6,10,14]
+   * [12,13,14,15]  [3,7,11,15]
+   * 
    * @return A new matrix that is the transposed of this
    */
   transpose(): Matrix {
@@ -249,144 +240,6 @@ export default class Matrix {
       }
     }
     return result;
-  }
-
-  /**
-   * Get the inverse of this matrix
-   */
-  inverse(): Matrix {
-    let m = this.data;
-    let inv = new Float32Array(16);
-
-    inv[0] = m[5] * m[10] * m[15] -
-      m[5] * m[11] * m[14] -
-      m[9] * m[6] * m[15] +
-      m[9] * m[7] * m[14] +
-      m[13] * m[6] * m[11] -
-      m[13] * m[7] * m[10];
-
-    inv[4] = -m[4] * m[10] * m[15] +
-      m[4] * m[11] * m[14] +
-      m[8] * m[6] * m[15] -
-      m[8] * m[7] * m[14] -
-      m[12] * m[6] * m[11] +
-      m[12] * m[7] * m[10];
-
-    inv[8] = m[4] * m[9] * m[15] -
-      m[4] * m[11] * m[13] -
-      m[8] * m[5] * m[15] +
-      m[8] * m[7] * m[13] +
-      m[12] * m[5] * m[11] -
-      m[12] * m[7] * m[9];
-
-    inv[12] = -m[4] * m[9] * m[14] +
-      m[4] * m[10] * m[13] +
-      m[8] * m[5] * m[14] -
-      m[8] * m[6] * m[13] -
-      m[12] * m[5] * m[10] +
-      m[12] * m[6] * m[9];
-
-    inv[1] = -m[1] * m[10] * m[15] +
-      m[1] * m[11] * m[14] +
-      m[9] * m[2] * m[15] -
-      m[9] * m[3] * m[14] -
-      m[13] * m[2] * m[11] +
-      m[13] * m[3] * m[10];
-
-    inv[5] = m[0] * m[10] * m[15] -
-      m[0] * m[11] * m[14] -
-      m[8] * m[2] * m[15] +
-      m[8] * m[3] * m[14] +
-      m[12] * m[2] * m[11] -
-      m[12] * m[3] * m[10];
-
-    inv[9] = -m[0] * m[9] * m[15] +
-      m[0] * m[11] * m[13] +
-      m[8] * m[1] * m[15] -
-      m[8] * m[3] * m[13] -
-      m[12] * m[1] * m[11] +
-      m[12] * m[3] * m[9];
-
-    inv[13] = m[0] * m[9] * m[14] -
-      m[0] * m[10] * m[13] -
-      m[8] * m[1] * m[14] +
-      m[8] * m[2] * m[13] +
-      m[12] * m[1] * m[10] -
-      m[12] * m[2] * m[9];
-
-    inv[2] = m[1] * m[6] * m[15] -
-      m[1] * m[7] * m[14] -
-      m[5] * m[2] * m[15] +
-      m[5] * m[3] * m[14] +
-      m[13] * m[2] * m[7] -
-      m[13] * m[3] * m[6];
-
-    inv[6] = -m[0] * m[6] * m[15] +
-      m[0] * m[7] * m[14] +
-      m[4] * m[2] * m[15] -
-      m[4] * m[3] * m[14] -
-      m[12] * m[2] * m[7] +
-      m[12] * m[3] * m[6];
-
-    inv[10] = m[0] * m[5] * m[15] -
-      m[0] * m[7] * m[13] -
-      m[4] * m[1] * m[15] +
-      m[4] * m[3] * m[13] +
-      m[12] * m[1] * m[7] -
-      m[12] * m[3] * m[5];
-
-    inv[14] = -m[0] * m[5] * m[14] +
-      m[0] * m[6] * m[13] +
-      m[4] * m[1] * m[14] -
-      m[4] * m[2] * m[13] -
-      m[12] * m[1] * m[6] +
-      m[12] * m[2] * m[5];
-
-    inv[3] = -m[1] * m[6] * m[11] +
-      m[1] * m[7] * m[10] +
-      m[5] * m[2] * m[11] -
-      m[5] * m[3] * m[10] -
-      m[9] * m[2] * m[7] +
-      m[9] * m[3] * m[6];
-
-    inv[7] = m[0] * m[6] * m[11] -
-      m[0] * m[7] * m[10] -
-      m[4] * m[2] * m[11] +
-      m[4] * m[3] * m[10] +
-      m[8] * m[2] * m[7] -
-      m[8] * m[3] * m[6];
-
-    inv[11] = -m[0] * m[5] * m[11] +
-      m[0] * m[7] * m[9] +
-      m[4] * m[1] * m[11] -
-      m[4] * m[3] * m[9] -
-      m[8] * m[1] * m[7] +
-      m[8] * m[3] * m[5];
-
-    inv[15] = m[0] * m[5] * m[10] -
-      m[0] * m[6] * m[9] -
-      m[4] * m[1] * m[10] +
-      m[4] * m[2] * m[9] +
-      m[8] * m[1] * m[6] -
-      m[8] * m[2] * m[5];
-
-    let det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
-    if (det == 0) {
-      return this;
-    }
-
-    det = 1.0 / det;
-
-    for (let i = 0; i < 16; i++) {
-      inv[i] = inv[i] * det;
-    }
-
-    return new Matrix([
-      inv[0], inv[1], inv[2], inv[3],
-      inv[4], inv[5], inv[6], inv[7],
-      inv[8], inv[9], inv[10], inv[11],
-      inv[12], inv[13], inv[14], inv[15]
-    ]);
   }
 
   /**
@@ -402,6 +255,10 @@ export default class Matrix {
     }
   }
 
+  /**
+   * Converts the matrix to a JSON representation
+   * @return The JSON representation of the matrix
+   */
   toJSON() {
     let d: { [key: string]: any } = {}; // Add index signature to allow indexing with a string
     for (let i = 0; i < this.data.length; i++) {

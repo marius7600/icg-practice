@@ -1,3 +1,6 @@
+/**
+ * Class representing the properties of a Phong material.
+ */
 export default class PhongProperties {
 
     ambient: number;
@@ -5,7 +8,9 @@ export default class PhongProperties {
     specular: number;
     shininess: number;
 
-    // PhongProperties get declared with current slider Values
+    /**
+     * Constructs a new instance of the PhongProperties class.
+     */
     constructor() {
         let phongValues = this.getPhongPropertyValues();
         this.ambient = phongValues.get('ambient_value');
@@ -15,9 +20,8 @@ export default class PhongProperties {
     }
 
     /**
-     * @return Map with phong attributes and their values
-     * key = phongSlider
-     * value = number of phong attribute
+     * Retrieves the values of Phong properties from the corresponding HTML sliders.
+     * @returns A map containing the Phong property names as keys and their corresponding values as values.
      */
     getPhongPropertyValues(): Map<string, number> {
         let map = new Map<string, number>();

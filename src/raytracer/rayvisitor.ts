@@ -22,26 +22,25 @@ import Pyramid from "./pyramid";
 import Ray from "./ray";
 import Sphere from "./ray-sphere";
 
+/**
+ * Class representing Objects that can be intersected with a ray.
+ * The object can have a color.
+ */
 interface Intersectable {
   intersect(ray: Ray): Intersection | null;
   color?: Vector;
 }
 
 /**
- * Class representing a Visitor that uses
- * Raytracing to render a Scenegraph
+ * Class representing a Visitor that uses Raytracing to render a Scenegraph
  */
 export default class RayVisitor implements Visitor {
   /**
-   * The image data of the context to
-   * set individual pixels
+   * The image data of the context to set individual pixels
    */
   imageData: ImageData;
-  camera: CameraNode; // TODO do we need this? Camera is alwas given with render function
+  camera: CameraNode;
   objects: Array<Intersectable>;
-
-  // TODO declare instance variables here
-  // stack:  [{ matrix: Matrix, inverse: Matrix }];
   stack: Array<Matrix> = [];
   intersection: Intersection | null;
   intersectionColor: Vector;
@@ -51,9 +50,9 @@ export default class RayVisitor implements Visitor {
 
   /**
    * Creates a new RayVisitor
-   * @param context The 2D context to render to
-   * @param width The width of the canvas
-   * @param height The height of the canvas
+   * @param context - The 2D context to render to
+   * @param width - The width of the canvas
+   * @param height - The height of the canvas
    */
   constructor(
     private context: CanvasRenderingContext2D,
@@ -65,15 +64,104 @@ export default class RayVisitor implements Visitor {
     this.intersection = null;
   }
 
-  visitLightNode(node: LightNode): void {
-    // // Get the transform of the current node
-    // let myPosition = this.stack[this.stack.length - 1].mul(node.position);
-    // // Add a light node to the list of light nodes
-    // this.lightNodes.push(new LightNode(node.color, myPosition));
+  /**
+   * Renders the Scenegraph
+   * @param rootNode The root node of the Scenegraph
+   * @param camera The camera used
+   */
+  render(
+    rootNode: Node,
+    phongProperties: PhongProperties,
+    numSamples: number
+  ) {
+    // clear
+    let data = this.imageData.data;
+    data.fill(0);
+    this.objects = [];
+    this.lightNodes = [];
 
+    // get all light nodes
+    this.getLightNodes(rootNode);
+
+    //build list of render objects
+    rootNode.accept(this); // this = Visit: GroupNode, Visit: CameraNode, Visit: SphereNode, Visit: AABoxNode, Visit: TextureBoxNode, ...
+
+    // calculate bounding boxes
+    this.boundingBoxes = this.calcualteBoundingBoxes();
+    //this.boundingSpheres = this.calculateBoundingSpheres();
+
+
+    const width = this.imageData.width;
+    const height = this.imageData.height;
+
+    // iterate over all pixels and calculate the color for each pixel using raytracing and phong shading model
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+
+        const ray = Ray.makeRay(x, y, height, width, this.camera); // ray = new Ray(origin, direction)
+
+        let minIntersection = new Intersection(Infinity, null, null);
+        let minObj = null; // minObj is the closest object to the camera
+
+        // iterate over all objects and check for intersection with its bounding box
+        for (let j = 0; j < this.objects.length; j++) {
+          let box = this.boundingBoxes[j];
+          let shape = this.objects[j];
+
+          // check if ray intersects bounding box
+          if (box.intersect(ray)) {
+
+            // check if ray intersects shape
+            const intersection = shape.intersect(ray);
+            //const intersection = box.intersect(ray); // For debugging purposes (only renders bounding boxes)
+
+            // check if intersection exists and if it's closer than the current closest intersection
+            if (intersection && intersection.closerThan(minIntersection)) {
+              minIntersection = intersection;
+              minObj = shape;
+              //minObj = box; // For debugging purposes (only renders bounding boxes)
+            }
+          }
+          else {
+            continue;
+          }
+        }
+
+        if (minObj) {
+          if (!minObj.color) {
+            // if no color is given then set pixel to black , else calculate color with phong
+            data[4 * (width * y + x) + 0] = 0;
+            data[4 * (width * y + x) + 1] = 0;
+            data[4 * (width * y + x) + 2] = 0;
+            data[4 * (width * y + x) + 3] = 255;
+          } else {
+            let color = phong(
+              minObj.color,
+              minIntersection,
+              this.lightNodes,
+              this.camera.center,
+              phongProperties
+            );
+
+            data[4 * (width * y + x) + 0] += color.r * 255;
+            data[4 * (width * y + x) + 1] += color.g * 255;
+            data[4 * (width * y + x) + 2] += color.b * 255;
+            data[4 * (width * y + x) + 3] = 255;
+          }
+        }
+      }
+    }
+    // put the image data to the context (canvas)
+    this.context.putImageData(this.imageData, 0, 0);
+  }
+
+  /**
+   * Visits a LightNode and updates its position based on the current transformation matrix.
+   * @param node - The LightNode to visit.
+   */
+  visitLightNode(node: LightNode): void {
     // Get the current transformation matrix
     let m = this.stack.at(this.stack.length - 1);
-
 
     // Iterate over the lightNodes
     for (let i = 0; i < this.lightNodes.length; i++) {
@@ -137,7 +225,6 @@ export default class RayVisitor implements Visitor {
         max.x = Math.max(max.x, shape.maxPoint.x);
         max.y = Math.max(max.y, shape.maxPoint.y);
         max.z = Math.max(max.z, shape.maxPoint.z);
-        //console.log("Min: ", min, " Max: ", max);
       }
       else {
         console.log("Unknown shape node " + shape);
@@ -147,6 +234,10 @@ export default class RayVisitor implements Visitor {
     return boundingBoxes;
   }
 
+  /**
+   * Calculates the bounding spheres for the objects in the ray visitor.
+   * @returns An array of Sphere objects representing the bounding spheres.
+   */
   calculateBoundingSpheres(): Sphere[] {
     let boundingSpheres: Sphere[] = [];
 
@@ -179,134 +270,14 @@ export default class RayVisitor implements Visitor {
     return boundingSpheres;
   }
 
-  /**
-   * Renders the Scenegraph
-   * @param rootNode The root node of the Scenegraph
-   * @param camera The camera used
-   */
-  render(
-    rootNode: Node,
-    phongProperties: PhongProperties,
-    numSamples: number
-  ) {
-    // clear
-    let data = this.imageData.data;
-    data.fill(0);
-    this.objects = [];
-    this.lightNodes = [];
-
-    this.getLightNodes(rootNode); // get all light nodes
-
-    //build list of render objects
-    rootNode.accept(this); // this = Visit: GroupNode, Visit: CameraNode, Visit: SphereNode, Visit: AABoxNode, Visit: TextureBoxNode
-
-    // calculate bounding boxes
-    this.boundingBoxes = this.calcualteBoundingBoxes();
-    //this.boundingSpheres = this.calculateBoundingSpheres();
-    // raytrace
-    const width = this.imageData.width;
-    const height = this.imageData.height;
-
-    // //For schleife für alle Pixel
-    // for (let i = 0; i < numSamples; i++) {
-    //   const x = Math.floor(Math.random() * width);
-    //   const y = Math.floor(Math.random() * height);
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-
-        const ray = Ray.makeRay(x, y, height, width, this.camera); // ray = new Ray(origin, direction)
-
-        let minIntersection = new Intersection(Infinity, null, null);
-        let minObj = null; // minObj is the closest object to the camera
-
-
-        // for (let j = 0; j < this.objects.length; j++) {
-        //   let shape = this.objects[j];
-
-        //   const intersection = shape.intersect(ray);
-
-        //   if (intersection && intersection.closerThan(minIntersection)) {
-        //     minIntersection = intersection;
-        //     minObj = shape;
-        //   }
-        // }
-
-        // iterate over all objects and check for intersection with its bounding box
-        for (let j = 0; j < this.objects.length; j++) {
-          let box = this.boundingBoxes[j];
-          // let sphere = this.boundingSpheres[j];
-          let shape = this.objects[j];
-
-          // check if ray intersects bounding box/sphere
-          if (box.intersect(ray)) {
-            // if (sphere.intersect(ray)) {
-            // check if ray intersects shape
-            const intersection = shape.intersect(ray);
-            //const intersection = box.intersect(ray);
-
-            // check if intersection exists and if it's closer than the current closest intersection
-            if (intersection && intersection.closerThan(minIntersection)) {
-              minIntersection = intersection;
-              minObj = shape;
-              //minObj = box;
-            }
-          }
-          else {
-            continue;
-          }
-        }
-
-        if (minObj) {
-          if (!minObj.color) {
-            // if no color is given then set pixel to black , else calculate color with phong
-            data[4 * (width * y + x) + 0] = 0;
-            data[4 * (width * y + x) + 1] = 0;
-            data[4 * (width * y + x) + 2] = 0;
-            data[4 * (width * y + x) + 3] = 255;
-          } else {
-            let color = phong(
-              minObj.color,
-              minIntersection,
-              this.lightNodes,
-              this.camera.center,
-              phongProperties
-            );
-
-            data[4 * (width * y + x) + 0] += color.r * 255;
-            data[4 * (width * y + x) + 1] += color.g * 255;
-            data[4 * (width * y + x) + 2] += color.b * 255;
-            data[4 * (width * y + x) + 3] = 255;
-          }
-        }
-      }
-    }
-
-    // // Accumulate old to the new data
-    // let myImageData = this.context.getImageData(0, 0, width, height);
-    // for (let i = 0; i < myImageData.data.length; i += 4) {
-    //   if (myImageData.data[i] != 0 // For all old non-empty pixels 
-    //     && myImageData.data[i + 1] != 0
-    //     && myImageData.data[i + 2] != 0
-    //     && myImageData.data[i + 3] != 0
-    //   ) { // Uebernimm alle alten Pixel falls vorhanden
-    //     this.imageData.data[i] = myImageData.data[i];
-    //     this.imageData.data[i + 1] = myImageData.data[i + 1];
-    //     this.imageData.data[i + 2] = myImageData.data[i + 2];
-    //     this.imageData.data[i + 3] = myImageData.data[i + 3];
-    //   }
-    // }
-    this.context.putImageData(this.imageData, 0, 0); // put the image data to the context (canvas)
-  }
-
 
 
   /**
-  * Seachres for light nodes and sets them in the lights array
+  * Searches for light nodes and sets them in the lights array
   * @parm {Node} The node to search for light nodes
   */
   getLightNodes(node: Node) {
     if (node instanceof LightNode) {
-      //node.position = this.stack.at(this.stack.length - 1).traverse.mul(new Vector(0, 0, 0, 1));
       this.lightNodes.push(node);
     } else if (node instanceof GroupNode) {
       for (let i = 0; i < node.children.length; i++) {
@@ -316,11 +287,10 @@ export default class RayVisitor implements Visitor {
   }
 
   /**
-   * Visits a group node
+   * Visits a group node and pushes the transformation matrix to the stack and visits its children nodes 
    * @param node The node to visit
    */
   visitGroupNode(node: GroupNode) {
-    // TODO traverse the graph and build the model matrix
     let toWorld = this.stack.at(this.stack.length - 1).mul(node.transform.getMatrix());
     this.stack.push(toWorld);
     for (let i = 0; i < node.children.length; i++) {
@@ -330,68 +300,69 @@ export default class RayVisitor implements Visitor {
   }
 
   /**
-   * Visits a sphere node
+   * Visits a sphere node, creates a new sphere object and push it to the objects array
    * @param node - The node to visit
    */
   visitSphereNode(node: SphereNode) {
-    let m = this.stack[this.stack.length - 1]; //translation matrix
+    // Get the current transformation matrix to set the spheres position
+    let m = this.stack[this.stack.length - 1];
 
     let xScale = m.getVal(0, 0);
     let yScale = m.getVal(0, 1);
     let zScale = m.getVal(0, 2);
 
     let scale = Math.sqrt(xScale * xScale + yScale * yScale + zScale * zScale);
-    // console.log(scale);
     this.objects.push(
       new Sphere(m.mul(node.center), node.radius * scale, node.color)
     );
   }
 
   /**
-   * Visits an axis aligned box node and push it to the objects array
+   * Visits an axis aligned box node, creates a new AABox object and push it to the objects array
    * @param node The node to visit
    */
   visitAABoxNode(node: AABoxNode) {
-    // Visit the node and push it to the objects array
-    // this.objects.push(new AABox(node.minPoint, node.maxPoint, node.color));
-
-    // this.stack[0] = Matrix.identity();
     let mat = this.stack[this.stack.length - 1];
     let min = mat.mul(node.minPoint);
     let max = mat.mul(node.maxPoint);
     this.objects.push(new AABox(min, max, node.color));
+  }
 
+  /**
+ * Visits a PyramidNode, creates a new Pyramid and push it to the objects array.
+ * @param node - The PyramidNode to visit.
+ */
+  visitPyramidNode(node: PyramidNode) {
+    let mat = this.stack[this.stack.length - 1];
+    let min = mat.mul(node.minPoint);
+    let max = mat.mul(node.maxPoint);
+    this.objects.push(new Pyramid(min, max, node.color));
   }
 
 
   /**
-   * Visits a textured box node
-   * @param node The node to visit
+   * Visits a textured box node, nothing to do here since we don't support textures yet
    */
   visitTextureBoxNode(node: TextureBoxNode) { }
 
+  /**
+ * Visits a texture video box node, nothing to do here since we don't support textures yet
+ */
   visitTextureVideoBoxNode(node: TextureVideoBoxNode): void { }
 
+  /**
+ * Visits a texture text node, nothing to do here since we don't support textures yet
+ */
   visitTextureTextBoxNode(node: TextureTextBoxNode): void { }
 
+  /**
+   * Visits a MeshNode and transforms its vertices using the current transformation matrix.
+   * Creates a new MeshObject with the transformed vertices and adds it to the objects array.
+   * 
+   * @param node - The MeshNode to visit.
+   */
   visitMeshNode(node: MeshNode): void {
-    // let mat = this.stack[this.stack.length - 1];
-
-    // // Transform the vertices
-    // let transformedVertices = [];
-    // for (let i = 0; i < node.vertices.length; i += 3) {
-    //   let vertex = [node.vertices[i], node.vertices[i + 1], node.vertices[i + 2], 1];
-    //   let transformedVertex = [
-    //     mat.data[0] * vertex[0] + mat.data[4] * vertex[1] + mat.data[8] * vertex[2] + mat.data[12] * vertex[3],
-    //     mat.data[1] * vertex[0] + mat.data[5] * vertex[1] + mat.data[9] * vertex[2] + mat.data[13] * vertex[3],
-    //     mat.data[2] * vertex[0] + mat.data[6] * vertex[1] + mat.data[10] * vertex[2] + mat.data[14] * vertex[3]
-    //   ];
-    //   transformedVertices.push(...transformedVertex);
-    // }
-
-    // // Create a new MeshObject with the transformed vertices and add it to the objects array
-    // const mesh = new MeshObject(transformedVertices, node.normals, node.color, node.maxPoint, node.minPoint);
-    // this.objects.push(mesh);
+    // Get the current transformation matrix
     let mat = this.stack[this.stack.length - 1];
     let matData = mat.data; // Cache mat.data to avoid repeated property lookups
 
@@ -401,13 +372,7 @@ export default class RayVisitor implements Visitor {
     for (let i = 0; i < node.vertices.length; i += 3) {
       let vertex = [node.vertices[i], node.vertices[i + 1], node.vertices[i + 2], 1];
 
-      // Cache repeated computations
-      let matDataTimesVertex0 = matData[0] * vertex[0];
-      let matDataTimesVertex1 = matData[4] * vertex[1];
-      let matDataTimesVertex2 = matData[8] * vertex[2];
-      let matDataTimesVertex3 = matData[12] * vertex[3];
-
-      transformedVertices[i] = matDataTimesVertex0 + matDataTimesVertex1 + matDataTimesVertex2 + matDataTimesVertex3;
+      transformedVertices[i] = matData[0] * vertex[0] + matData[4] * vertex[1] + matData[8] * vertex[2] + matData[12] * vertex[3];
       transformedVertices[i + 1] = matData[1] * vertex[0] + matData[5] * vertex[1] + matData[9] * vertex[2] + matData[13] * vertex[3];
       transformedVertices[i + 2] = matData[2] * vertex[0] + matData[6] * vertex[1] + matData[10] * vertex[2] + matData[14] * vertex[3];
     }
@@ -418,18 +383,13 @@ export default class RayVisitor implements Visitor {
     return;
   }
 
-  //   visitBoxNode(node: BoxNode, object?: GeometryObject) {
-  //     const toWorld = this.getToWorld(Matrix.identity());
-  //     const fromWorld = this.getFromWorld(Matrix.identity());
-  //     if (!object) {
-  //         object = new AABox(node.minPoint, node.maxPoint, new Vector(.5, 0, 1, 1));
-  //     }
-  //     const bounding = BoundingSphere.fromMinMax(node.minPoint, node.maxPoint);
-  //     this.objects.push({node: object, toWorld, fromWorld, boundingSphere: bounding})
-  // }
 
+  /**
+   * Visits a CameraNode and performs necessary operations.
+   * 
+   * @param node - The CameraNode to visit.
+   */
   visitCameraNode(node: CameraNode) {
-    // Frage an Marius: warum machen wir uns den ganzen aufwand, und verwenden nicht einfach node.eye, node.center, node.up?
     let center = this.stack[this.stack.length - 1].mul(node.center);
     let eye = node.eye.mul(1);
     eye.z -= 2;
@@ -444,27 +404,16 @@ export default class RayVisitor implements Visitor {
       node.near,
       node.far
     );
-    // coordinaten hardcoden für test der camera
-    // this.camera = new CameraNode(new Vector(0, 0, 0, 1), new Vector(0, 0, -1, 1), new Vector(0, 1, 0, 0), node.fovy, node.aspect, node.near, node.far);
   }
 
   /**
-   * Visits a camera node
-   * @param node The node to visit
+   * Visits a camera node, nothing to do here
    */
   visitGroupNodeCamera(node: GroupNode) { }
 
-  visitPyramidNode(node: PyramidNode) {
-    let mat = this.stack[this.stack.length - 1];
-    let min = mat.mul(node.minPoint);
-    let max = mat.mul(node.maxPoint);
-    this.objects.push(new Pyramid(min, max, node.color));
-
-  }
-
+  /**
+   * Visits an animation node, nothing to do here
+   */
   visitAnimationNode(node: AnimationNode): void {
-    //TODO-Animation
-    //console.log("AnimationNode visited; not implemented yet");
-
   }
 }

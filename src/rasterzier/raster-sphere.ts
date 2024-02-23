@@ -4,7 +4,8 @@ import Matrix from '../math/matrix';
 import GlUtils from "../glUtils";
 
 /**
- * A class creating buffers for a sphere to render it with WebGL
+ * A class representing a sphere to render it with WebGL.
+ * The sphere can be textured or coloured.
  */
 export default class RasterSphere {
     /**

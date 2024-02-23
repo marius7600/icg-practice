@@ -25,10 +25,11 @@ export default class Pyramid {
      */
     constructor(public minPoint: Vector, public maxPoint: Vector, public color: Vector) {
 
+        // calculate the top point of the pyramid
         let topx = (minPoint.x) + (maxPoint.x - minPoint.x) / 2;
         let topz = (minPoint.z) + (maxPoint.z - minPoint.z) / 2;
 
-
+        // The vertices of the pyramid that form the corners
         this.vertices = [
             new Vector(minPoint.x, minPoint.y, maxPoint.z, 1), //0
             new Vector(maxPoint.x, minPoint.y, maxPoint.z, 1), //1
@@ -37,6 +38,8 @@ export default class Pyramid {
             new Vector(topx, maxPoint.y, topz, 1)
 
         ];
+
+        // The indices of the vertices defining how to connect vertices in order to produce a surface
         this.indices = [
             0, 1, 2,
             0, 2, 3,

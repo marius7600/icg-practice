@@ -36,6 +36,9 @@ export default class MouseVisitor implements Visitor {
     ray: Ray;
 
 
+    /**
+     * Constructs a new instance of the MouseVisitor class.
+     */
     constructor() {
         this.stack.push(Matrix.identity());
         // this.intersection = new Intersection(Infinity, null, null);
@@ -43,6 +46,11 @@ export default class MouseVisitor implements Visitor {
         this.nodes = [];
     }
 
+    /**
+     * Visits a LightNode and performs necessary operations.
+     * 
+     * @param node - The LightNode to visit.
+     */
     visitLightNode(node: LightNode): void {
         // throw new Error('Method not implemented.');
 
@@ -51,9 +59,13 @@ export default class MouseVisitor implements Visitor {
         // Add a light node to the list of light nodes
         this.lightNodes.push(new LightNode(node.color, myPosition));
     }
-    visitGroupNode(node: GroupNode): void {
-        // throw new Error('Method not implemented.');
 
+    /**
+     * Visits a GroupNode and performs necessary operations.
+     * 
+     * @param node - The GroupNode to visit.
+     */
+    visitGroupNode(node: GroupNode): void {
         let toWorld = this.stack
             .at(this.stack.length - 1)
             .mul(node.transform.getMatrix());
@@ -63,6 +75,12 @@ export default class MouseVisitor implements Visitor {
         }
         this.stack.pop();
     }
+
+    /**
+     * Visits a SphereNode and performs necessary operations.
+     * 
+     * @param node - The SphereNode to visit.
+     */
     visitSphereNode(node: SphereNode): void {
         // throw new Error('Method not implemented.');
 
@@ -78,6 +96,12 @@ export default class MouseVisitor implements Visitor {
         );
         this.nodes.push(node);
     }
+
+    /**
+     * Visits an AABoxNode and performs necessary operations.
+     * 
+     * @param node - The AABoxNode to visit.
+     */
     visitAABoxNode(node: AABoxNode): void {
         // Get the transformation matrix for the current node
         let m = this.stack[this.stack.length - 1];
@@ -88,14 +112,28 @@ export default class MouseVisitor implements Visitor {
         this.intersectables.push(new AABox(min, max, node.color));
         this.nodes.push(node);
     }
-    visitTextureBoxNode(node: TextureBoxNode): void {
-        // throw new Error('Method not implemented.');
-    }
 
+    /*
+    * Visits a TextureBoxNode. Do nothing.
+    */
+    visitTextureBoxNode(node: TextureBoxNode): void { }
+
+    /*
+* Visits a MeshNode. Do nothing.
+*/
     visitMeshNode(node: MeshNode): void { }
 
+    /*
+* Visits a TextureVideoBoxNode. Do nothing.
+*/
     visitTextureVideoBoxNode(node: TextureVideoBoxNode): void { }
 
+
+    /**
+     * Visits a TextureTextBoxNode and creates an AABox that represents the bounding box of the node.
+     * Pushes the box to the intersectables array and the node to the nodes array.
+     * @param node - The TextureTextBoxNode to visit.
+     */
     visitTextureTextBoxNode(node: TextureTextBoxNode): void {
         // Get the transformation matrix for the current node
         let m = this.stack[this.stack.length - 1];
@@ -114,14 +152,12 @@ export default class MouseVisitor implements Visitor {
         this.nodes.push(node);
     }
 
+    /**
+     * Visits a CameraNode and sets is attributes to the current camera.
+     * 
+     * @param node - The CameraNode to visit.
+     */
     visitCameraNode(node: CameraNode): void {
-        // throw new Error('Method not implemented.');
-
-        let center = this.stack[this.stack.length - 1].mul(node.center);
-        let eye = node.eye.mul(1);
-        eye.z -= 2;
-        eye = this.stack[this.stack.length - 1].mul(node.eye);
-        let up = this.stack[this.stack.length - 1].mul(node.up);
         this.camera = new CameraNode(
             node.eye,
             node.center,
@@ -132,11 +168,18 @@ export default class MouseVisitor implements Visitor {
             node.far
         );
     }
-    visitGroupNodeCamera(node: GroupNode): void {
-        // throw new Error('Method not implemented.');
-    }
+
+    /**
+     * Visits a GroupNodeCamera. Do nothing.
+     */
+    visitGroupNodeCamera(node: GroupNode): void { }
+
+    /**
+     * Visits a PyramidNode. 
+     * Creates a Pyramid object and adds it to the intersectables and nodes arrays.
+     * @param node The PyramidNode to visit.
+     */
     visitPyramidNode(node: PyramidNode): void {
-        // throw new Error('Method not implemented.');
         let mat = this.stack[this.stack.length - 1];
         let min = mat.mul(node.minPoint);
         let max = mat.mul(node.maxPoint);
@@ -144,9 +187,10 @@ export default class MouseVisitor implements Visitor {
         this.nodes.push(node);
     }
 
-    visitAnimationNode(node: AnimationNode): void {
-        //console.log("AnimationNode  in MouseVisitor");
-    }
+    /**
+     * Visits an AnimationNode and does nothing.
+     */
+    visitAnimationNode(node: AnimationNode): void { }
 
     /**
      * Calculates the closest node to the mouse position
@@ -162,15 +206,22 @@ export default class MouseVisitor implements Visitor {
         mouse_y: number,
         context: CanvasRenderingContext2D | WebGL2RenderingContext
     ): Node {
+        // Initialize intersection with default values
         this.intersection = new Intersection(Infinity, null, null);
+
+        // Initialize arrays for intersectables, nodes, and lightNodes
         this.intersectables = [];
         this.nodes = [];
-        this.camera = null;
-        this.imageData = null;
         this.lightNodes = [];
 
+        // Initialize camera and imageData as null
+        this.camera = null;
+        this.imageData = null;
+
+        // Accept the current object as a visitor to the sceneGraph
         sceneGraph.accept(this);
 
+        // Create a ray from the mouse position and the camera
         this.ray = Ray.makeRay(
             mouse_x,
             mouse_y,
@@ -179,29 +230,29 @@ export default class MouseVisitor implements Visitor {
             this.camera
         );
 
+        // Initialize minimum intersection and selectedNode with default values
         let minIntersection = new Intersection(Infinity, null, null);
         let selectedNode: Node = null;
-        // console.log(this.intersectables);
 
-        for (
-            let i = 0;
-            i < this.intersectables.length && i < this.nodes.length;
-            i++
-        ) {
+        // Loop through intersectables and nodes
+        for (let i = 0; i < this.intersectables.length && i < this.nodes.length; i++) {
             try {
+                // Try to find an intersection between the ray and the current intersectable
                 this.intersection = this.intersectables[i].intersect(this.ray);
             } catch (e) {
+                // Log any errors and continue with the next iteration
                 console.log(e);
                 continue;
             }
+            // If an intersection is found and it's closer than the current minimum intersection
             if (this.intersection && this.intersection.closerThan(minIntersection)) {
-                // console.log("New minIntersection found: " + this.intersection);
+                // Update the minimum intersection and the selected node
                 minIntersection = this.intersection;
                 selectedNode = this.nodes[i];
             }
         }
-        //console.log("Selected node is:", selectedNode);
 
+        // Return the selected node
         return selectedNode;
     }
 }

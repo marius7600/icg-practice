@@ -1,35 +1,25 @@
 import "bootstrap";
 import "bootstrap/scss/bootstrap.scss";
 import MouseVisitor from "./mousevisitor";
-import AABoxNode from "./nodes/aabox-node";
-import { DriverNode, DriverNodeMouse, JumperNode, RotationNode, ScaleNode } from "./nodes/animation-nodes";
+import { JumperNode } from "./nodes/animation-nodes";
 import CameraNode from "./nodes/camera-node";
 import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
-import PyramidNode from "./nodes/pyramid-node";
-import SphereNode from "./nodes/sphere-node";
 import PhongProperties from "./phong-properties";
-import TextureVideoBoxNode from "./nodes/texture-video-box-node";
 import { RasterSetupVisitor, RasterVisitor } from "./rasterzier/rastervisitor";
 import RayVisitor from "./raytracer/rayvisitor";
 import phongFragmentShader from "./shader/phong-fragment-shader.glsl";
 import phongVertexShader from "./shader/phong-vertex-perspective-shader.glsl";
 import Shader from "./shader/shader";
-import { EmptyTransformation, RotateWithPosition, Rotation, Scaling, Transform4x4, Translation } from "./math/transformation";
 import Vector from "./math/vector";
-import TextureBoxNode from "./nodes/texture-box-node";
 import textureVertexShader from "./shader/texture-vertex-perspective-shader.glsl";
 import textureFragmentShader from "./shader/texture-fragment-shader.glsl";
 import Matrix from "./math/matrix";
 import { Scenegraph } from "./scenegraph";
 import JsonVisitor from "./jsonVisitor";
-import TextureTextBoxNode from "./nodes/texture-text-box-node";
 import Node from "./nodes/node";
-import MeshNode from "./nodes/mesh-node";
 import { TicTacToe } from "./ticTacToe";
-import { WindowNode } from "./nodes/window-node";
 import AnimationNode from "./nodes/animation-nodes";
-import Ray from "./raytracer/ray";
 
 let rasterizing: boolean = true;
 
@@ -52,6 +42,11 @@ let myJumperNode: JumperNode = null;
 let canvas_raster: HTMLCanvasElement;
 let ctx_raster: WebGL2RenderingContext;
 
+let rasterSetupVisitor: RasterSetupVisitor;
+let mouseVisitor: MouseVisitor;
+let canvas_ray: HTMLCanvasElement
+let ctx_ray: CanvasRenderingContext2D;
+
 
 export default interface PhongValues {
   ambient: number;
@@ -62,221 +57,15 @@ export default interface PhongValues {
 
 let selectedNode: Node = null;
 
+// Load the scene graph and start the main function
+window.addEventListener("load", main);
 
-
-window.addEventListener("load", () => {
-  const canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
-  const ctx_ray = canvas_ray.getContext("2d");
-
-  canvas_raster = document.getElementById("rasterizer") as HTMLCanvasElement;
-  ctx_raster = canvas_raster.getContext("webgl2");
-
-  const rasterSetupVisitor = new RasterSetupVisitor(ctx_raster);
-
-  const mouseVisitor = new MouseVisitor();
-
-
-  //!!!create scene graph!!!
-  Scenegraph.createProjectGraph(canvas_raster.width, canvas_raster.height, rasterSetupVisitor);
-
-
-  // Get a reference to the canvas and its context
-  const canvas = document.getElementById('drawing') as HTMLCanvasElement;
-  const ctx = canvas.getContext('2d');
-  // Set the fill color to black
-  ctx.fillStyle = 'white';
-
-  // Flag to keep track of whether the mouse button is down
-  let isDrawing = false;
-
-  // Function to start drawing
-  canvas.addEventListener('mousedown', function () {
-    isDrawing = true;
-  });
-
-  // Function to stop drawing
-  canvas.addEventListener('mouseup', function () {
-    isDrawing = false;
-  });
-
-  // Function to draw a pixel at the mouse position
-  canvas.addEventListener('mousemove', function (e) {
-    if (!isDrawing) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    ctx.fillRect(x, y, 3, 3);
-  });
-
-  // Function to clear the drawable canvas
-  document.getElementById('clearCanvas')?.addEventListener('click', function () {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  });
-
-  // Function to clear the game
-  document.getElementById('clearGame')?.addEventListener('click', function () {
-    TicTacToe.clearGame();
-    rasterSetupVisitor.setup(Scenegraph.getGraph());
-  });
-
-  // Add a click event listener to the canvas
-  canvas_ray.addEventListener("click", function (info) {
-    //Playing tik tak toe
-    selectedNode = mouseVisitor.getSelectedNode(Scenegraph.getGraph(), info.offsetX, info.offsetY, ctx_raster);
-    handleMouseclickEvent(selectedNode, info.x, info.y);
-    // CheckTikTakToeField(currentPlayer, selectedNode);
-  });
-
-  // Add a click event listener to the canvas
-  canvas_raster.addEventListener("click", function (info) {
-    //Playing tik tak toe
-    selectedNode = mouseVisitor.getSelectedNode(Scenegraph.getGraph(), info.offsetX, info.offsetY, ctx_raster);
-    console.log("Object clicked: ", selectedNode);
-    TicTacToe.CheckTikTakToeField(selectedNode, rasterSetupVisitor);
-    // Handle events when clicking on objects with the mouse
-    handleMouseclickEvent(selectedNode, info.x, info.y);
-  });
-
-  // Event listeners for the slider changes
-  window.addEventListener("input", function (event) {
-    sliderChanged(event);
-  });
-
-  /*
-  * Event listener for the keydown event to stop the animation
-  */
-  window.addEventListener("keydown", (event) => {
-    if (event.key === "p") {
-      Scenegraph.getAllNodesOfType(AnimationNode).forEach((node) => {
-        if (node.name == null) return;
-        if (node.name.startsWith("animateLight")) {
-          node.toggleActive();
-        }
-      }
-      )
-    }
-
-  })
-
-  /* Call figure toggle if key 2 is pressed */
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "2") {
-      toggleFigure();
-    }
-  });
-  document.getElementById("animationToggle").addEventListener("click", () => {
-    toggleAnimation();
-  });
-
-  // initialize the phong properties
-  phongProperties = new PhongProperties();
-
-  // setup for raytracing rendering
-  rayVisitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
-
-  // setup for raster rendering
-
-  rasterSetupVisitor.setup(Scenegraph.getGraph());
-
-  phongShader = new Shader(ctx_raster, phongVertexShader, phongFragmentShader);
-
-  textureShader = new Shader(
-    ctx_raster,
-    textureVertexShader,
-    textureFragmentShader
-  );
-
-  rasterVisitor = new RasterVisitor(
-    ctx_raster,
-    phongShader,
-    textureShader,
-    rasterSetupVisitor.objects,
-    phongProperties
-  );
-
-  phongShader.load();
-  textureShader.load();
-  rasterVisitor.setupCamera(Scenegraph.getCamera());
-
-
-  lastTimestamp = performance.now();
-  startAnimation();
-
-  function startAnimation() {
-    // start animation
-    lastTimestamp = 0;
-    Promise.all([phongShader.load(), textureShader.load()]).then(() => {
-      window.requestAnimationFrame(animate);
-    });
-  }
-
-  /* animate the scene */
-  function animate(timestamp: number) {
-    let delta = 0.01;
-    if (animationActivated) {
-      // console.log("animation loop started");
-      if (lastTimestamp === 0) {
-        lastTimestamp = timestamp;
-      }
-      delta = (timestamp - lastTimestamp);
-      lastTimestamp = timestamp;
-      if (rasterizing) {
-        rasterVisitor.render(Scenegraph.getGraph(), Scenegraph.getCamera())
-      } else {
-        rayVisitor.render(Scenegraph.getGraph(), phongProperties, 500000);
-      }
-      const animationNodeList = Scenegraph.getAllNodesOfType(AnimationNode);
-
-      for (let animationNode of animationNodeList) {
-        animationNode.simulate(delta);
-      }
-      window.requestAnimationFrame(animate);
-    }
-
-
-  }
-
-  function toggleAnimation() {
-    console.log("toggle animation");
-    console.log("Animation Activated old Satus: " + animationActivated);
-    animationActivated = !animationActivated;
-    console.log("Animation Activated new Satus: " + animationActivated);
-    if (animationActivated) {
-      document.getElementById("animationToggle").style.background = "green";
-      startAnimation();
-    } else {
-      document.getElementById("animationToggle").style.background = "red";
-      lastTimestamp = 0;
-    }
-  }
-
-  // dowload scene as JSON file
-  document.getElementById('downloadButton').addEventListener("click", () => {
-    new JsonVisitor().saveSceneGraph(Scenegraph.getGraph())
-  })
-
-  // upload scene from JSON file
-  let uploadButton = document.getElementById("uploadButton");
-  uploadButton.onclick = () => {
-    let fileSelector = document.createElement("input");
-    fileSelector.setAttribute("type", "file");
-    fileSelector.onchange = () => {
-      let files = fileSelector.files[0];
-      let reader = new FileReader();
-      reader.onload = (event) => {
-        Scenegraph.fromJSON(files, rasterVisitor, rasterSetupVisitor)
-        console.log("JSON file uploaded");
-
-
-      };
-      reader.readAsText(files);
-    };
-    fileSelector.click();
-  };
-});
-
-
-
+/**
+ * Handles the mouse click event on a selected node.
+ * @param selectedNode - The selected node.
+ * @param mouseX - The x-coordinate of the mouse click.
+ * @param mouseY - The y-coordinate of the mouse click.
+ */
 function handleMouseclickEvent(selectedNode: Node, mouseX: number, mouseY: number) {
   if (selectedNode == null || selectedNode.name == null) return;
 
@@ -353,35 +142,27 @@ function sliderChanged(event: any) {
   switch (id) {
     case "ambient_value":
       phongProperties.ambient = value;
-      console.log("Ambient: " + value);
       break;
     case "diffuse_value":
       phongProperties.diffuse = value;
-      console.log("Diffuse: " + value);
       break;
     case "specular_value":
       phongProperties.specular = value;
-      console.log("Specular: " + value);
       break;
     case "shininess_value":
       phongProperties.shininess = value;
-      console.log("Shininess: " + value);
       break;
     case "fov_value":
       cameraNode.fovy = value;
-      console.log("FOV: " + value);
       break;
     case "light1_x_value":
       light1.position.x = value;
-      console.log("Light1 x: " + value);
       break;
     case "light1_y_value":
       light1.position.y = value;
-      console.log("Light1 y: " + value);
       break;
     case "light1_z_value":
       light1.position.z = value;
-      console.log("Light1 z: " + value);
       break;
     default:
       console.log("Unknown slider: " + id);
@@ -389,3 +170,236 @@ function sliderChanged(event: any) {
   }
 }
 
+/**
+ * Creates a drawing canvas and sets up event listeners for drawing functionality.
+ */
+function createDrawingCanvas() {
+  // Get a reference to the canvas and its context
+  const canvas = document.getElementById('drawing') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d');
+  // Set the fill color to black
+  ctx.fillStyle = 'white';
+
+  // Flag to keep track of whether the mouse button is down
+  let isDrawing = false;
+
+  // Function to start drawing
+  canvas.addEventListener('mousedown', function () {
+    isDrawing = true;
+  });
+
+  // Function to stop drawing
+  canvas.addEventListener('mouseup', function () {
+    isDrawing = false;
+  });
+
+  // Function to draw a pixel at the mouse position
+  canvas.addEventListener('mousemove', function (e) {
+    if (!isDrawing) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    ctx.fillRect(x, y, 3, 3);
+  });
+
+  // Function to clear the drawable canvas
+  document.getElementById('clearCanvas')?.addEventListener('click', function () {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+}
+
+/**
+ * Creates event listeners for various interactions in the scene graph.
+ */
+function createEventListeners() {
+  // Function to clear the tic tac toe field
+  document.getElementById('clearGame')?.addEventListener('click', function () {
+    TicTacToe.clearGame();
+    rasterSetupVisitor.setup(Scenegraph.getGraph());
+  });
+
+  // Add a click event listener to the ray canvas
+  canvas_ray.addEventListener("click", function (info) {
+    selectedNode = mouseVisitor.getSelectedNode(Scenegraph.getGraph(), info.offsetX, info.offsetY, ctx_raster);
+    // Handle events when clicking on objects with the mouse
+    handleMouseclickEvent(selectedNode, info.x, info.y);
+  });
+
+  // Add a click event listener to the raster canvas
+  canvas_raster.addEventListener("click", function (info) {
+    selectedNode = mouseVisitor.getSelectedNode(Scenegraph.getGraph(), info.offsetX, info.offsetY, ctx_raster);
+    TicTacToe.CheckTikTakToeField(selectedNode, rasterSetupVisitor);
+    // Handle events when clicking on objects with the mouse
+    handleMouseclickEvent(selectedNode, info.x, info.y);
+  });
+
+  // Event listeners for the slider changes
+  window.addEventListener("input", function (event) {
+    sliderChanged(event);
+  });
+
+
+  // Event listener for the keydown event to stop the animation
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "p") {
+      Scenegraph.getAllNodesOfType(AnimationNode).forEach((node) => {
+        if (node.name == null) return;
+        if (node.name.startsWith("animateLight")) {
+          node.toggleActive();
+        }
+      }
+      )
+    }
+
+  })
+
+  // toggle between raytracer and rasterizer
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "2") {
+      toggleFigure();
+    }
+  });
+}
+
+/**
+ * The main entry point of the application.
+ */
+function main() {
+  canvas_ray = document.getElementById("raytracer") as HTMLCanvasElement;
+  ctx_ray = canvas_ray.getContext("2d");
+
+  canvas_raster = document.getElementById("rasterizer") as HTMLCanvasElement;
+  ctx_raster = canvas_raster.getContext("webgl2");
+
+  rasterSetupVisitor = new RasterSetupVisitor(ctx_raster);
+
+  mouseVisitor = new MouseVisitor();
+
+  // Create the drawing canvas
+  createDrawingCanvas();
+
+  //!!!create scene graph!!!\\
+  Scenegraph.createProjectGraph(canvas_raster.width, canvas_raster.height, rasterSetupVisitor);
+
+  // Create event listeners
+  createEventListeners();
+
+  document.getElementById("animationToggle").addEventListener("click", () => {
+    toggleAnimation();
+  });
+
+  // initialize the phong properties
+  phongProperties = new PhongProperties();
+
+  // setup for raytracing rendering
+  rayVisitor = new RayVisitor(ctx_ray, canvas_ray.width, canvas_ray.height);
+
+  // setup for raster rendering
+  rasterSetupVisitor.setup(Scenegraph.getGraph());
+
+  // create the phong shader
+  phongShader = new Shader(ctx_raster, phongVertexShader, phongFragmentShader);
+
+  // create the texture shader
+  textureShader = new Shader(
+    ctx_raster,
+    textureVertexShader,
+    textureFragmentShader
+  );
+
+  // create the raster visitor
+  rasterVisitor = new RasterVisitor(
+    ctx_raster,
+    phongShader,
+    textureShader,
+    rasterSetupVisitor.objects,
+    phongProperties
+  );
+
+  // load shaders
+  phongShader.load();
+  textureShader.load();
+
+  // setup the camera
+  rasterVisitor.setupCamera(Scenegraph.getCamera());
+
+
+  lastTimestamp = performance.now();
+  startAnimation();
+
+  /**
+   * Starts the animation loop.
+   */
+  function startAnimation() {
+    lastTimestamp = 0;
+    Promise.all([phongShader.load(), textureShader.load()]).then(() => {
+      window.requestAnimationFrame(animate);
+    });
+  }
+
+  /**
+   * Animates the scene graph based on the given timestamp.
+   * @param timestamp - The current timestamp.
+   */
+  function animate(timestamp: number) {
+    let delta = 0.01;
+    if (animationActivated) {
+      if (lastTimestamp === 0) {
+        lastTimestamp = timestamp;
+      }
+
+      delta = (timestamp - lastTimestamp);
+      lastTimestamp = timestamp;
+
+      if (rasterizing) {
+        rasterVisitor.render(Scenegraph.getGraph(), Scenegraph.getCamera())
+      } else {
+        rayVisitor.render(Scenegraph.getGraph(), phongProperties, 500000);
+      }
+      const animationNodeList = Scenegraph.getAllNodesOfType(AnimationNode);
+
+      for (let animationNode of animationNodeList) {
+        animationNode.simulate(delta);
+      }
+      window.requestAnimationFrame(animate);
+    }
+  }
+
+  /**
+   * Toggles the animation state.
+   */
+  function toggleAnimation() {
+    animationActivated = !animationActivated;
+    if (animationActivated) {
+      document.getElementById("animationToggle").style.background = "green";
+      startAnimation();
+    } else {
+      document.getElementById("animationToggle").style.background = "red";
+      lastTimestamp = 0;
+    }
+  }
+
+  // dowload scene as JSON file
+  document.getElementById('downloadButton').addEventListener("click", () => {
+    new JsonVisitor().saveSceneGraph(Scenegraph.getGraph())
+  })
+
+  // upload scene from JSON file
+  let uploadButton = document.getElementById("uploadButton");
+  uploadButton.onclick = () => {
+    let fileSelector = document.createElement("input");
+    fileSelector.setAttribute("type", "file");
+    fileSelector.onchange = () => {
+      let files = fileSelector.files[0];
+      let reader = new FileReader();
+      reader.onload = (event) => {
+        Scenegraph.fromJSON(files, rasterVisitor, rasterSetupVisitor)
+        console.log("JSON file uploaded");
+
+
+      };
+      reader.readAsText(files);
+    };
+    fileSelector.click();
+  };
+}

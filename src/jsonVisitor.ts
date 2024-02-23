@@ -15,19 +15,26 @@ import MeshNode from "./nodes/mesh-node";
 import TextureTextBoxNode from "./nodes/texture-text-box-node";
 import { WindowNode } from "./nodes/window-node";
 
-
+/*
+* This class is used to visit all the nodes in the scene graph and save them as a JSON file.
+* 
+* The JSON file is saved as a string and then downloaded. 
+*/
 export default class JsonVisitor implements Visitor {
 
     serialScene: any // sceneObject
-    lastCode: number
-    parentCodeStack: string[]
-    animationsNodes: AnimationNode[]
+    lastCode: number //How far inside the tree we are
+    parentCodeStack: string[] //Stack of parent node codes
+    animationsNodes: AnimationNode[] //List of animation nodes
 
 
 
-    // save the scene graph to a JSON file
-    // sceneGraphRootNode is first Object in JSON file
-    // cameraNode is second Object in JSON file
+
+    /**
+     * Saves the scene graph as a JSON file.
+     * 
+     * @param sceneGraph - The scene graph to be saved.
+     */
     saveSceneGraph(sceneGraph: Scenegraph) {
         const root = Scenegraph.getGraph()
         this.animationsNodes = Scenegraph.getAnimationNodes()
@@ -41,7 +48,13 @@ export default class JsonVisitor implements Visitor {
         this.download(serialScene, "scene.json", "JSON")
     }
 
-    // visit leafNode and add it to the sceneGraph in serialScene
+
+    /**
+     * Visits a leaf node, saves its properties to JSON.
+     * 
+     * @param node - The leaf node to be visited.
+     * @returns The code generated for the leaf node.
+     */
     private visitLeafNode(node: Node) {
         console.log("Current Node in visitLeafNodes: ", node);
         const code = this.nextCode();
@@ -52,7 +65,11 @@ export default class JsonVisitor implements Visitor {
     }
 
 
-    // add child code to parent node to create SceneGraphStructure
+
+    /**
+     * Adds the provided code as a child code to the parent node.
+     * @param code The code to be added as a child code.
+     */
     private addChildCodeToParentNode(code: string) {
         console.log("Current Code in addChildCodeToParentNode: ", code);
 
@@ -65,28 +82,30 @@ export default class JsonVisitor implements Visitor {
     }
 
 
-    // generate next code for the node
+
+    /**
+     * Generates the next code in the sequence.
+     * @returns The next code as a string.
+     */
     private nextCode(): string {
         let nextCode = "" + this.lastCode++
         return nextCode.padStart(4, "0")
     }
 
 
-    // get all the animation nodes from the scene graph as a list
-    // FIXME: getFunction should return the list
-    private getAnimationNodes() {
-        const animationNodes = Scenegraph.getAnimationNodes();
-        this.serialScene.animationNodes = []
-        for (let animationNode of animationNodes) {
-            this.serialScene.animationNodes.push()
-        }
-
-    }
-
-    // methods for visiting nodes
 
 
-    // visiting froup node and its children
+    /*
+    * Visiting the nodes
+    */
+
+
+
+    /**
+     * Visits a GroupNode and its children.
+     * 
+     * @param node The GroupNode to visit.
+     */
     visitGroupNode(node: GroupNode) {
         const code = this.visitLeafNode(node);
 
@@ -122,8 +141,7 @@ export default class JsonVisitor implements Visitor {
         this.visitLeafNode(node)
     }
 
-    // visiting CameraNode 
-    // !!! CAMERA IS SAVED SEPARATELY IN THE saveSceneGraph method
+    // visiting CameraNode
     visitCameraNode(node: CameraNode): void {
         this.visitLeafNode(node)
     }
@@ -140,23 +158,20 @@ export default class JsonVisitor implements Visitor {
 
     // visiting AnimationNode
     visitAnimationNode(node: AnimationNode) {
-        // const code = this.visitLeafNode(node);
-        // this.parentCodeStack.push(code)
-        // node.groupNode.accept(this)
-        // this.parentCodeStack.pop()
         this.visitLeafNode(node);
     }
 
-    // TODO: visiting TextureTextBoxNode
+    // visiting TextureTextBoxNode
     visitTextureTextBoxNode(node: TextureTextBoxNode): void {
         this.visitLeafNode(node)
     }
 
-    // TODO: visiting MeshNode
+    // visiting MeshNode
     visitMeshNode(node: MeshNode): void {
         this.visitLeafNode(node)
     }
 
+    // visiting WindowNode
     visitWindowNode(node: WindowNode): void {
         const code = this.visitLeafNode(node);
 
@@ -169,7 +184,14 @@ export default class JsonVisitor implements Visitor {
     }
 
 
-    // create a download link for the JSON file
+
+    /**
+     * Downloads the specified data as a file with the given filename and type.
+     * 
+     * @param data - The data to be downloaded.
+     * @param filename - The name of the file to be downloaded.
+     * @param type - The MIME type of the file.
+     */
     private download(data: string, filename: string, type: string) {
         var file = new Blob([data], { type: type });
         // Others
@@ -190,9 +212,11 @@ export default class JsonVisitor implements Visitor {
 
 };
 
-// classes for serializing the scene graph
 
 // class for serializing nodes
+/**
+ * Represents a serialized node.
+ */
 class SerializeNode {
     classname: string
 
@@ -201,7 +225,10 @@ class SerializeNode {
     }
 }
 
-// class for serializing group node
+
+/**
+ * Represents a node used for serializing a group.
+ */
 class SerializeGroupNode extends SerializeNode {
     childCodes: string[]
     transformation: { type: string, transformation: Transformation }

@@ -10,18 +10,19 @@ This repository contains the project of the course "Interactive Computer Graphic
 
 ```
 .
+.
+├── --charset
 ├── dist
-│   ├── assitoni.mp4
 │   ├── brickwall-normal.jpg
 │   ├── cube.obj
+│   ├── fish.mp4
 │   ├── hci-logo.png
 │   ├── index.html
-│   ├── lool.obj
 │   ├── monkey.obj
 │   ├── normalneutral.png
-│   ├── pychoandi.png
+│   ├── psychoandreas.png
 │   ├── source-missing-texture.png
-│   └── towelie.obj
+│   ├── tictactoe.png
 ├── Finale Abgabe Modul Interaktive Computergraphik Übung.pdf
 ├── fragen.md
 ├── img
@@ -30,9 +31,7 @@ This repository contains the project of the course "Interactive Computer Graphic
 ├── package-lock.json
 ├── README.md
 ├── src
-│   ├── animationVisitor.ts
 │   ├── boxSharedProperties.ts
-│   ├── game.ts
 │   ├── glUtils.ts
 │   ├── index.ts
 │   ├── jsonLoader.ts
@@ -86,10 +85,12 @@ This repository contains the project of the course "Interactive Computer Graphic
 │   │   ├── shader.ts
 │   │   ├── texture-fragment-shader.glsl
 │   │   └── texture-vertex-perspective-shader.glsl
+│   ├── ticTacToe.ts
 │   └── visitor.ts
 ├── tree.txt
 ├── tsconfig.json
 └── webpack.config.js
+
 ```
 
 The project is divided thematically into several folders.
@@ -159,13 +160,11 @@ Buttons for the following functions are located below the render canvas:
 
 - _Download JSON_: Saves the current scene as a JSON file.
 
-- _Upload JSON_: Loads a scene from a JSON file.
+- _Upload JSON_: Loads a scene from a JSON file. A uploaded scene cannot be downloaded and uploaded again!
 
 The Phong shading parameters can be set using the sliders below the render canvas.
 
-The Field of View (FOV) of the camera can be set using the slider below the Phong parameters.
-
-The coordinates of one light source can be set using the sliders below the Field of View slider.
+Use keys "W,A,S,D" to translate the pyramid in their respective directions and "r,f" for translating it forward/backwards in the z-direction.
 
 ## Interaction with Objects
 
@@ -178,10 +177,6 @@ Zooming in and out to focus a single window can be achieved by clicking the **le
 
 The right window displays a tic-tac-toe game. The user can click on the boxes to alternately place a cross or a circle on the playing field.
 
-## Free Flight Modus
-
-Um zwischen Fester Kamera und Free Flight Modus zu wechseln ...
-
 ### Functions
 
 | Nummer | Punkte | Beschreibung                                                      | bearbeitet               | Verantwortliche/r                           |
@@ -192,17 +187,17 @@ Um zwischen Fester Kamera und Free Flight Modus zu wechseln ...
 | M4     | 8      | min. drei verschiedene Animationsknoten                           | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm               |
 | M5     | 4      | Objekte mit Textur                                                | <ul><li>- [X] </li></ul> | Marius Röhm, Lorenz Bauer                   |
 | M6     | 5      | mathematische Bibliothek                                          | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm               |
-| M7     | 4      | Phong Shader                                                      | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm, ?            |
-| M8     | 2      | Zwei Anwendungsfenster                                            | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm               |
-| M9     | 4      | Taskleiste mit Icons                                              | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm               |
+| M7     | 4      | Phong Shader                                                      | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm               |
+| M8     | 2      | Zwei Anwendungsfenster                                            | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm, Lorenz Bauer |
+| M9     | 4      | Taskleiste mit Icons                                              | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm, Lorenz Bauer |
 | M10    | 5      | Auswahl & Manipulation per Maus                                   | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm               |
 | O1     | 7      | Materials for phong shading                                       | <ul><li>- [] </li></ul>  |                                             |
 | O2     | 3      | Videos and Text as texture                                        | <ul><li>- [X] </li></ul> | Julius Arzberger                            |
 | O3     | 8      | OBJ Loader                                                        | <ul><li>- [X] </li></ul> | Julius Arzberger                            |
 | O4     | 4      | Multiple moving light sources                                     | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm               |
 | O5     | 6      | Magnifying glass effect                                           | <ul><li>- [ ] </li></ul> |                                             |
-| O6     | 4      | Animation when clicking an object                                 | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm               |
-| O7     | 8      | Camera Nodes as part of the scene grap                            | <ul><li>- [X] </li></ul> | Marius Röhm                                 |
+| O6     | 4      | Animation when clicking an object                                 | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm, Lorenz Bauer |
+| O7     | 8      | Camera Nodes as part of the scene grap                            | <ul><li>- [X] </li></ul> | Marius Röhm, Lorenz Bauer                   |
 | O8     | 5      | Bounding Volumes                                                  | <ul><li>- [X] </li></ul> | Marius Röhm, Julius Arzberger               |
 | O9     | 8      | JSON Loader                                                       | <ul><li>- [X] </li></ul> | Lorenz Bauer                                |
 | 10     | 7      | Ractracing of all Objects from triangles                          | <ul><li>- [X] </li></ul> | Julius Arzberger, Marius Röhm               |

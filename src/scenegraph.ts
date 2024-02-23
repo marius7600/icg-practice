@@ -1,5 +1,5 @@
 import JsonVisitor from "./jsonVisitor";
-import AnimationNode, { DriverNode, DriverNodeMouse, RotationNode, ScalerNodeMouse } from "./nodes/animation-nodes";
+import AnimationNode, { DriverNode, InputDriverNode, RotationNode, InputScalerNode } from "./nodes/animation-nodes";
 import GroupNode from "./nodes/group-node";
 import LightNode from "./nodes/light-node";
 import SphereNode from "./nodes/sphere-node";
@@ -30,6 +30,10 @@ export class Scenegraph {
     private static camera: CameraNode;
     private static TicTacToe: TicTacToe = new TicTacToe();
 
+    /**
+     * Retrieves the scene graph.
+     * @returns The scene graph.
+     */
     static getGraph() {
         if (!this.sceneGraph) {
             alert("No Nodes in Scenegraph initialized! Please put Nodes in the scenegraph first");
@@ -37,29 +41,43 @@ export class Scenegraph {
         return this.sceneGraph;
     }
 
+    /**
+     * Sets the scene graph for the application.
+     * @param sceneGraph - The scene graph to set.
+     */
     static setGraph(sceneGraph: GroupNode) {
         this.sceneGraph = sceneGraph;
     }
 
-    // get all nodes of the given type
+    /**
+     * Retrieves all nodes of a specific type from the scene graph.
+     * 
+     * @template T - The type of nodes to retrieve.
+     * @param type - The constructor function of the node type.
+     * @returns An array of nodes of the specified type.
+     */
     static getAllNodesOfType<T extends Node>(type: new (...args: any[]) => T): T[] {
         return this._getAllNodesOfType(this.sceneGraph, type);
     }
 
-    // get all nodes of the given type
+
+    /**
+     * Recursive helper method to retrieve all nodes of a specific type from the scene graph.
+     * @template T - The type of nodes to retrieve.
+     * @param node - The root node to start the search from.
+     * @param type - The constructor function of the node type to retrieve.
+     * @returns An array of nodes of the specified type.
+     */
     static _getAllNodesOfType<T extends Node>(node: Node, type: new (...args: any[]) => T): T[] {
         let nodes: T[] = [];
-
         if (node instanceof type) {
             nodes.push(node);
         }
-
         if (node instanceof GroupNode || node instanceof WindowNode) {
             for (let child of node.children) {
                 nodes = nodes.concat(this._getAllNodesOfType(child, type));
             }
         }
-
         return nodes;
     }
 
@@ -149,7 +167,6 @@ export class Scenegraph {
      * @returns The found groupNode over the camera node.
      */
     static _getGroupNodeCamera(node: Node): GroupNode {
-        console.log(this.getCamera());
 
         if (node instanceof GroupNode && node.containsCamera(this.getCamera())) {
             return node;
@@ -168,31 +185,46 @@ export class Scenegraph {
     }
 
 
+    /**
+     * Retrieves the animation nodes from the scene graph.
+     * @returns An array of AnimationNode objects.
+     */
     static getAnimationNodes(): AnimationNode[] {
         return this.animationNodesList;
     }
 
-    static setAnimationNodes(nodes: AnimationNode[]) {
-        this.animationNodesList = nodes
-    }
 
+    /**
+     * Sets the animation node for the scene graph.
+     * @param {AnimationNode} node - The animation node to be set.
+     */
     static setAnimationNode(node: AnimationNode) {
         this.animationNodesList.push(node)
     }
 
-    static getDriver() {
-        return this.driver
-    }
-
+    /**
+     * Returns the camera object of the scene graph.
+     * @returns The camera object.
+     */
     static getCamera() {
         return this.camera
     }
 
+    /**
+     * Converts the scene graph to JSON format.
+     * @returns {void}
+     */
     static toJSON() {
         new JsonVisitor().saveSceneGraph(this.sceneGraph)
     }
 
-    //TODO: Animation Visitor/ flexible for ray and raster
+    /**
+     * Creates a scenegraph from a JSON file.
+     * 
+     * @param file - The JSON file to load.
+     * @param visitor - The raster visitor.
+     * @param rasterSetupVisitor - The raster setup visitor.
+     */
     static fromJSON(file: File, visitor: RasterVisitor, rasterSetupVisitor: RasterSetupVisitor) {
         JsonLoader.JsonToScenegraph(file)
             .then(loaded => {
@@ -203,13 +235,16 @@ export class Scenegraph {
 
                 this.setGraph(loaded.sg)
                 rasterSetupVisitor.setup(loaded.sg);
-
-                //const animationNodes = new AnimationVisitor().visit(loaded.sg);
-                //Scenegraph.setAnimationNodes(animationNodes)
-                //visitor.render(loaded.sg, loaded.camera);
             });
     }
 
+    /**
+     * Creates the scene graph for the scene by adding all nodes to the scene graph. 
+     * @param canvasWidth - The width of the canvas.
+     * @param canvasHeight - The height of the canvas.
+     * @param rasterSetupVisitor - The raster setup visitor.
+     * @returns A Promise that resolves to the created scene graph.
+     */
     static async createProjectGraph(canvasWidth: number, canvasHeight: number, rasterSetupVisitor: RasterSetupVisitor) {
         /***************************************************************/
         /*********************  START OF SCENEGRAPH *********************/
@@ -225,53 +260,49 @@ export class Scenegraph {
             0.1, // near
             100 // far
         );
-
+        // Add group node for the camera 
         const groupNodeCamera = new GroupNode(new Translation(new Vector(0, 0, 0, 1)));
         this.camera.name = "sceneCamera";
         groupNodeCamera.add(this.camera);
         groupNodeCamera.name = "groupNodeCamera";
 
-        const driveToMouse = new DriverNode(groupNodeCamera, new Vector(-1.777, 0.1, -3, 0), 0.002);
-
-        groupNodeCamera.add(driveToMouse);
+        // Add driver to the camera group node to move the camera
+        const driveCamera = new DriverNode(groupNodeCamera, new Vector(-1.777, 0.1, -3, 0), 0.002);
+        groupNodeCamera.add(driveCamera);
         this.sceneGraph.add(groupNodeCamera);
 
-        //this.sceneGraph.add(this.camera);
-
-        // add group node
+        // Group node under the root which contains all other nodes
         const groupNodeUnderRoot = new GroupNode(new Translation(new Vector(0, 0, -5, 0)));
         groupNodeUnderRoot.name = "groupNodeUnderRoot";
         this.sceneGraph.add(groupNodeUnderRoot);
 
-        // test pyramid node
-        // const pyramid = new PyramidNode(new Vector(1, 1, 1, 1), new Vector(1, 0, 0, 1));
-        //const pyramid = new PyramidNode(new Vector(1, 1, 1, 1), null, "source-missing-texture.png");
-        const aaboxGroup = new GroupNode(new Translation(new Vector(0, 0, 0, 0)));
+        // Group node holding the movable AABox
+        const pyramidNode = new GroupNode(new Translation(new Vector(0, 2.15, 0, 0)));
+        //const pyramidNode = new GroupNode(new Transform4x4(new Vector(0, 0, 0, 0), new Rotation(new Vector(1, 0, 0, 0), 180)));
+        const pyramid = new PyramidNode(new Vector(1, 1, 1, 1), new Vector(1, 0, 1, 1));
+        pyramid.name = "Testbox";
+        pyramidNode.add(pyramid);
 
-        const aabox = new AABoxNode(new Vector(1, 1, 1, 1), new Vector(1, 0, 1, 1));
-        aabox.name = "Testbox";
-        aaboxGroup.add(aabox);
-        const driveBox = new DriverNodeMouse(aaboxGroup);
-        aaboxGroup.add(driveBox);
+
+
+        // Driver for moving the AABox with W,A,S,D
+        const driveBox = new InputDriverNode(pyramidNode);
+        pyramidNode.add(driveBox);
         driveBox.toggleActive();
-        groupNodeUnderRoot.add(aaboxGroup);
+        groupNodeUnderRoot.add(pyramidNode);
 
-        // add light node 1
-        // light1 = new LightNode(new Vector(0.8, 0.8, 0.8, 1), new Vector(0, 4, -2, 0));
-        // groupNodeUnderRoot.add(light1);
+        // Yellow light sphere
+        let lightSpehre = new SphereNode(new Vector(1, 1, 0, 1), new Vector(0, 0, 0, 1), 0.25);
 
         // add light node 2
         const groupNodeLight2 = new GroupNode(new Translation(new Vector(-2, -1, -5, 0)));
         groupNodeLight2.name = "groupNodeLight2";
         const light2 = new LightNode(new Vector(1, 0, 0, 1), new Vector(0, 0, 0, 1));
-        //let lightSpehre = new SphereNode(new Vector(1, 1, 0, 1), new Vector(0, 0, 0, 1), 0.25, "source-missing-texture.png");
-        let lightSpehre = new SphereNode(new Vector(1, 1, 0, 1), new Vector(0, 0, 0, 1), 0.25);
 
         groupNodeLight2.add(light2);
         groupNodeLight2.add(lightSpehre);
 
-
-
+        // add light node 3
         const groupNodeLight3 = new GroupNode(new Translation(new Vector(0, -3, -3, 0)));
         groupNodeLight3.name = "groupNodeLight3";
         const light3 = new LightNode(new Vector(0, 1, 0, 1), new Vector(0, -1.5, -3, 1));
@@ -279,6 +310,7 @@ export class Scenegraph {
         groupNodeLight3.add(light3);
         groupNodeLight3.add(lightSpehre);
 
+        // add light node 4
         const groupNodeLight4 = new GroupNode(new Translation(new Vector(2, -1, -5, 0)));
         groupNodeLight4.name = "groupNodeLight4";
         const light4 = new LightNode(new Vector(0, 0, 1, 1), new Vector(0, 0, 0, 1));
@@ -287,6 +319,7 @@ export class Scenegraph {
         groupNodeLight4.add(lightSpehre);
 
 
+        // Add animation nodes to the light nodes
         const animateLight2 = new DriverNode(groupNodeLight2, new Vector(2, 0, 0, 0), 0.0005, true);
         animateLight2.name = "animateLight2";
         animateLight2.toggleActive();
@@ -304,6 +337,7 @@ export class Scenegraph {
         groupNodeLight4.add(animateLight4);
 
 
+        // Add the light nodes to the scene graph
         this.sceneGraph.add(groupNodeLight2);
         this.sceneGraph.add(groupNodeLight3);
         this.sceneGraph.add(groupNodeLight4);
@@ -324,13 +358,11 @@ export class Scenegraph {
         const taskbarButtonGroupRight = new GroupNode(new Translation(new Vector(2, .45, 0, 0)));
         taskbarButtonGroupRight.name = "taskbarButtonGroupRightWindow";
         const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, null, "tictactoe.png");
-        // const taskbarButtonRight = new AABoxNode(taskbarButtonDimension, taskbarButtonColor);
         taskbarButtonRight.name = "taskbarButtonRightWindow";
         taskbarButtonGroupRight.add(taskbarButtonRight)
         taskbarGroup.add(taskbarButtonGroupRight)
 
         // add Taskbar Buttons on the Left
-        // const taskbarButtonGroupLeft = new GroupNode(new Transform4x4(new Vector(-2, .45, 0, 0), new Rotation(new Vector(0, 1, 0, 0), Math.PI)));
         const taskbarButtonGroupLeft = new GroupNode(new Translation(new Vector(-2, .45, 0, 0)));
         taskbarButtonGroupLeft.name = "taskbarButtonGroupLeftWindow";
         const taskbarButtonLeft = new AABoxNode(taskbarButtonDimension, null, "psychoandreas.png");
@@ -342,19 +374,15 @@ export class Scenegraph {
 
         const rightWindowGroup = new WindowNode(new Translation(new Vector(1.8, 0, -1, 0)), "RightWindow");
         groupNodeUnderRoot.add(rightWindowGroup);
-        // rightWindowGroup.add(rightWindowMenu);
 
         // Add ticTacToe to the right window
         const ticTacToeRoot = new GroupNode(new Translation(new Vector(-1.3, -1.4, 0, 0)));
         ticTacToeRoot.name = "ticTacToeRoot";
-        // ticTacToeRoot.add(createTicTacToe());
-        // rightWindowGroup.add(ticTacToeRoot);
         ticTacToeRoot.add(this.TicTacToe.createTicTacToe());
         rightWindowGroup.add(ticTacToeRoot);
 
         ///////////// ===== ADD LEFT WINDOW ===== /////////////
-        // groupNode for the secound application window
-        //const leftWindowGroup = new WindowNode(new Translation(new Vector(-1.8, 0, -5, 0)), "LeftWindow");
+
         const leftWindowGroup = new WindowNode(new Translation(new Vector(-1.8, 0, -1, 0)), "LeftWindow");
         groupNodeUnderRoot.add(leftWindowGroup);
 
@@ -362,25 +390,25 @@ export class Scenegraph {
         const textureBoxGroup = new GroupNode(new Translation(new Vector(-1.5, 1.2, 0, 0)));
         textureBoxGroup.name = "textureBoxGroup";
         leftWindowGroup.add(textureBoxGroup);
-        //const textureBox = new TextureBoxNode("source-missing-texture.png", new Vector(0.5, 0.5, 0.5, 1), new Vector(1, 1, 1, 1), "brickwall-normal.png");
-        const textureVideoBox = new TextureVideoBoxNode("assitoni.mp4", new Vector(0, 0, 0, 1), new Vector(3, 1.5, 0.1, 1));
 
         const textureVideoBoxGroup = new GroupNode(new EmptyTransformation);
         textureVideoBoxGroup.name = "textureVideoBoxGroup";
         let rotation = rotateWithPosition(textureVideoBoxGroup, 180);
         textureVideoBoxGroup.transform = rotation;
 
+        const textureVideoBox = new TextureVideoBoxNode("fish.mp4", new Vector(0, 0, 0, 1), new Vector(3, 1.5, 0.1, 1));
 
         textureBoxGroup.add(textureVideoBoxGroup);
         textureVideoBoxGroup.add(textureVideoBox);
 
-        //const meshPosition = new GroupNode(new Transform4x4(new Vector(0.8, 0.8, 0, 0), new Rotation(new Vector(1, 0, 0, 0), -90)));
+        // Add mesh Node
         const meshPosition = new GroupNode(new Translation(new Vector(0, .2, -2, 0)));
         meshPosition.name = "meshPosition";
         const meshScale = new GroupNode(new Scaling(new Vector(0.8, 0.8, 0.8, 1)));
         meshScale.name = "meshScale";
         meshPosition.add(meshScale);
 
+        // async function to load the mesh
         (async () => {
             try {
                 const object = await loadOBJ();
@@ -393,7 +421,6 @@ export class Scenegraph {
                 console.log(error);
             }
         })();
-        console.log("Created scenegraph: ", this.sceneGraph);
 
         // /***************************************************************/
         // /*********************  END OF SCENE GRAPH *********************/
@@ -407,15 +434,20 @@ export class Scenegraph {
  * @returns {Promise<MeshNode>} A promise that resolves to the loaded mesh object.
  */
 async function loadOBJ() {
-    //const object = await MeshNode.getNode("towelie.obj", new Vector(0, 0.2, 1, 0));
     const object = await MeshNode.getNode("cube.obj", new Vector(0, 0.2, 1, 0));
-    // const object = await MeshNode.getNode("monkey.obj", new Vector(0, 0.2, 1, 0));
     return object;
 }
 
-function rotateWithPosition(textureVideoBoxGroup: GroupNode, angle: number) {
-    const position = textureVideoBoxGroup.transform.getMatrix();
-    const inverse = textureVideoBoxGroup.transform.getInverseMatrix();
+
+/**
+ * Rotates a group node with a given angle.
+ * @param groupNodeToRotate - The group node to rotate.
+ * @param angle - The angle of rotation in radians.
+ * @returns The rotation transformation applied to the group node.
+ */
+function rotateWithPosition(groupNodeToRotate: GroupNode, angle: number) {
+    const position = groupNodeToRotate.transform.getMatrix();
+    const inverse = groupNodeToRotate.transform.getInverseMatrix();
     let rotation = new Rotation(new Vector(1, 0, 0, 0), angle);
     rotation.matrix = position.mul(rotation.getMatrix());
     rotation.inverse = rotation.getInverseMatrix().mul(inverse);

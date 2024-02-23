@@ -1,6 +1,13 @@
 import Vector from "./math/vector";
 
 export default class BoxSharedProperties {
+    /**
+     * Calculates the vertices of a box given the minimum and maximum coordinates.
+     * 
+     * @param mi - The minimum coordinates of the box.
+     * @param ma - The maximum coordinates of the box.
+     * @returns An array of vertices representing the box.
+     */
     static calcVertices(mi: Vector, ma: Vector) {
         return [
             // front
@@ -48,12 +55,32 @@ export default class BoxSharedProperties {
         ];
     }
 
+    /**
+     * Calculates the vertex vectors of a box given the minimum and maximum coordinates.
+     * @param mi The minimum coordinates of the box.
+     * @param ma The maximum coordinates of the box.
+     * @returns The vertex vectors of the box.
+     */
     static calcVertexVecs(mi: Vector, ma: Vector) {
         const vertexCoords = this.calcVertices(mi, ma);
         return this.tripletArrayToVec(vertexCoords)
     }
 
-    //source: https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Lighting_in_WebGL
+    /**
+     * Returns an array of normals for the box faces.
+     * The normals are represented as a flat array of numbers.
+     * Each set of three numbers represents the x, y, and z components of a normal vector.
+     * The order of the normals in the array is as follows:
+     * - Front face: [0.0, 0.0, 1.0]
+     * - Back face: [0.0, 0.0, -1.0]
+     * - Right face: [1.0, 0.0, 0.0]
+     * - Top face: [0.0, 1.0, 0.0]
+     * - Left face: [-1.0, 0.0, 0.0]
+     * - Bottom face: [0.0, -1.0, 0.0]
+     * 
+     * @returns {number[]} The array of normals.
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Lighting_in_WebGL
+     */
     static getNormals() {
         return [
             // Front
@@ -108,6 +135,11 @@ export default class BoxSharedProperties {
         ]
     }
 
+    /**
+     * Returns an array of normal vectors.
+     * 
+     * @returns An array of normal vectors.
+     */
     static getNormalVecs() {
         return this.tripletArrayToVec(
             this.getNormals()
@@ -115,8 +147,13 @@ export default class BoxSharedProperties {
     }
 
 
+    /**
+     * Returns the UV coordinates for the box faces.
+     * The UV coordinates are arranged in the following order: front, back, right, top, left, bottom.
+     * Each face has 6 UV coordinates, representing the texture mapping for the vertices of the face.
+     * @returns An array of UV coordinates.
+     */
     static getUVCords() {
-
         return [
             // front
             0, 1, 1, 1, 1, 0,
@@ -139,74 +176,13 @@ export default class BoxSharedProperties {
         ];
     }
 
-    static getUVVecs() {
-        const uvCords = this.getUVCords();
-        const uvVecs: Vec2[] = []
-        for (let i = 0; i < uvCords.length; i += 2) {
-            const x = uvCords[i]
-            const y = uvCords[i + 1]
-            const vec2 = new Vec2(x, y);
-            uvVecs.push(vec2)
-
-        }
-        return uvVecs
-    }
-
-    static generateTangentsBitangents(vertices: Vector[]) {
-        const tangents: Vector[] = []
-        const bitangents: Vector[] = []
-        const texCords = this.getUVVecs()
-        for (let i = 0; i < vertices.length; i += 3) {
-            const point0 = vertices[i]
-            const point1 = vertices[i + 1]
-            const point2 = vertices[i + 2]
-
-            const uv0 = texCords[i]
-            const uv1 = texCords[i + 1]
-            const uv2 = texCords[i + 2]
-
-            const edge1 = point1.sub(point0)
-            const edge2 = point2.sub(point0)
-
-            const deltaUV1 = uv1.sub(uv0)
-            const deltaUV2 = uv2.sub(uv0)
-
-            const r = 1.0 / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x)
-
-            const tangent = (edge1.mul(deltaUV2.y).sub(edge2.mul(deltaUV1.y))).mul(r)
-            const bitangent = (edge2.mul(deltaUV1.x).sub(edge1.mul(deltaUV2.x))).mul(r).mul(-1)
-            tangents.push(tangent, tangent, tangent)
-            bitangents.push(bitangent, bitangent, bitangent)
-        }
-
-        return {
-            tangents,
-            bitangents
-        }
-
-    }
-
-    static vecsToNumbersArray(vec: Vector[]) {
-        const nrs: number[] = []
-        for (let vector of vec) {
-            nrs.push(vector.x, vector.y, vector.z)
-        }
-        return nrs
-    }
-
-    static numbersToVecsArray(nrs: number[]) {
-        const vecs = []
-        for (let i = 0; i < nrs.length; i += 3) {
-            const x = nrs[i]
-            const y = nrs[i + 1]
-            const z = nrs[i + 2]
-            vecs.push(new Vector(x, y, z, 1))
-        }
-        return vecs
-    }
-
+    /**
+     * Converts an array of numbers representing triplets into an array of Vector objects.
+     * Each triplet in the array represents the x, y, and z coordinates of a vector.
+     * @param nrs - The array of numbers representing triplets.
+     * @returns An array of Vector objects.
+     */
     private static tripletArrayToVec(nrs: number[]) {
-
         const vectors = []
         for (let i = 0; i < nrs.length; i += 3) {
 
@@ -219,20 +195,3 @@ export default class BoxSharedProperties {
         return vectors
     }
 };
-
-class Vec2 {
-    constructor(public x: number, public y: number) {
-    }
-
-    add(other: Vec2) {
-        const newX = this.x + other.x;
-        const newY = this.y + other.y;
-        return new Vec2(newX, newY)
-    }
-
-    sub(other: Vec2) {
-        const newX = this.x - other.x;
-        const newY = this.y - other.y;
-        return new Vec2(newX, newY)
-    }
-}

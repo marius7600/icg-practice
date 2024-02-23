@@ -21,6 +21,10 @@ export default class LightNode extends Node {
     visitor.visitLightNode(this);
   }
 
+  /**
+   * Converts the LightNode object to a JSON representation.
+   * @returns The JSON representation of the LightNode object.
+   */
   toJSON(): any {
     const json = super.toJSON();
     json["color"] = this.color;

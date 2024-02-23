@@ -3,7 +3,8 @@ import Shader from '../shader/shader';
 import GlUtils from "../glUtils";
 
 /**
- * A class creating buffers for an axis aligned Pyramid to render it with WebGL
+ * A class representing an axis-aligned pyramid to render it with WebGL.
+ * The pyramid can be textured or coloured.
  */
 export default class RasterPyramid {
     /**
@@ -39,10 +40,6 @@ export default class RasterPyramid {
     */
     texture: WebGLTexture;
 
-
-
-
-
     /**
      * Creates all WebGL buffers for the pyramid
      *
@@ -58,6 +55,8 @@ export default class RasterPyramid {
      * @param gl The canvas' context
      * @param minPoint The minimal x,y,z of the box
      * @param maxPoint The maximal x,y,z of the box
+     * @param color The color of the box if no texture is used
+     * @param texture The name to the image to be used as texture
      */
     constructor(
         gl: WebGL2RenderingContext,
@@ -211,6 +210,13 @@ export default class RasterPyramid {
         }
     }
 
+    /**
+     * Calculates the cross product of three vectors and returns the normalized result.
+     * @param vector1 The first vector.
+     * @param vector2 The second vector.
+     * @param vector3 The third vector.
+     * @returns The normalized cross product of the three vectors.
+     */
     makecross(vector1: Vector, vector2: Vector, vector3: Vector) {
 
         let sub1 = vector1.sub(vector3);

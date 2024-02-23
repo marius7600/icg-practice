@@ -1,8 +1,9 @@
+import GlUtils from '../glUtils';
 import Vector from '../math/vector';
 import Shader from '../shader/shader';
 
 /**
- * A class creating buffers for a textured box to render it with WebGL
+ * A class representing a axis-aligned box with a texture containing a video to render it with WebGL
  */
 export default class RasterVideoTextureBox {
     private video: HTMLVideoElement;
@@ -45,6 +46,7 @@ export default class RasterVideoTextureBox {
         maxPoint: Vector,
         texture: string
     ) {
+        const glUtils = new GlUtils(gl);
         const mi = minPoint;
         const ma = maxPoint;
         let vertices = [
@@ -68,32 +70,22 @@ export default class RasterVideoTextureBox {
             ma.x, mi.y, ma.z, mi.x, mi.y, ma.z, mi.x, mi.y, mi.z
         ];
 
-        const vertexBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        this.vertexBuffer = vertexBuffer;
+        this.vertexBuffer = glUtils.createVertexBuffer(vertices);
         this.elements = vertices.length / 3;
 
 
-
-        if (typeof texture === 'string') {
-            let cubeTexture = gl.createTexture();
-            let cubeImage = new Image();
-            cubeImage.onload = function () {
-                gl.bindTexture(gl.TEXTURE_2D, cubeTexture);
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cubeImage);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-                gl.bindTexture(gl.TEXTURE_2D, null);
-            };
-            cubeImage.src = texture;
-            this.texBuffer = cubeTexture;
-        } else {
-            this.texBuffer = texture;
-        }
-
-
+        let cubeTexture = gl.createTexture();
+        let cubeImage = new Image();
+        cubeImage.onload = function () {
+            gl.bindTexture(gl.TEXTURE_2D, cubeTexture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cubeImage);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+        };
+        cubeImage.src = texture;
+        this.texBuffer = cubeTexture;
 
         let uv = [
             // front
@@ -115,18 +107,20 @@ export default class RasterVideoTextureBox {
             0, 0, 1, 0, 1, 1,
             1, 1, 0, 1, 0, 0,
         ];
-        let uvBuffer = this.gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
-        gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(uv),
-            gl.STATIC_DRAW);
-        this.texCoords = uvBuffer;
 
+        this.texCoords = glUtils.createTextureBuffer(uv);
 
         this.texBuffer = this.initTexture(gl);
         this.video = this.setupVideo(texture);
         this.checkCopyVideo = false;
     }
 
+    /**
+     * Sets up a video element with the specified URL.
+     * 
+     * @param url - The URL of the video.
+     * @returns The created video element.
+     */
     setupVideo(url: string) {
         const video = document.createElement("video");
 
@@ -159,20 +153,26 @@ export default class RasterVideoTextureBox {
         return video;
     }
 
+    /**
+     * Checks if the video is ready to be copied.
+     * @param playing - Indicates if the video is currently playing.
+     * @param timeupdate - Indicates if the video's time has been updated.
+     */
     private checkReady(playing: boolean, timeupdate: boolean) {
         if (playing && timeupdate) {
             this.checkCopyVideo = true;
         }
     }
 
+    /**
+     * Initializes a texture for rendering video frames.
+     * @param {WebGL2RenderingContext} gl - The WebGL rendering context.
+     * @returns {WebGLTexture} The initialized texture.
+     */
     private initTexture(gl: WebGL2RenderingContext) {
         const texture = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, texture);
 
-        // Because video havs to be download over the internet
-        // they might take a moment until it's ready so
-        // put a single pixel in the texture so we can
-        // use it immediately.
         const level = 0;
         const internalFormat = gl.RGBA;
         const width = 1;
@@ -180,6 +180,7 @@ export default class RasterVideoTextureBox {
         const border = 0;
         const srcFormat = gl.RGBA;
         const srcType = gl.UNSIGNED_BYTE;
+        // Put a single pixel in the texture to use it immediately.
         const pixel = new Uint8Array([0, 0, 255, 255]);
         gl.texImage2D(
             gl.TEXTURE_2D,
@@ -193,8 +194,7 @@ export default class RasterVideoTextureBox {
             pixel
         );
 
-        // Turn off mips and set wrapping to clamp to edge so it
-        // will work regardless of the dimensions of the video.
+        // Turn off mips and set wrapping to clamp to edge so it will work regardless of the dimensions of the video.
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -202,6 +202,13 @@ export default class RasterVideoTextureBox {
         return texture;
     }
 
+    /**
+     * Updates the texture with the contents of a video element.
+     * 
+     * @param gl - The WebGL2 rendering context.
+     * @param texture - The WebGL texture to update.
+     * @param video - The HTML video element containing the new texture data.
+     */
     private updateTexture(
         gl: WebGL2RenderingContext,
         texture: WebGLTexture,

@@ -8,24 +8,28 @@ import Vector from "../math/vector";
  */
 export default class TextureBoxNode extends Node {
   /**
-   * Creates an axis aligned box textured box
-   * The box's center is located at the origin
-   * with all edges of length 1
-   * @param texture The image filename for the texture
+   * Creates a new TextureBoxNode instance.
+   * @param texture The image filename for the texture.
+   * @param minPoint The minimum point of the box.
+   * @param maxPoint The maximum point of the box.
+   * @param normal The normal vector of the box (optional).
    */
   constructor(public texture: string, public minPoint: Vector, public maxPoint: Vector, public normal?: string) {
     super();
   }
 
   /**
-   * Accepts a visitor according to the visitor pattern
-   * @param visitor The visitor
+   * Accepts a visitor according to the visitor pattern.
+   * @param visitor The visitor object.
    */
   accept(visitor: Visitor) {
-    // TODO
     visitor.visitTextureBoxNode(this);
   }
 
+  /**
+   * Serializes the TextureBoxNode instance to JSON.
+   * @returns The JSON representation of the TextureBoxNode.
+   */
   toJSON(): any {
     const json = super.toJSON();
     json["texture"] = this.texture;
@@ -33,6 +37,5 @@ export default class TextureBoxNode extends Node {
     json["maxPoint"] = this.maxPoint;
     json["normal"] = this.normal;
     return json;
-
   }
 }

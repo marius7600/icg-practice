@@ -10,6 +10,9 @@ import TextureTextBoxNode from "./nodes/texture-text-box-node";
 import TextureVideoBoxNode from "./nodes/texture-video-box-node";
 import AnimationNode from "./nodes/animation-nodes";
 
+/**
+ * Interface representing a visitor that can visit different types of nodes.
+ */
 export default interface Visitor {
   visitLightNode(node: LightNode): void;
   visitGroupNode(node: GroupNode): void;

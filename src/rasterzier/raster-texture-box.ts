@@ -2,7 +2,7 @@ import Vector from '../math/vector';
 import Shader from '../shader/shader';
 import SharedProps from '../boxSharedProperties';
 /**
- * A class creating buffers for a textured box to render it with WebGL
+ * A class representing a axis aligned box with a texture
  */
 export default class RasterTextureBox {
     /**
@@ -84,8 +84,7 @@ export default class RasterTextureBox {
         this.gl.enableVertexAttribArray(positionLocation);
         this.gl.vertexAttribPointer(positionLocation, 3, this.gl.FLOAT, false, 0, 0);
 
-        // Bind the texture coordinates in this.texCoords
-        // to their attribute in the shader
+        // Bind the texture coordinates in this.texCoords to their attribute in the shader
 
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoords);
         const texCoordLocation = shader.getAttributeLocation("a_texCoord");

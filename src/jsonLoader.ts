@@ -10,7 +10,7 @@ import SphereNode from "./nodes/sphere-node";
 import TextureVideoBoxNode from "./nodes/texture-video-box-node";
 import TextureBoxNode from "./nodes/texture-box-node";
 import AABoxNode from "./nodes/aabox-node";
-import AnimationNode, { DriverNode, DriverNodeMouse, JumperNode, RotationNode, ScaleNode, ScalerNodeMouse } from "./nodes/animation-nodes";
+import AnimationNode, { DriverNode, InputDriverNode, JumperNode, RotationNode, ScaleNode, InputScalerNode } from "./nodes/animation-nodes";
 import { Scenegraph } from "./scenegraph";
 import MeshNode from "./nodes/mesh-node";
 import { WindowNode } from "./nodes/window-node";
@@ -22,9 +22,11 @@ export class JsonLoader {
     private static sg: GroupNode
     private static camera: CameraNode
 
-
-    // loading the JSON file and parse the Scenegraph 
-    // sceneGraphRootNode is the first object in the JSON file
+    /**
+     * Converts a JSON file to a scenegraph representation.
+     * @param file - The JSON file to be converted.
+     * @returns A promise that resolves to an object containing the scenegraph and camera nodes.
+     */
     static async JsonToScenegraph(file: File): Promise<{ sg: GroupNode, camera: CameraNode }> {
         const text = await file.text();
         this.json = await JSON.parse(text)
@@ -36,7 +38,12 @@ export class JsonLoader {
 
 
 
-    // loading transformation from JSON Object
+
+    /**
+     * Retrieves a Transformation object from a JSON representation.
+     * @param transformJson - The JSON object representing the transformation.
+     * @returns The Transformation object.
+     */
     private static getTransformation(transformJson: any): Transformation {
         transformJson.transform as MatrixTransformation;
         const traverse = this.parseMatrix(transformJson.transformation.matrix)
@@ -44,7 +51,15 @@ export class JsonLoader {
         return new MatrixTransformation(traverse, inverse)
     }
 
-    // parsing the matrix from JSON Object
+
+
+
+    /**
+     * Parses a matrix from a JSON object.
+     * 
+     * @param matrixJson - The JSON object representing the matrix.
+     * @returns A new Matrix object.
+     */
     private static parseMatrix(matrixJson: any) {
         const d = matrixJson.data
         const data = [
@@ -56,16 +71,47 @@ export class JsonLoader {
         return new Matrix(data)
     }
 
-    // parsing the vector from JSON Object
+
+
+    /**
+     * Parses a vector from JSON data.
+     * @param vectorJson - The JSON data representing the vector.
+     * @returns The parsed vector.
+     */
     private static parseVector(vectorJson: any): Vector {
         const data = vectorJson.data as [number, number, number, number]
         return new Vector(...data)
     }
 
-    // factory method to load the node with corresponding type from JSON Object
-    private static nodeFactory(nodeJson: any, groupNodeJson: any): Node {
+    /**
+     * Retrieves the texture properties from a given node.
+     * 
+     * @param node - The node containing the texture properties.
+     * @returns An object containing the texture, minPoint, maxPoint, and normal properties.
+     */
+    private static getTextureProbs(node: any) {
+        const texture = <string>node.texture
+        const minPoint = this.parseVector(node.minPoint)
+        const maxPoint = this.parseVector(node.maxPoint)
+        const normal = <string>node.normal
+        return {
+            texture, minPoint, maxPoint, normal
+        }
+    }
+
+
+
+    /**
+     * Creates a Node object based on the provided nodeJson.
+     * @param nodeJson - The JSON object representing the node.
+     * @param groupNodeJson - The GroupNode of the object.
+     * @returns The created Node object.
+     */
+    private static nodeFactory(nodeJson: any, groupNodeJson: GroupNode): Node {
         const classname = nodeJson.classname
         switch (classname) {
+            case "WindowNode":
+                return this.loadWindowNode(nodeJson)
             case "GroupNode":
                 return this.loadGroupNode(nodeJson)
             case "CameraNode":
@@ -84,8 +130,6 @@ export class JsonLoader {
                 return this.loadPyramidNode(nodeJson)
             case "MeshNode":
                 return this.loadMeshNode(nodeJson);
-            case "WindowNode":
-                return this.loadWindowNode(nodeJson)
             case "TextureTextBoxNode":
                 return this.loadTextureTextBoxNode(nodeJson)
             // create Animation Nodes with corresponding groupNodeJson
@@ -95,7 +139,7 @@ export class JsonLoader {
                 return this.loadJumperNode(nodeJson, groupNodeJson)
             case "DriverNode":
                 return this.loadDriverNode(nodeJson, groupNodeJson)
-            case "DriverNodeMouse":
+            case "InputDriverNode":
                 return this.loadDriverNodeMouse(nodeJson, groupNodeJson)
             case "ScalerNode":
                 return this.loadScalerNode(nodeJson, groupNodeJson)
@@ -103,16 +147,21 @@ export class JsonLoader {
                 return this.loadScalerNodeMouse(nodeJson, groupNodeJson)
             default:
                 console.error(nodeJson, " not found!");
-
         }
     }
 
 
 
-    // loading group node from JSON Object and its children
+
+    /**
+     * Loads a GroupNode and its children from a JSON object.
+     * 
+     * @param node - The JSON object representing the GroupNode.
+     * @returns The loaded GroupNode.
+     */
     private static loadGroupNode(node: any): GroupNode {
 
-        //console.log("Loading GroupNode: ", node);
+        console.log("Loading GroupNode: ", node);
 
         const transformation = this.getTransformation(node.transform);
         const groupNode = new GroupNode(transformation);
@@ -131,8 +180,13 @@ export class JsonLoader {
 
     }
 
-    // loading the camera from JSON Object
-    // camerNode is second object in the JSON file
+
+    /**
+     * Loads a camera from a JSON object.
+     * 
+     * @param cameraJson - The JSON object representing the camera.
+     * @returns The loaded CameraNode object.
+     */
     private static loadCamera(cameraJson: any): CameraNode {
         const eye = this.parseVector(cameraJson.eye)
         const center = this.parseVector(cameraJson.center)
@@ -154,7 +208,12 @@ export class JsonLoader {
         return camera
     }
 
-    // loading AABoxNode from JSON Object
+
+    /**
+     * Loads an AABoxNode from a JSON node object.
+     * @param node - The JSON node containg the data.
+     * @returns The loaded AABoxNode.
+     */
     private static loadAABoxNode(node: any): AABoxNode {
         const minPoint = this.parseVector(node.minPoint);
         const maxPoint = this.parseVector(node.maxPoint);
@@ -173,7 +232,13 @@ export class JsonLoader {
 
     }
 
-    // loading TextureBoxNode from JSON Object
+
+    /**
+     * Loads a TextureBoxNode from a JSON node object.
+     * 
+     * @param node - The JSON node object containing the texture box node data.
+     * @returns The loaded TextureBoxNode instance.
+     */
     private static loadTextureBoxNode(node: any): TextureBoxNode {
         const { texture, minPoint, maxPoint, normal } = this.getTextureProbs(node)
         if (normal) {
@@ -184,7 +249,12 @@ export class JsonLoader {
 
 
 
-    // loading TextureVideoBoxNode from JSON Object
+
+    /**
+     * Loads a TextureVideoBoxNode from a given JSON node.
+     * @param node - The JSON node containing the data for the TextureVideoBoxNode.
+     * @returns The loaded TextureVideoBoxNode.
+     */
     private static loadVideoBoxNode(node: any): TextureVideoBoxNode {
         const { texture, minPoint, maxPoint, normal } = this.getTextureProbs(node);
         if (normal) {
@@ -201,7 +271,12 @@ export class JsonLoader {
         return new TextureTextBoxNode(texture, minPoint, maxPoint)
     }
 
-    // loading SphereNode from JSON Object
+
+    /**
+     * Loads a sphere node from the given JSON node object.
+     * @param node - The JSON node object representing the sphere node.
+     * @returns The loaded SphereNode object.
+     */
     private static loadSphereNode(node: any): SphereNode {
         const center = this.parseVector(node.center)
         const radius = <number>node.radius
@@ -218,7 +293,12 @@ export class JsonLoader {
         }
     }
 
-    // loading PyramidNode from JSON Object
+
+    /**
+     * Loads a pyramid node from a JSON object.
+     * @param node - The JSON object representing the pyramid node.
+     * @returns The loaded PyramidNode object.
+     */
     private static loadPyramidNode(node: any): PyramidNode {
         const maxPoint = this.parseVector(node.maxPoint).mul(2);
         const dimensions = maxPoint.sub(this.parseVector(node.minPoint));
@@ -231,24 +311,43 @@ export class JsonLoader {
         }
     }
 
-    // loading LightNode from JSON Object
+    /**
+     * Loads a LightNode from a JSON object.
+     * 
+     * @param node - The JSON object representing the light node.
+     * @returns The loaded LightNode object.
+     */
     private static loadLightNode(node: any): LightNode {
         const position = this.parseVector(node.position)
         const color = this.parseVector(node.color)
         return new LightNode(color, position);
     }
 
-    // loading RotationNode from JSON Object
+
+    /**
+     * Loads a rotation node from a JSON object and creates a RotationNode instance.
+     * 
+     * @param node - The JSON object representing the rotation node.
+     * @param groupNode - The parent group node.
+     * @returns The created RotationNode instance.
+     */
     private static loadRotationNode(node: any, groupNode: any): RotationNode {
         const axis = this.parseVector(node.axis);
-        const rotationNode = new RotationNode(groupNode, axis);
-        rotationNode.angle = node.angle
+        const speed = node.speed
+        const rotationNode = new RotationNode(groupNode, axis, speed);
         rotationNode.active = node.active
         rotationNode.name = node.name
         return rotationNode
     }
 
-    // loading JumperNode from JSON Object
+
+    /**
+     * Loads a JumperNode from a JSON object.
+     * 
+     * @param node - The JSON object representing the JumperNode.
+     * @param groupNode - The parent group node.
+     * @returns The loaded JumperNode.
+     */
     private static loadJumperNode(node: any, groupNode: any): JumperNode {
         const translation = this.parseVector(node.translation);
         const startingPos = this.parseMatrix(node.startingPos);
@@ -258,7 +357,13 @@ export class JsonLoader {
         return jumper
     }
 
-    // loading DriverNode from JSON Object
+    /**
+     * Loads a driver node from a JSON object.
+     * 
+     * @param node - The JSON object representing the driver node.
+     * @param groupNode - The parent group node.
+     * @returns The loaded driver node.
+     */
     private static loadDriverNode(node: any, groupNode: any): DriverNode {
         const directionVector = this.parseVector(node.direction)
         const driver = new DriverNode(groupNode, directionVector)
@@ -269,15 +374,29 @@ export class JsonLoader {
         return driver
     }
 
-    // loading DriverNodeMouse from JSON Object
-    private static loadDriverNodeMouse(node: any, groupNode: any): DriverNodeMouse {
-        const driver = new DriverNodeMouse(groupNode)
+
+    /**
+     * Loads a input driver node for mouse input from a JSON object.
+     * 
+     * @param node - The JSON object representing the driver node.
+     * @param groupNode - The parent group node.
+     * @returns The loaded InputDriverNode instance.
+     */
+    private static loadDriverNodeMouse(node: any, groupNode: any): InputDriverNode {
+        const driver = new InputDriverNode(groupNode)
         driver.active = node.active
         return driver
     }
 
 
-    // loading ScalerNode from JSON Object
+
+    /**
+     * Loads a scaler node from a JSON object.
+     * 
+     * @param node - The JSON object representing the scaler node.
+     * @param groupNode - The parent group node.
+     * @returns The loaded scaler node.
+     */
     private static loadScalerNode(node: any, groupNode: any): ScaleNode {
         const targetScale = this.parseVector(node.targetScale);
         const duration = node.duration
@@ -287,24 +406,27 @@ export class JsonLoader {
         return scaler
     }
 
-    // loading ScalerNodeMouse from JSON Object
-    private static loadScalerNodeMouse(node: any, groupNode: any): ScalerNodeMouse {
-        const scaler = new ScalerNodeMouse(groupNode)
+
+    /**
+     * Loads a input scaler node mouse for mouse input from a JSON object.
+     * 
+     * @param node - The JSON object representing the scaler node.
+     * @param groupNode - The parent group node.
+     * @returns The loaded InputScalerNode instance.
+     */
+    private static loadScalerNodeMouse(node: any, groupNode: any): InputScalerNode {
+        const scaler = new InputScalerNode(groupNode)
         scaler.active = node.active
         return scaler
     }
 
-    // loading TextureProbs from JSON Object
-    private static getTextureProbs(node: any) {
-        const texture = <string>node.texture
-        const minPoint = this.parseVector(node.minPoint)
-        const maxPoint = this.parseVector(node.maxPoint)
-        const normal = <string>node.normal
-        return {
-            texture, minPoint, maxPoint, normal
-        }
-    }
 
+    /**
+     * Loads a mesh node from the given JSON node object.
+     * 
+     * @param node - The JSON node object containing the mesh data.
+     * @returns A new MeshNode instance created from the JSON data.
+     */
     private static loadMeshNode(node: any) {
         // Set attributes from mesh 
         const vertices = node.vertices;
@@ -316,6 +438,13 @@ export class JsonLoader {
         return new MeshNode(vertices, normals, color, meshName, maxPoint, minPoint);
     }
 
+
+
+    /**
+     * Loads a window node from the provided JSON node.
+     * @param node - The JSON node representing the window.
+     * @returns The loaded WindowNode object.
+     */
     private static loadWindowNode(node: any) {
         const transformation = this.getTransformation(node.transform);
         const windowNode = new WindowNode(transformation, node.name);

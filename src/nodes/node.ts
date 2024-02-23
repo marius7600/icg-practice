@@ -1,7 +1,7 @@
 import Visitor from "../visitor";
 
 /**
- * Class representing a Node in a Scenegraph
+ * Abstract class representing a Node in a Scenegraph
  */
 export default abstract class Node {
   // optional name for the node
@@ -12,6 +12,10 @@ export default abstract class Node {
    */
   abstract accept(visitor: Visitor): void
 
+  /**
+   * Converts the Node object to a JSON representation.
+   * @returns The JSON representation of the Node object.
+   */
   toJSON(): any {
     if (this.name) {
       return {

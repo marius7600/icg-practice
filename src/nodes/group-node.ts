@@ -10,7 +10,9 @@ import CameraNode from "./camera-node";
  * @extends Node
  */
 export default class GroupNode extends Node {
-  // TODO declare instance variables
+  /**
+   * The children of the group node
+   */
   public children: Node[];
 
   /**
@@ -19,17 +21,8 @@ export default class GroupNode extends Node {
    */
   constructor(public transform: Transformation) {
     super();
-    // TODO
     this.children = [];
     this.transform = transform;
-  }
-
-  /**
-   * Method to get the current transformation of the group node
-   */
-  getTransformation(): Transformation {
-
-    return this.transform;
   }
 
   /**
@@ -37,41 +30,57 @@ export default class GroupNode extends Node {
    * @param visitor The visitor
    */
   accept(visitor: Visitor) {
-    // TODO
     visitor.visitGroupNode(this);
   }
+
+  /**
+   * Method to get the current transformation of the group node
+   */
+  getTransformation(): Transformation {
+    return this.transform;
+  }
+
 
   /**
    * Adds a child node
    * @param childNode The child node to add
    */
   add(childNode: Node) {
-    // TODO
     this.children.push(childNode);
   }
 
-  //Für camera traversal
+
+  /**
+   * Accepts a visitor that operates on GroupNodeCamera instances.
+   * Is used to find the camera node in the group node.
+   * @param visitor The visitor to accept.
+   */
   acceptOnlyCamera(visitor: Visitor) {
     visitor.visitGroupNodeCamera(this);
   }
 
+  /**
+   * Removes a child node from the group node.
+   * @param childNode - The child node to be removed.
+   */
   remove(childNode: Node) {
     let indexOfchild = this.children.indexOf(childNode);
     this.children.splice(indexOfchild, 1);
   }
 
+  /**
+   * Checks if the group node contains a camera node.
+   * @param cameraNode - The camera node to check for.
+   * @returns True if the group node contains the camera node, false otherwise.
+   */
   containsCamera(cameraNode: CameraNode) {
     return this.children.includes(cameraNode);
   }
 
-  getCamera() {
-    for (let i = 0; i < this.children.length; i++) {
-      if (this.children[i] instanceof CameraNode) {
-        return this.children[i] as CameraNode;
-      }
-    }
-  }
-
+  /**
+   * Converts the GroupNode object to a JSON representation.
+   * @returns The JSON representation of the GroupNode object.
+   */
   toJSON() {
     const json = super.toJSON();
     json["childCodes"] = []

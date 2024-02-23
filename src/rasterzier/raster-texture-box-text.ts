@@ -2,7 +2,7 @@ import Vector from '../math/vector';
 import Shader from '../shader/shader';
 
 /**
- * A class creating buffers for a textured box to render it with WebGL
+ * A class representing a axis-aligned box with a texture containing text to render it with WebGL
  */
 export default class RasterTextTextureBox {
     /**
@@ -80,19 +80,6 @@ export default class RasterTextTextureBox {
         this.vertexBuffer = vertexBuffer;
         this.elements = vertices.length / 3;
 
-        // let cubeTexture = gl.createTexture();
-        // let cubeImage = new Image();
-        // cubeImage.onload = function () {
-        //     gl.bindTexture(gl.TEXTURE_2D, cubeTexture);
-        //     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cubeImage);
-        //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        //     gl.bindTexture(gl.TEXTURE_2D, null);
-        // }
-        // cubeImage.src = texture;
-        // this.texBuffer = cubeTexture;
-
         let uv = [
             // front
             0, 0, 1, 0, 1, 1,
@@ -142,15 +129,22 @@ export default class RasterTextTextureBox {
         this.initTextureText();
         this.texBuffer = this.canvasTexture;
     }
-    /**
- * Displays the texture on a 2D canvas and appends it to the document body.
- */
 
+
+    /**
+     * Initializes the texture for rendering text on the canvas.
+     */
     private initTextureText() {
         this.canvasTexture = this.gl.createTexture();
         this.handleLoadedTexture(this.canvasTexture, this.textCanvas);
     }
 
+    /**
+     * Handles the loaded texture by binding it to the WebGL context and setting the necessary parameters.
+     * 
+     * @param texture - The WebGL texture object.
+     * @param textureCanvas - The HTML canvas element containing the texture data.
+     */
     private handleLoadedTexture(
         texture: WebGLTexture,
         textureCanvas: HTMLCanvasElement
@@ -190,8 +184,6 @@ export default class RasterTextTextureBox {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
         const positionLocation = shader.getAttributeLocation("a_position");
 
-        // console.log("positionLocation: ", positionLocation);
-
         this.gl.enableVertexAttribArray(positionLocation);
         this.gl.vertexAttribPointer(
             positionLocation,
@@ -202,8 +194,7 @@ export default class RasterTextTextureBox {
             0
         );
 
-        // Bind the texture coordinates in this.texCoords
-        // to their attribute in the shader
+        // Bind the texture coordinates in this.texCoords to their attribute in the shader
 
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoords);
 

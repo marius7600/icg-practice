@@ -2,18 +2,25 @@ import Node from "./node";
 import Vector from "../math/vector";
 import Visitor from "../visitor";
 
+/**
+ * Class representing a camera node in the Scenegraph.
+ * A camera node holds the position of the camera, the point the camera is looking at,
+ * the up direction of the camera, the vertical field of view in degrees, the aspect ratio
+ * of the camera's view, and the distance to the near and far clipping planes.
+ * @extends Node
+ */
 export default class CameraNode extends Node {
-  /**
-   * Creates a new Camera
-   * @param eye {Vector} - eye-Vector of camera
-   * @param center {Vector} - center Vector of camera
-   * @param up {Vector} - up Vector of camera
-   * @param fovy - field of view
-   * @param aspect - aspect ratio
-   * @param near - nearPlane
-   * @param far - farPlane
-   */
 
+  /**
+   * Represents a camera node in a 3D scene.
+   * @param eye - The position of the camera.
+   * @param center - The point the camera is looking at.
+   * @param up - The up direction of the camera.
+   * @param fovy - The vertical field of view in degrees.
+   * @param aspect - The aspect ratio of the camera's view.
+   * @param near - The distance to the near clipping plane.
+   * @param far - The distance to the far clipping plane.
+   */
   constructor(
     public eye: Vector,
     public center: Vector,
@@ -30,11 +37,14 @@ export default class CameraNode extends Node {
    * Accepts a visitor according to the visitor pattern
    * @param visitor
    */
-
   accept(visitor: Visitor) {
     visitor.visitCameraNode(this);
   }
 
+  /**
+   * Converts the CameraNode object to a JSON representation.
+   * @returns The JSON representation of the CameraNode object.
+   */
   toJSON() {
     const json = super.toJSON();
     json["eye"] = this.eye;

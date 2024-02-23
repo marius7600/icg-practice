@@ -10,11 +10,12 @@ export default class AABoxNode extends Node {
   minPoint: Vector; // The minimum point of the box
   maxPoint: Vector; // The maximum point of the box
 
+
   /**
-   * Creates an axis aligned box.
-   * The box's center is located at the origin
-   * with all edges of length 1
-   * @param color The colour of the cube
+   * Creates a new AABoxNode instance.
+   * @param dimensions - The dimensions of the AABoxNode.
+   * @param color - The color of the AABoxNode.
+   * @param texture - The texture of the AABoxNode (optional).
    */
   constructor(public dimensions: Vector, public color: Vector, public texture?: string) {
     super();
@@ -29,14 +30,14 @@ export default class AABoxNode extends Node {
    * @param  {Visitor} visitor - The visitor
    */
   accept(visitor: Visitor) {
-    // TODO
     visitor.visitAABoxNode(this);
   }
 
-  toString() {
-    return `AABoxNode: ${this.color}`;
-  }
 
+  /**
+   * Converts the AABoxNode object to a JSON representation.
+   * @returns The JSON representation of the AABoxNode object.
+   */
   toJSON(): any {
     const json = super.toJSON();
     json["minPoint"] = this.minPoint;

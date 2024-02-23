@@ -6,6 +6,9 @@ import { EmptyTransformation, Scaling, Translation } from "./math/transformation
 import Vector from "./math/vector";
 import Node from "./nodes/node";
 
+/**
+ * A class representing a Tic Tac Toe game.
+ */
 export class TicTacToe {
     private static parent: GroupNode;
     private static currentPlayer = true; // true = X, false = O
@@ -15,12 +18,13 @@ export class TicTacToe {
      * @returns The root node of the Tic Tac Toe game.
      */
     createTicTacToe() {
-        console.log("Creating tic tac toe");
         // create root for the tic tac toe
         TicTacToe.parent = new GroupNode(new EmptyTransformation());
         console.log(TicTacToe.parent);
+
         // Scale the size of the cubes
         const ticTacToeScale = new GroupNode(new Scaling(new Vector(1.5, 1.5, 1.5, 1)));
+
         //Add the cubes to the scaler
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
@@ -31,6 +35,7 @@ export class TicTacToe {
                 ticTacToeScale.add(position);
             }
         }
+        // Add the new game to the parent
         TicTacToe.parent.add(ticTacToeScale);
         return TicTacToe.parent;
     }
@@ -42,8 +47,10 @@ export class TicTacToe {
     static clearGame() {
         // clear children of the parent
         TicTacToe.parent.children = [];
+
         // Scale the size of the cubes
         const ticTacToeScale = new GroupNode(new Scaling(new Vector(1.5, 1.5, 1.5, 1)));
+
         //Add the cubes to the scaler
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
@@ -54,9 +61,9 @@ export class TicTacToe {
                 ticTacToeScale.add(position);
             }
         }
-
         // Add the new game to the parent
         TicTacToe.parent.add(ticTacToeScale);
+
         // Reset the current player
         this.currentPlayer = true;
     }

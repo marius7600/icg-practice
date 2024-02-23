@@ -3,12 +3,22 @@ import GlUtils from "../glUtils";
 import Shader from "../shader/shader";
 //import {ShaderName} from "../shader/shaderName";
 
+/**
+ * Represents a raster mesh object in WebGL.
+ */
 export default class RasterMeshObject {
     private elements: number
     private vertexBuffer: WebGLBuffer
     private normalBuffer: WebGLBuffer
     private colorBuffer: WebGLBuffer
 
+    /**
+     * Creates a new RasterMeshObject.
+     * @param gl - The WebGL2 rendering context.
+     * @param vertices - The array of vertex positions.
+     * @param normals - The array of vertex normals.
+     * @param color - The color of the mesh object.
+     */
     constructor(
         private gl: WebGL2RenderingContext,
         private vertices: number[],
@@ -23,6 +33,10 @@ export default class RasterMeshObject {
         this.colorBuffer = glu.createColorBuffer(colorsArray);
     }
 
+    /**
+     * Renders the mesh object using the specified shader.
+     * @param shader - The shader to use for rendering.
+     */
     render(shader: Shader) {
 
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);

@@ -12,13 +12,13 @@ export default class Vector {
    * @param x The x component
    * @param y The y component
    * @param z The z component
-   * @param w The w component if 1 the vector is a point, if 0 the vector is a direction
+   * @param w The w component. If 1 the vector is a point, if 0 the vector is a direction.
    */
   constructor(x: number, y: number, z: number, w: number) {
     this.data = [x, y, z, w];
   }
 
-  /**no
+  /**
    * Returns the x component of the vector
    * @return The x component of the vector
    */
@@ -35,16 +35,16 @@ export default class Vector {
   }
 
   /**
-   * Returns the first component of the vector
-   * @return The first component of the vector
+   * Returns the first component of the vector for color
+   * @return The first component of the vector for color
    */
   get r(): number {
     return this.data[0];
   }
 
   /**
-   * Sets the first component of the vector to val
-   * @param val The new value
+   * Sets the first component of the vector to val for color
+   * @param val The new value for color
    */
   set r(val: number) {
     this.data[0] = val;
@@ -67,16 +67,16 @@ export default class Vector {
   }
 
   /**
-   * Returns the second component of the vector
-   * @return The second component of the vector
+   * Returns the second component of the vector for color
+   * @return The second component of the vector for color
    */
   get g(): number {
     return this.data[1];
   }
 
   /**
-   * Sets the second component of the vector to val
-   * @param val The new value
+   * Sets the second component of the vector to val for color
+   * @param val The new value for color
    */
   set g(val: number) {
     this.data[1] = val;
@@ -99,16 +99,16 @@ export default class Vector {
   }
 
   /**
-   * Returns the third component of the vector
-   * @return The third component of the vector
+   * Returns the third component of the vector for color
+   * @return The third component of the vector for color
    */
   get b(): number {
     return this.data[2];
   }
 
   /**
-   * Sets the third component of the vector to val
-   * @param val The new value
+   * Sets the third component of the vector to val for color
+   * @param val The new value for color
    */
   set b(val: number) {
     this.data[2] = val;
@@ -131,16 +131,16 @@ export default class Vector {
   }
 
   /**
-   * Returns the fourth component of the vector
-   * @return The fourth component of the vector
+   * Returns the fourth component of the vector for opacity
+   * @return The fourth component of the vector for opacity
    */
   get a(): number {
     return this.data[3];
   }
 
   /**
-   * Sets the fourth component of the vector to val
-   * @param val The new value
+   * Sets the fourth component of the vector to val for opacity
+   * @param val The new value for opacity
    */
   set a(val: number) {
     this.data[3] = val;
@@ -203,15 +203,16 @@ export default class Vector {
 
   /**
    * Returns an array representation of the vector
-   * @return An array representation.
+   * @return The array representation of the vector
    */
   valueOf(): [number, number, number, number] {
     return this.data;
   }
 
+
   /**
-   * Normalizes this vector in place
-   * @returns this vector for easier function chaining
+   * Normalizes the vector, returning a new vector with the same direction but a length of 1.
+   * @returns A new Vector object representing the normalized vector.
    */
   normalize(): Vector {
     const length = this.length;
@@ -236,6 +237,10 @@ export default class Vector {
     return Math.sqrt(this.data[0] * this.data[0] + this.data[1] * this.data[1] + this.data[2] * this.data[2] + this.data[3] * this.data[3]);
   }
 
+  /**
+   * Converts the vector to a JSON object.
+   * @returns The JSON representation of the vector.
+   */
   toJSON() {
     return {
       data: this.data

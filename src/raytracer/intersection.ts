@@ -1,14 +1,14 @@
 import Vector from '../math/vector';
 
 /**
- * Class representing a ray-sphere intersection in 3D space
+ * Represents an intersection between a ray and an object
  */
 export default class Intersection {
   /**
    * Create an Intersection
-   * @param t The distance on the ray
-   * @param point The intersection point
-   * @param normal The normal in the intersection
+   * @param t - The distance on the ray
+   * @param point - The intersection point
+   * @param normal - The normal in the intersection
    */
   constructor(public t: number, public point: Vector, public normal: Vector) {
     if (t) {
@@ -18,11 +18,11 @@ export default class Intersection {
     }
   }
 
+
   /**
-   * Determines whether this intersection
-   * is closer than the other
-   * @param other The other Intersection
-   * @return The result
+   * Checks if this intersection is closer than the given intersection.
+   * @param other - The other intersection to compare against.
+   * @returns True if this intersection is closer, false otherwise.
    */
   closerThan(other: Intersection): boolean {
     if (this.t < other.t) return true;
