@@ -161,10 +161,14 @@ export class JsonLoader {
         const dimensions = maxPoint.sub(minPoint)
         if (node.color != null) {
             const color = this.parseVector(node.color)
-            return new AABoxNode(dimensions, color)
+            const aaBox = new AABoxNode(dimensions, color)
+            aaBox.name = node.name
+            return aaBox
         } else {
             const texture = node.texture
-            return new AABoxNode(dimensions, null, texture)
+            const aaBox = new AABoxNode(dimensions, null, texture)
+            aaBox.name = node.name
+            return aaBox
         }
 
     }
@@ -203,10 +207,14 @@ export class JsonLoader {
         const radius = <number>node.radius
         if (node.color) {
             const color = this.parseVector(node.color)
-            return new SphereNode(color, center, radius)
+            const sphere = new SphereNode(color, center, radius)
+            sphere.name = node.name
+            return sphere
         } else if (node.texture) {
             const texture = <string>node.texture
-            return new SphereNode(null, center, radius, texture)
+            const sphere = new SphereNode(null, center, radius, texture)
+            sphere.name = node.name
+            return sphere
         }
     }
 

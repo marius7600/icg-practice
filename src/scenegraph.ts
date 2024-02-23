@@ -251,9 +251,9 @@ export class Scenegraph {
         const aabox = new AABoxNode(new Vector(1, 1, 1, 1), new Vector(1, 0, 1, 1));
         aabox.name = "Testbox";
         aaboxGroup.add(aabox);
-        //const driveBox = new DriverNodeMouse(aaboxGroup);
-        //aaboxGroup.add(driveBox);
-        //driveBox.toggleActive();
+        const driveBox = new DriverNodeMouse(aaboxGroup);
+        aaboxGroup.add(driveBox);
+        driveBox.toggleActive();
         groupNodeUnderRoot.add(aaboxGroup);
 
         // add light node 1
@@ -407,8 +407,8 @@ export class Scenegraph {
  * @returns {Promise<MeshNode>} A promise that resolves to the loaded mesh object.
  */
 async function loadOBJ() {
-    const object = await MeshNode.getNode("towelie.obj", new Vector(0, 0.2, 1, 0));
-    //const object = await MeshNode.getNode("cube.obj", new Vector(0, 0.2, 1, 0));
+    //const object = await MeshNode.getNode("towelie.obj", new Vector(0, 0.2, 1, 0));
+    const object = await MeshNode.getNode("cube.obj", new Vector(0, 0.2, 1, 0));
     // const object = await MeshNode.getNode("monkey.obj", new Vector(0, 0.2, 1, 0));
     return object;
 }
