@@ -1,11 +1,15 @@
 precision mediump float;
 
-// Get the position and normal of the vertex from the object
+// Attributes: Variables hold data for each vertex from application -> Can be changed per vertex
+// Varyings: Passed to the fragment shader & interpolated across primitives 
+// Uniforms: Variables that are constant for all vertices in a draw call
+
+// Get the position normal and color of the vertex from the object
 attribute vec3 a_position;
 attribute vec3 a_normal;
+attribute vec3 a_color;
 
 // Pass color as attribute and forward it to the fragment shader
-attribute vec3 a_color;
 varying vec3 v_color;
 
 // Pass the vertex position in view space to the fragment shader

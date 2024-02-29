@@ -114,11 +114,15 @@ export default class RasterBox {
                 const image = new Image();
                 image.src = texture;
                 image.onload = () => {
+                    // bind the texture and set the image
                     this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
                     this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, gl.UNSIGNED_BYTE, image);
+                    // apply linear filtering
                     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+                    // clamp the texture to the edges of the box to avoid repeating
                     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
                     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+                    // unbind the texture
                     this.gl.bindTexture(this.gl.TEXTURE_2D, null);
                 };
             }
